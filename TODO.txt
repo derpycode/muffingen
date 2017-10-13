@@ -1,0 +1,94 @@
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ muffingen TO-DO ++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+     
+ * UPDATE DOCUMENTATION!!!
+
+ * complete MIT comparison configs and experiments 
+ 
+ * re-do border cleanup if it has been user-edited
+ 
+ * relax islands constraints.
+   (Currently it requires a seperation of land masses sufficient to fit 2 non overlapping paths between in order to count them as separate islands.
+   Also land seperated by only 1 ocean cell from the pole is counted as part of the polar island.)
+  
+ * add a setting to optimize land fraction automatically?
+
+ * create GUI!!!
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ muffingen DONE +++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+ * add option for loading in template k1 file
+   (in this: strip out boundary rows and columns to create a simple mask)
+   
+ * create versions of basic 36x36 pol and eq configs and TEST
+   => this becomes the proof-of-concept (1st) test stage and test of basic usability
+   
+ * create new 36x36 modern config and TEST
+   => this is the 2nd test stage and now a test with 'real' config
+
+ *** SORT OUT .PATHS -- STILL SOMETHING WRONG WITH HOW IT IS CREATED ***
+ 
+ * add in further mask filtering options
+ 
+ * add in wind product generation
+
+ * add in the ability to generate non-equal area grids
+   
+ * add in SEDGEM file generation
+   
+ * convert k-levels back to topo and plot
+ 
+ * calculate areas of input and output masks
+ 
+ * add iteration to removal of orphan border cells
+   
+ * create user-creatable/editable mask
+ 
+ * create user-creatable/editable topo
+   
+ * add in albedo generation
+   + GENIE code to read in 2D file rather than parameter values
+     
+ * fix situation with pole-to-pole continent  
+ 
+ * enable ASCII input for mask (i.e. non space seperated columns)
+   -> '1' = ocean, everything else land
+     
+ * create new 36x36 (& 18x18) modern config with the new wind products and TEST
+ 
+ * create new 36x36 Eocene config and TEST
+   => this is the 3rd test stage
+ 
+ * create new 36x36 Eocene config and TEST
+   => this is the 4th test stage -- of generated SEDGEM config
+     
+ * make wind filenames ocnsistent between re-gridding and zonal mean
+   
+ * automatically generate relevant part of .config file
+   
+ * fix bug in paths cleanup (path rings) as manisfested in sandy config
+ 
+ * update plotting / netCDF output for PSI
+ 
+ * generate albedo profile (from equation ... default values?)
+
+ * add calculation of solar constant and salinity (from age)
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++ muffingen CUTTING ROOM FLOOR +++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+   ALSO: add in option for spcifying default ocean depth (i.e. different from max depth)
+ 
+ * in messaging -- report FULL filenames
+   
+ * instead of muffingen exiting with an error if a path cannot be followed
+   -> bring up the editing window to edit the borders, and try following again
+   (i.e. rather than the default being to user-edit -- only if an error occurs)
+ 
+ * add parameter to set minimum k (maximum water depth) (e.g. for flat-bottom oceans)
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
