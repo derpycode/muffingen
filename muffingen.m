@@ -113,6 +113,11 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.53 ********************************************
 %   17/10/13: added data path
 %             *** VERSION 0.54 ********************************************
+%   17/10/16: changed '\' -> '/'
+%             ('/' valid under windows MATLAB (as well as normal Win '\')
+%             fixed parsing of which return (to avoid occurrence of '//')
+%             *** VERSION 0.55 ********************************************
+%             NOW MacOSX FRIENDLY!!!
 %
 %   ***********************************************************************
 %%
@@ -128,7 +133,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.54;
+par_muffingen_ver = 0.55;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -226,9 +231,9 @@ end
 %       remove its name (+ '.m' extension) from the returned path ...
 %       add relative source path to it
 tmp_path = which(str_function);
-tmp_path = tmp_path(1:end-length(str_function)-2);
-addpath([tmp_path '\' par_dpath_source]);
-addpath([tmp_path '\' 'DATA']);
+tmp_path = tmp_path(1:end-length(str_function)-3);
+addpath([tmp_path '/' par_dpath_source]);
+addpath([tmp_path '/' 'DATA']);
 % set full file name string
 if ~isempty(par_gcm),
     str_file = [str_function '.' par_gcm '.' str_nameout];
@@ -240,10 +245,10 @@ if opt_outputdir,
     str_dirout = uigetdir(par_pathout);
 else
     if isempty(par_pathout)
-        str_dirout = [pwd '\' par_wor_name];
+        str_dirout = [pwd '/' par_wor_name];
     else
         if ~(exist(par_pathout,'dir') == 7), mkdir(par_pathout); end
-        str_dirout = [pwd '\' par_pathout '\' par_wor_name];
+        str_dirout = [pwd '/' par_pathout '/' par_wor_name];
     end
     if ~(exist(str_dirout,'dir') == 7), mkdir(str_dirout); end
 end
@@ -267,10 +272,10 @@ str = setfield(str, {5}, 'nc', par_nc_coupl_name);
 % *** initialize reporting ********************************************** %
 %
 % create copy of .m file options
-copyfile([POPT '.m'],[str(2).dir '\' POPT '_' str_date '.m'])
+copyfile([POPT '.m'],[str(2).dir '/' POPT '_' str_date '.m'])
 % start logging
 % NOTE: delete any existing (current date) log file in the directory first
-str_log = [str(2).dir '\' 'log_' str_date '.txt'];
+str_log = [str(2).dir '/' 'log_' str_date '.txt'];
 if (exist(str_log,'file') == 2), delete(str_log); end
 diary(str_log)
 % display warm and comforting welcoming message
@@ -375,8 +380,8 @@ switch par_gcm
         end
         disp(['       - Mask & topo info read.']);
         % plot input mask & topo
-        plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '\' str_nameout] '.mask_in'],['mask in']);
-        plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '\' str_nameout] '.topo_in'],['topo in']);
+        plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']);
+        plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']);
     case {'k1','mask'}
         % load topo directly
         [go_k1,go_mask,imax,jmax] = fun_read_k1(str);
@@ -422,7 +427,7 @@ switch par_gcm
         disp(['       - Blank mask created (nothing to re-grid).']);
 end
 % plot & save initial mask re-grid
-plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '\' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']);
+plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']);
 %
 % *** (6) RE-GRID TOPO ************************************************** %
 %
@@ -451,7 +456,7 @@ if opt_maketopo
     end
     % plot & save initial topo re-grid
     if ~strcmp(par_gcm,'k1'),
-        plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '\' str_nameout] '.topo_out.RAW'],['topo out -- RAW']);
+        plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']);
     end
     %
 end
@@ -492,7 +497,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         % <<< LOOP
         fprintf('       - Single cell embayments filtered out.\n')
         % plot mask
-        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '\' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
         %
     end
     %
@@ -510,7 +515,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         %
         fprintf('       - Polar connections cleaned up.\n')
         % plot mask
-        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '\' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
         %
     end
     %
@@ -520,7 +525,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         %
         [go_oceans,n_oceans,i_oceans] = find_grid_oceans(go_mask);
         % plot oceans!
-        plot_2dgridded(flipud(go_oceans),999,'',[[str_dirout '\' str_nameout] '.ocean_out.INIT'],['oceans out -- INITIAL']);
+        plot_2dgridded(flipud(go_oceans),999,'',[[str_dirout '/' str_nameout] '.ocean_out.INIT'],['oceans out -- INITIAL']);
         % increment VERSION
         grid_ver = grid_ver + 1;
         str_ver = num2str(grid_ver);
@@ -528,7 +533,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         [go_mask,go_oceans,n_oceans] = find_grid_oceans_update(go_mask,go_oceans,n_oceans,par_min_oceann);
         fprintf('       - Small water bodies cleaned up.\n')
         % plot mask
-        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '\' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
         %
     end
     %
@@ -549,7 +554,7 @@ if opt_user
     grid_ver = grid_ver + 1;
     str_ver = num2str(grid_ver);
     % plot mask
-    plot_2dgridded(flipud(go_mask),2,'',[[str_dirout '\' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+    plot_2dgridded(flipud(go_mask),2,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
     % calculate new fractional area
     [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
     disp(['       * Revised land area fraction = ', num2str(1.0-so_farea)]);
@@ -563,7 +568,7 @@ go_masknan = go_mask;
 go_masknan(find(go_masknan == 0)) = NaN;
 %
 % plot final mask
-plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '\' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']);
+plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']);
 %
 % calculate new fractional area
 [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
@@ -586,7 +591,7 @@ if opt_maketopo,
     % filter min k value
     go_k1(find(go_k1 < par_min_k)) = par_min_k;
     % plot initial k1 re-grid
-    plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '\' str_nameout] '.k1_out.RAW'],['k1 out -- RAW re-gridded']);
+    plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '/' str_nameout] '.k1_out.RAW'],['k1 out -- RAW re-gridded']);
     %
 end
 %
@@ -600,7 +605,7 @@ if opt_maketopo && opt_filtertopo,
     [go_k1] = fun_grid_topo_filter(go_k1);
     fprintf('       - Topography filtered.\n')
     % plot adjusted k1 re-grid
-    plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '\' str_nameout] '.k1_out.FILTERED'],['k1 out -- auto filtered']);
+    plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '/' str_nameout] '.k1_out.FILTERED'],['k1 out -- auto filtered']);
 end
 %
 % *** (11) ADJUST TOPO -- USER! ***************************************** %
@@ -611,7 +616,7 @@ if opt_maketopo && opt_user
     % user-editing! what can go wrong?
     [go_k1] = fun_grid_edit_k1(go_k1,kmax);
     % plot mask
-    plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '\' str_nameout '.k1_out.USEREDITED'],['k1 out -- user edited version']);
+    plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.USEREDITED'],['k1 out -- user edited version']);
     % convert k-levels back to depth
     [go_topo] = fun_conv_k1(go_de,go_k1);
     %
@@ -620,9 +625,9 @@ if opt_maketopo && opt_user
 end
 %
 % plot final k1
-plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '\' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
+plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
 % plot final topo
-plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '\' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
+plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
 %
 % *** (12) CALCULATE RUNOFF & COMPLETE k1 FILE ************************** %
 %
@@ -639,7 +644,7 @@ if opt_makeocean
         [go_k1] = make_grid_runoff_roof(go_mask,go_k1,str);
         loc_k1 = go_k1;
         loc_k1(find(loc_k1 < 91)) = 95;
-        plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '\' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']);
+        plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']);
     end
     % (iii) extend k1 grid
     % NOTE: mark first row: maxk+1, last as maxk+2
@@ -655,10 +660,10 @@ if opt_makeocean
         [goex_k1] = make_grid_runoff_rnd(goex_k1,str,opt_debug);
         loc_k1 = goex_k1(2:end-1,2:end-1);
         loc_k1(find(loc_k1 < 91)) = 95;
-        plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '\' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']);
+        plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']);
     end
     % (v) save .k1 file
-    fprint_2DM(goex_k1(:,:),[],[[str_dirout '\' str_nameout] '.k1'],'%3i','%3i',true,false);
+    fprint_2DM(goex_k1(:,:),[],[[str_dirout '/' str_nameout] '.k1'],'%3i','%3i',true,false);
     fprintf('       - .k1 file saved\n')
     %
 end
@@ -671,7 +676,7 @@ if opt_makeocean
     % initial islands count
     [go_islands,n_islands,i_islands] = find_grid_islands(go_mask);
     % plot islands
-    plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '\' str_nameout] '.islnd_out.INIT'],['island out -- INITIAL']);
+    plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '/' str_nameout] '.islnd_out.INIT'],['island out -- INITIAL']);
     %
 end
 %
@@ -683,17 +688,17 @@ if opt_makeocean
     % NOTE: generate all possible paths initially (and filter later)
     % (1) generate generic borders around all (initial) islands
     [go_borders] = find_grid_borders(go_mask);
-    plot_2dgridded(flipud(go_borders),99999.0,'',[[str_dirout '\' str_nameout] '.brds_out.INIT'],['borders out -- INITIAL']);
+    plot_2dgridded(flipud(go_borders),99999.0,'',[[str_dirout '/' str_nameout] '.brds_out.INIT'],['borders out -- INITIAL']);
     % (2) update islands count
     %     identify islands that are insufficiently seperated (and combined)
     %     identify polar islands
     %     re-number all
     [go_islands,n_islands,i_islands,i_poles] = find_grid_islands_update(go_islands,n_islands,i_islands,go_borders,opt_makepoleswide);
-    plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '\' str_nameout] '.islnd_out.FINAL'],['islands out -- FINAL']);
+    plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '/' str_nameout] '.islnd_out.FINAL'],['islands out -- FINAL']);
     % (3) update borders
     %     number borders as per bordering islands
     [go_borders] = find_grid_borders_update(go_borders,go_islands,go_mask,n_islands);
-    plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '\' str_nameout] '.brds_out.FILTERED'],['borders out -- FILTERED']);
+    plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FILTERED'],['borders out -- FILTERED']);
     % (4) border check
     [opt_user] = find_grid_borders_check(go_borders,opt_user);
     % (5) user editing of borders
@@ -701,10 +706,10 @@ if opt_makeocean
         % user-editing! what can go wrong?
         [go_borders] = fun_grid_edit_borders(go_borders,go_mask);
         % plot mask
-        plot_2dgridded(flipud(go_borders),999,'',[str_dirout '\' str_nameout '.brds_out.USEREDITED'],['borders out -- user edited version']);
+        plot_2dgridded(flipud(go_borders),999,'',[str_dirout '/' str_nameout '.brds_out.USEREDITED'],['borders out -- user edited version']);
     end
     % plot final borders
-    plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '\' str_nameout] '.brds_out.FINAL'],['borders out -- FINAL']);
+    plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FINAL'],['borders out -- FINAL']);
     %
 end
 %
@@ -716,9 +721,9 @@ if opt_makeocean
     % create paths
     [n_paths,v_paths,n_islands,go_paths] = find_grid_paths(go_borders,n_islands,i_poles);
     % plot paths data
-    plot_2dgridded(flipud(go_paths),999,'',[[str_dirout '\' str_nameout] '.paths_out.FINAL'],['Paths file -- FINAL']);
+    plot_2dgridded(flipud(go_paths),999,'',[[str_dirout '/' str_nameout] '.paths_out.FINAL'],['Paths file -- FINAL']);
     % save .paths file
-    fprint_paths(n_paths,v_paths,[[str_dirout '\' str_nameout] '.paths']);
+    fprint_paths(n_paths,v_paths,[[str_dirout '/' str_nameout] '.paths']);
     fprintf('       - .paths file saved\n')
     %
 end
@@ -731,9 +736,9 @@ if opt_makeocean
     % generate PSI islands data
     [go_psiles,n_islands_recnt] = make_grid_psiles(go_islands,i_poles);
     % plot PSI islands data
-    plot_2dgridded(flipud(go_psiles),999,'',[[str_dirout '\' str_nameout] '.psiles_out.FINAL'],['PSI islands file -- FINAL']);
+    plot_2dgridded(flipud(go_psiles),999,'',[[str_dirout '/' str_nameout] '.psiles_out.FINAL'],['PSI islands file -- FINAL']);
     % save .psiles file
-    fprint_2DM(go_psiles(:,:),[],[[str_dirout '\' str_nameout] '.psiles'],'%3i','%3i',true,false);
+    fprint_2DM(go_psiles(:,:),[],[[str_dirout '/' str_nameout] '.psiles'],'%3i','%3i',true,false);
     fprintf('       - .psiles file saved\n')
     % carry out check on # islands
     if (n_islands ~= n_islands_recnt),
@@ -760,7 +765,7 @@ if opt_makewind
             end
             disp(['       - Re-grided GCM wind products.']);
         otherwise
-            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '\' str_nameout]);
+            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout]);
             disp(['       - Generated zonal wind products.']);
     end
 end
@@ -781,7 +786,7 @@ if opt_makealbedo
             end
             disp(['       - Read GCM albedo data.']);
             % plot input albedo
-            plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '\' str_nameout] '.albd_in'],['albedo in']);
+            plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_in'],['albedo in']);
         otherwise
             disp(['         (Nothing to load.)']);
     end
@@ -802,9 +807,9 @@ if opt_makealbedo
             go_falbd = go_falbd';
             disp(['       - Re-gridded GCM albedo data.']);
             % plot output albedo
-            plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '\' str_nameout] '.albd_out'],['albedo out']);
+            plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_out'],['albedo out']);
             % save 2D file
-            fprint_2DM(go_albd(:,:),[],[[str_dirout '\' str_nameout] '.2Dalbd.dat'],'%8.4f','%8.4f',true,false);
+            fprint_2DM(go_albd(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd.dat'],'%8.4f','%8.4f',true,false);
             fprintf('       - 2D albedo file saved\n')
             % create zonal mean
             vo_albd = mean(go_albd');
@@ -821,7 +826,7 @@ if opt_makealbedo
             xlabel('Latitude');
             ylabel('Albedo');
             title('Zonally averaged albedo profile');
-            print('-dpsc2', [[str_dirout '\' str_nameout] '.zonalalbd.' str_date '.ps']);
+            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd.' str_date '.ps']);
             % reorientate albedo vector for saving
             vo_albd = fliplr(vo_albd);
     end
@@ -830,7 +835,7 @@ if opt_makealbedo
     %       such that the N pole is the first element in file;
     %       fprint_1Dn saves the 2st row at the top, hence the vector
     %       must be orientated as in a map orientation (N at top)
-    fprint_1Dn(vo_albd(:),[[str_dirout '\' str_nameout] '.albd.dat'],'%8.4f','%8.4f',true,false);
+    fprint_1Dn(vo_albd(:),[[str_dirout '/' str_nameout] '.albd.dat'],'%8.4f','%8.4f',true,false);
     fprintf('       - .albd.dat file saved\n')
     %
 end
@@ -880,18 +885,18 @@ if opt_makeseds
     end
     %
     % plot sediment topo
-    plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '\' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']);
+    plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']);
     % save sediment topo
-    fprint_2DM(gos_topo(:,:),[],[[str_dirout '\' str_nameout] '.depth.dat'],'%8.2f','%8.2f',true,false);
+    fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%8.2f','%8.2f',true,false);
     fprintf('       - .depth.dat saved\n')
     % save other sediment files
     gos_mask = gos_topo;
     gos_mask(find(gos_mask > 0)) = 1;
     gos_sedc = 0.0*gos_mask;
-    fprint_2DM(gos_sedc(:,:),gos_mask(:,:),[[str_dirout '\' str_nameout] '.sedcoremask.dat'],'%4.1f','%4i',true,false);
+    fprint_2DM(gos_sedc(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.sedcoremask.dat'],'%4.1f','%4i',true,false);
     fprintf('       - template file .sedcoremask.dat saved\n')
     gos_reef = 0.0*gos_mask;
-    fprint_2DM(gos_reef(:,:),gos_mask(:,:),[[str_dirout '\' str_nameout] '.reefmask.dat'],'%4.1f','%4i',true,false);
+    fprint_2DM(gos_reef(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.reefmask.dat'],'%4.1f','%4i',true,false);
     fprintf('       - template file .reefmask.dat saved\n')
 end
 %
@@ -899,7 +904,7 @@ end
 %
 disp(['>  21. GENERATING CONFIG FILE PARAMETER LINES ...']);
 %
-fid = fopen([str_dirout '\' 'config_' str_date '.txt'],'w');
+fid = fopen([str_dirout '/' 'config_' str_date '.txt'],'w');
 % START
 fprintf(fid,'%s\n','##################################################################################');
 fprintf(fid,'%s\n',['### cGENIE .config file parameter lines generated by muffingen v',num2str(par_muffingen_ver),' on: ',str_date,' ###']);

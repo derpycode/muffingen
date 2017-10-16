@@ -246,7 +246,7 @@ k1out = k1_new;
 if opt_debug,
     %
     % save data - k1 file
-    outname = [str(2).dir '\' str(2).exp '.RNDRUNOFF.k1'];
+    outname = [str(2).dir '/' str(2).exp '.RNDRUNOFF.k1'];
     fid = fopen(outname,'w');
     for i = 1:i_max
         for j = 1:j_max
@@ -260,7 +260,7 @@ if opt_debug,
     end
     fclose(fid);
     % save data - drain basin colors
-    outname = [str(2).dir '\' str(2).exp '.RNDRUNOFF_BASINS.dat'];
+    outname = [str(2).dir '/' str(2).exp '.RNDRUNOFF_BASINS.dat'];
     fid = fopen(outname,'w');
     for i = 1:i_max
         for j = 1:j_max
@@ -283,7 +283,7 @@ if opt_debug,
     [X Y] = meshgrid(1.5:1:j_max-1.5,1.5:1:i_max-1.5);
     quiver(X,Y,flipdim(k1_u(2:j_max-1,2:i_max-1),1),-flipdim(k1_v(2:j_max-1,2:i_max-1),1),0.5,'-k','LineWidth',1.0);
     axis([1 i_max 1 j_max]);
-    outname = [str(2).dir '\' str(2).exp '.RNDRUNOFF' '.ps'];
+    outname = [str(2).dir '/' str(2).exp '.RNDRUNOFF' '.ps'];
     print('-dpsc2', outname);
     %
 end
