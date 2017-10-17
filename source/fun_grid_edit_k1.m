@@ -22,7 +22,7 @@ gk_ex = [gk_ex(1,:); gk_ex];
 fprintf('       * Topography alteration procedure :\n');
 fprintf('         (1) left button to deepen grid cell\n');
 fprintf('         (2) right button to shallow grid cell\n');
-fprintf('         (3) middle button to finish\n');
+fprintf('         (3) middle button, or clickoutside the grid, to finish\n');
 %cmap = [0.5 1 0.5; 0.5 0.5 1]; colormap (cmap);
 %
 flag = 0;
@@ -36,6 +36,8 @@ while flag == 0
     ix = floor(x); iy = floor(y);
     if ix < 1 | ix > imax | iy < 1 | iy > jmax
         fprintf('       - Out of grid range\n');
+        flag = 1;
+        fprintf('       * Mask alteration complete\n');
     elseif button == 2
         flag = 1;
         fprintf('       * Topography alteration complete\n');

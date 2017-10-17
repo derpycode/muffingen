@@ -21,7 +21,7 @@ gm_ex = [gm_ex(1,:); gm_ex];
 fprintf('       * Mask alteration procedure :\n');
 fprintf('         (1) left button to turn grid cell to ocean\n');
 fprintf('         (2) right button to turn grid cell to land\n');
-fprintf('         (3) middle button to finish\n');
+fprintf('         (3) middle button, or clickoutside the grid, to finish\n');
 cmap = [0.5 1 0.5; 0.5 0.5 1]; 
 %
 flag = 0;
@@ -37,6 +37,8 @@ while flag == 0
     ix = floor(x); iy = floor(y);
     if ix < 1 | ix > imax | iy < 1 | iy > jmax
         fprintf('       - Out of grid range\n');
+        flag = 1;
+        fprintf('       * Mask alteration complete\n');
     elseif button == 2
         flag = 1;
         fprintf('       * Mask alteration complete\n');

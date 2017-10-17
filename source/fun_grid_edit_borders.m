@@ -22,7 +22,7 @@ gm_ex = [gm_ex(1,:); gm_ex];
 fprintf('       * Borders alteration procedure :\n');
 fprintf('         (1) left button to increase border #\n');
 fprintf('         (2) right button to decrease border # (0 == no border)\n');
-fprintf('         (3) middle button to finish\n');
+fprintf('         (3) middle button, or clickoutside the grid, to finish\n');
 fprintf('         [exit (middle button) if unsure WTF]\n');
 %
 flag = 0;
@@ -36,6 +36,8 @@ while flag == 0
     ix = floor(x); iy = floor(y);
     if ix < 1 | ix > imax | iy < 1 | iy > jmax
         fprintf('       - Out of grid range\n');
+        flag = 1;
+        fprintf('       * Mask alteration complete\n');
     elseif button == 2
         flag = 1;
         fprintf('       * Borders alteration complete\n');
