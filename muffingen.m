@@ -118,6 +118,8 @@ function [] = muffingen(POPT)
 %             fixed parsing of which return (to avoid occurrence of '//')
 %             *** VERSION 0.55 ********************************************
 %             NOW MacOSX FRIENDLY!!!
+%   17/10/19: added zip-file extraction for HadCM3L 'sed' netCDF file
+%             *** VERSION 0.56 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -133,7 +135,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.55;
+par_muffingen_ver = 0.56;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -624,10 +626,12 @@ if opt_maketopo && opt_user
     %
 end
 %
-% plot final k1
-plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
-% plot final topo
-plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
+if opt_maketopo,
+    % plot final k1
+    plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
+    % plot final topo
+    plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
+end
 %
 % *** (12) CALCULATE RUNOFF & COMPLETE k1 FILE ************************** %
 %
