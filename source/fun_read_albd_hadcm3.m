@@ -13,8 +13,21 @@ function [grid_albd]  = fun_read_albd_hadcm3(str)
 % str(4).nc == par_nc_ocean_name
 % str(5).nc == par_nc_coupl_name
 %
+str_path = [str(1).path '/' str(1).exp];
+if ~(exist([str_path '/' str(3).nc '.nc'],'file') == 2),
+    if (exist([str_path '/' str(3).nc '.zip'],'file') == 2),
+        unzip([str_path '/' str(3).nc '.zip'],str_path);
+        fprintf('       - Extracted zipped netCDF file.\n')
+    else
+        disp(['       * ERROR: file ' [str_path '/' str(3).nc '.nc'] ' cannot be found (nor a zipped version)']);
+        disp(['--------------------------------------------------------']);
+        disp([' ']);
+        diary off;
+        return;
+    end
+end
 % open netCDF file
-ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(3).nc '.nc'],'nowrite');
+ncid = netcdf.open([str_path '/' str(3).nc '.nc'],'nowrite');
 % ALBEDO
 % NOTE: albedop(time=18, lat=73, lon=96)
 varid  = netcdf.inqVarID(ncid,'albedop');
