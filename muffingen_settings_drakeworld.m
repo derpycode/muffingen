@@ -16,7 +16,7 @@
 %
 % *** EXPERIMENT INPUT AND OUTPUT *************************************** %
 %
-par_wor_name='wordrake';       % ['wworld'] 6-char (output) config name
+par_wor_name='wordrake';       % ['worworld'] 8-char (output) config name
 par_gcm='mask';                % ['dat'] input format/GCM name
 par_expid='wordrake';          % ['wwater'] input experiment/data name
 par_pathin='INPUT.EXAMPLES';   % ['EXAMPLES.INPUT'] path to input dir

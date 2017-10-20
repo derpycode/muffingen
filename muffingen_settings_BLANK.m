@@ -16,7 +16,7 @@
 %
 % *** EXPERIMENT INPUT AND OUTPUT *************************************** %
 %
-par_wor_name='worblank';       % ['wblank'] 8-char (output) config name
+par_wor_name='worblank';       % ['worblank'] 8-char (output) config name
 par_gcm='';                    % [''] input format/GCM name
 par_expid='';                  % [''] input experiment/data name
 par_pathin='INPUT.EXAMPLES';   % ['EXAMPLES.INPUT'] path to input dir

@@ -253,7 +253,7 @@ end
 fclose(fid);
 %
 % open file
-fid = fopen([str_nameout, '_u.dat'],'w');
+fid = fopen([str_nameout, '_wvelx.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,
@@ -264,7 +264,7 @@ end
 % close file
 fclose(fid);
 % open file
-fid = fopen([str_nameout, '_v.dat'],'w');
+fid = fopen([str_nameout, '_wvely.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,

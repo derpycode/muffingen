@@ -16,7 +16,7 @@
 %
 % *** EXPERIMENT INPUT AND OUTPUT *************************************** %
 %
-par_wor_name='worxbowl';       % ['wworld'] 6-char (output) config name
+par_wor_name='worxbowl';       % ['worworld'] 8-char (output) config name
 par_gcm='hadcm3l';             % ['hadcm3l'] input format/GCM name
 par_expid='xbowl';             % ['xbomg'] experiment name
 par_pathin='INPUT.EXAMPLES';   % ['EXAMPLES.INPUT'] path to input dir

@@ -219,20 +219,20 @@ plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau
 % replace NaNs with zeros
 % u
 fprintf('       - Regridding wind velocity (u) to GOLDSTEIN c-grid\n');
-plot_2dgridded(flipud(giwvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_u.IN'],['wind velocity in -- u']);
+plot_2dgridded(flipud(giwvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.IN'],['wind velocity in -- x']);
 [gowvelu,gofwvelu] = make_regrid_2d(gilonae,gilatae,giwvelu',golone,golate,false);
 gowvelu(find(isnan(gowvelu))) = 0.0;
 gowvelu = gowvelu'; 
 gofwvelu = gofwvelu';
-plot_2dgridded(flipud(gowvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_u.OUT'],['wind velocity out -- u']);
+plot_2dgridded(flipud(gowvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.OUT'],['wind velocity out -- x']);
 % v
 fprintf('       - Regridding wind velocity (v) to GOLDSTEIN c-grid\n');
-plot_2dgridded(flipud(giwvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_v.IN'],['wind velocity in -- v']);
+plot_2dgridded(flipud(giwvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.IN'],['wind velocity in -- y']);
 [gowvelv,gofwvelv] = make_regrid_2d(gilonae,gilatae,giwvelv',golone,golate,false);
 gowvelv(find(isnan(gowvelv))) = 0.0;
 gowvelv = gowvelv';
 gofwvelv = gofwvelv';
-plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_v.OUT'],['wind velocity out -- v']);
+plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.OUT'],['wind velocity out -- y']);
 %
 % -> wind speed
 % NOTE: GENIE c-grid: (golate,golone) == jmax+1 x imax+1
@@ -288,12 +288,12 @@ c = wstress(:,:,4); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written tau v (v point) data to %s\n',outname);
 % U wind velocity 
-outname = [str(2).dir '/' str(2).exp '_u.dat'];
+outname = [str(2).dir '/' str(2).exp '_wvelx.dat'];
 c = wvelocity(:,:,1); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written u wind speed data to %s\n',outname);
 % V wind speed
-outname = [str(2).dir '/' str(2).exp '_v.dat'];
+outname = [str(2).dir '/' str(2).exp '_wvely.dat'];
 c = wvelocity(:,:,2); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written v wind speed data to %s\n',outname);

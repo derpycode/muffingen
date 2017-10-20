@@ -120,6 +120,10 @@ function [] = muffingen(POPT)
 %             NOW MacOSX FRIENDLY!!!
 %   17/10/19: added zip-file extraction for HadCM3L 'sed' netCDF file
 %             *** VERSION 0.56 ********************************************
+%   17/10/20: added par_wor_name (world name) length check
+%             revised wind velocity component naming (now x and y)
+%             (consistent with tau components)
+%             *** VERSION 0.57 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -135,7 +139,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.56;
+par_muffingen_ver = 0.57;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -323,6 +327,14 @@ disp([' ']);
 % *** (1) CONFIRM OPTIONS *********************************************** %
 %
 disp(['>   1. CHECKING PRIMARY OPTIONS ...']);
+% check world name
+if (length(par_wor_name) ~= 8),
+    disp(['       * ERROR: World name (par_wor_name) must be 8 characters long.']);
+    disp(['--------------------------------------------------------']);
+    disp([' ']);
+    diary off;
+    return;
+end
 % check GCM options
 switch str(1).gcm
     case ('hadcm3')
@@ -943,8 +955,8 @@ fprintf(fid,'%s\n',['ea_taux_u=''',par_wor_name,'_taux_u.dat''']);
 fprintf(fid,'%s\n',['ea_tauy_u=''',par_wor_name,'_tauy_u.dat''']);
 fprintf(fid,'%s\n',['ea_taux_v=''',par_wor_name,'_taux_v.dat''']);
 fprintf(fid,'%s\n',['ea_tauy_v=''',par_wor_name,'_tauy_v.dat''']);
-fprintf(fid,'%s\n',['ea_adv_u=''',par_wor_name,'_u.dat''']);
-fprintf(fid,'%s\n',['ea_adv_v=''',par_wor_name,'_v.dat''']);
+fprintf(fid,'%s\n',['ea_adv_u=''',par_wor_name,'_wvelx.dat''']);
+fprintf(fid,'%s\n',['ea_adv_v=''',par_wor_name,'_wvely.dat''']);
 % Boundary conditions: GOLDSTEIN
 fprintf(fid,'%s\n','# Boundary conditions: GOLDSTEIN');
 fprintf(fid,'%s\n',['go_topo=''',par_wor_name,'''']);
