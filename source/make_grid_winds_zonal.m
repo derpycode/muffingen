@@ -1,4 +1,4 @@
-function [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout)
+function [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout,par_tauopt)
 % make_grid_winds_zonal
 %
 %   *********************************************************
@@ -34,6 +34,7 @@ function [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_
 %   17/04/18: revised automatic detection of gateways
 %             revised new algorithm for calculating wind stress
 %             removed un-used input parameters
+%   17/10/22: added new input parameter
 %
 %   ***********************************************************************
 
@@ -42,33 +43,43 @@ function [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_
 % *********************************************************************** %
 %
 % START
-%%%disp(['   START [make_grid_winds] >>>'])
 % determine grid size
 [jmax imax] = size(go_mask);
-% automatically determine water/land options
-% NOTE: any zeros present in mask == non-ocean => land present
-%       <=> a '1.0' will indicate a zonal gateway in the mask mean
-% NOTE: assume a higher lat than 40 degree N/S criteria
-% NOTE: remember that '1' is ocean
-% NOTE: re-orientate the latitude vector (so N pole is at the 'top')
-vo_latm = fliplr(go_latm);
-lat_thrsh = 40.0;
-vo_mask  = mean(go_mask');
-% N
-if max(vo_mask(find(vo_latm > lat_thrsh))) < 1.0,
-    loc_nswl(1:2) = 'nl';
-    fprintf('       * No Northern gateway found.\n')
-else
-    loc_nswl(1:2) = 'nw';    
-    fprintf('       * Northern gateway (> 40N) found.\n')
-end
-% S
-if max(vo_mask(find(vo_latm < -lat_thrsh))) < 1.0,
-    loc_nswl(3:4) = 'sl';
-    fprintf('       * No Southern gateway found.\n')
-else
-    loc_nswl(3:4) = 'sw';   
-    fprintf('       * Southern gateway (< -40S) found.\n') 
+switch par_tauopt
+    case {1}
+        % modern NH / paleo Eocene (both hemispheres)
+        loc_nswl(1:2) = 'nl';
+        loc_nswl(3:4) = 'sl';
+    case {2}
+        % water world
+        loc_nswl(1:2) = 'nw';
+        loc_nswl(3:4) = 'sw';
+    otherwise
+        % automatically determine water/land options
+        % NOTE: any zeros present in mask == non-ocean => land present
+        %       <=> a '1.0' will indicate a zonal gateway in the mask mean
+        % NOTE: assume a higher lat than 40 degree N/S criteria
+        % NOTE: remember that '1' is ocean
+        % NOTE: re-orientate the latitude vector (so N pole is at the 'top')
+        vo_latm = fliplr(go_latm);
+        lat_thrsh = 40.0;
+        vo_mask  = mean(go_mask');
+        % N
+        if max(vo_mask(find(vo_latm > lat_thrsh))) < 1.0,
+            loc_nswl(1:2) = 'nl';
+            fprintf('       * No Northern gateway found.\n')
+        else
+            loc_nswl(1:2) = 'nw';
+            fprintf('       * Northern gateway (> 40N) found.\n')
+        end
+        % S
+        if max(vo_mask(find(vo_latm < -lat_thrsh))) < 1.0,
+            loc_nswl(3:4) = 'sl';
+            fprintf('       * No Southern gateway found.\n')
+        else
+            loc_nswl(3:4) = 'sw';
+            fprintf('       * Southern gateway (< -40S) found.\n')
+        end
 end
 % set GOLDSTEIn parameters :: drag coefficent
 go_cd = 0.0013;
@@ -288,6 +299,5 @@ g_wspd = [];
 % *********************************************************************** %
 %
 % END
-%%%disp(['   <<< END [make_grid_winds]'])
 %
 % *********************************************************************** %

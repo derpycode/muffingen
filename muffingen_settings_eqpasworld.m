@@ -16,9 +16,9 @@
 %
 % *** EXPERIMENT INPUT AND OUTPUT *************************************** %
 %
-par_wor_name='woreqpas';       % ['worworld'] 8-char (output) config name
-par_gcm='mask';                % ['dat'] input format/GCM name
-par_expid='woreqpas';          % ['wwater'] input experiment/data name
+par_wor_name='woreqpas';       % ['woreqpas'] 8-char (output) config name
+par_gcm='mask';                % ['mask'] input format/GCM name
+par_expid='woreqpas';          % ['woreqpas'] input experiment/data name
 par_pathin='INPUT.EXAMPLES';   % ['EXAMPLES.INPUT'] path to input dir
 par_pathout='OUTPUT.EXAMPLES'; % ['EXAMPLES.OUTPUT'] path to output dir
 opt_outputdir=false;           % [false/true] ask for output directory?
@@ -37,6 +37,8 @@ opt_equalarea=true;            % [false/true] equal area grid?
 opt_highresseds=false;         % [false/true] create 2x res sediment grid
 par_runoffopt=0;               % [0/1] run-off generation option
 par_sedsopt=0;                 % [0/1/2] sediment re-gridding option
+par_tauopt=0;                  % [0/1/2] zonal windstress generation option
+par_age=0.0;                   % [0.0] optional age of paleo configuration
 %
 % *** OPTIONS -- MAIN *************************************************** %
 %

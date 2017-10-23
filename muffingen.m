@@ -124,6 +124,10 @@ function [] = muffingen(POPT)
 %             revised wind velocity component naming (now x and y)
 %             (consistent with tau components)
 %             *** VERSION 0.57 ********************************************
+%   17/10/22: added option to control assignment of zonal wind stress
+%             added calibrated air-sea gas exchange scaling parameter
+%             for zonal wind stress 
+%             *** VERSION 0.58 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -139,7 +143,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.57;
+par_muffingen_ver = 0.58;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -154,6 +158,10 @@ eval(POPT);
 %
 % *** check / filter options ******************************************** %
 %
+% zonal wind-stress generaton parameter
+if ~exist('par_tauopt','var'),
+    par_tauopt = 0;
+end
 % age parameter
 if ~exist('par_age','var'),
     par_age = 0.0;
@@ -174,10 +182,12 @@ if strcmp(par_gcm,'K1'),      par_gcm = 'k1';     end
 if strcmp(par_gcm,'.k1'),     par_gcm = 'k1';     end
 if strcmp(par_gcm,'.K1'),     par_gcm = 'k1';     end
 if strcmp(par_gcm,'MASK'),    par_gcm = 'mask';   end
-if strcmp(par_gcm,''),        par_gcm = 'blank';   end
-if strcmp(par_gcm,'BLANK'),   par_gcm = 'blank';   end
-if strcmp(par_gcm,'none'),    par_gcm = 'blank';   end
-if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';   end
+if strcmp(par_gcm,'dat'),     par_gcm = 'mask';   end
+if strcmp(par_gcm,'.dat'),    par_gcm = 'mask';   end
+if strcmp(par_gcm,''),        par_gcm = 'blank';  end
+if strcmp(par_gcm,'BLANK'),   par_gcm = 'blank';  end
+if strcmp(par_gcm,'none'),    par_gcm = 'blank';  end
+if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';  end
 % adjust options accroding to input (GCM) type
 switch par_gcm
     case {'hadcm3','foam'}
@@ -781,7 +791,7 @@ if opt_makewind
             end
             disp(['       - Re-grided GCM wind products.']);
         otherwise
-            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout]);
+            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
             disp(['       - Generated zonal wind products.']);
     end
 end
@@ -984,6 +994,7 @@ if opt_makewind
     % NOTE: re-scale to give a modern global mean air-sea coefficient of
     %       ~0.058 mol m-2 yr-1 uatm-1 
     %       (default is bg_par_gastransfer_a=0.310)
+    fprintf(fid,'%s\n','# BIOGEM MISC');
     switch par_gcm
         case {'hadcm3'}
             fprintf(fid,'%s\n','# gas transfer coeff');
@@ -992,8 +1003,31 @@ if opt_makewind
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.044)]);
         otherwise
-            fprintf(fid,'%s\n','# gas transfer coeff');
-            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.310)]);
+            % zonal field
+            % NOTE: for now: don't distinguish between different zonal
+            %       wind stress assumptions (and associated scaling)
+            %       => take a modern-like tau profile as corresponding
+            %          to ~0.058 mol m-2 yr-1 uatm-1 (and 0.310)
+            %       @ 0.310, drakeworld gives 0.024903 mol m-2 yr-1 uatm-1
+            %       (approx the mean of waterworld and ridgeworld values)
+            %       => a = 0.722
+            switch par_tauopt
+                case {1}
+                    % (low) modern NH / paleo Eocene (both hemispheres)
+                    % (0.0201 mol m-2 yr-1 uatm-1 @ a=0.310)
+                    fprintf(fid,'%s\n','# gas transfer coeff');
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+                case {2}
+                    % (high) water world
+                    % (0.0297 mol m-2 yr-1 uatm-1 @ a=0.310)
+                    fprintf(fid,'%s\n','# gas transfer coeff');
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+                otherwise
+                    % intermediate case
+                    % (0.024903 mol m-2 yr-1 uatm-1 @ a=0.310)
+                    fprintf(fid,'%s\n','# gas transfer coeff');
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+            end
     end
 end
 % SEDGEM/ROKGEM
