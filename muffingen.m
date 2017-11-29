@@ -128,6 +128,8 @@ function [] = muffingen(POPT)
 %             added calibrated air-sea gas exchange scaling parameter
 %             for zonal wind stress 
 %             *** VERSION 0.58 ********************************************
+%   17/11/29: fixed erroreous default longitude of perihelion
+%             *** VERSION 0.59 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -143,7 +145,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.58;
+par_muffingen_ver = 0.59;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -1057,8 +1059,7 @@ if (par_age == 0.0),
     fprintf(fid,'%s\n','# Orbital parameters (modern, defaults)');
     fprintf(fid,'%s\n',['###ea_par_orbit_osce=','0.0167',' # eccentricity']);
     fprintf(fid,'%s\n',['###ea_par_orbit_oscsob=','0.397789',' # sine of obliquity']);
-    fprintf(fid,'%s\n',['###ea_par_orbit_oscgam=','1.352631',' # longitude of perihelion? [radians]']);
-    fprintf(fid,'%s\n',['###ea_par_orbit_osctau0=','-0.5',' # ???']);
+    fprintf(fid,'%s\n',['###ea_par_orbit_oscgam=','102.92',' # longitude of perihelion']);
 else
     loc_per = 100.0*(1-1/(1+(2/5)*(1-(4.570E+03-par_age)/4.570E+03)));
     loc_S0  = 1.368E+03*(100-loc_per)/100;
@@ -1069,8 +1070,7 @@ else
     fprintf(fid,'%s\n','# Orbital parameters -- modern set => adjust as necessary');
     fprintf(fid,'%s\n',['ea_par_orbit_osce=','0.0167',' # eccentricity']);
     fprintf(fid,'%s\n',['ea_par_orbit_oscsob=','0.397789',' # sine of obliquity']);
-    fprintf(fid,'%s\n',['ea_par_orbit_oscgam=','1.352631',' # longitude of perihelion? [radians]']);
-    fprintf(fid,'%s\n',['ea_par_orbit_osctau0=','-0.5',' # ???']);
+    fprintf(fid,'%s\n',['ea_par_orbit_oscgam=','102.92',' # longitude of perihelion']);
 end
 if (par_age > 0.0) && (par_age <= 100.0),
     loc_Ca = 1E-3*(1.028E-02*1000 - 0.1966*(-par_age) - 0.001116*(-par_age)^2 - 0.000003374*(-par_age)^3 - 0.000000006584*(-par_age)^4);
