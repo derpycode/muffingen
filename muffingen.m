@@ -2,15 +2,15 @@ function [] = muffingen(POPT)
 % muffingen
 %
 %   ***********************************************************************
-%   *** muffingen_make [MAKE GENIE CONFIG] ********************************
+%   *** muffingen [MAKE MUFFIN CONFIG] ************************************
 %   ***********************************************************************
 %
-%   make_topogen(POPT)
-%   takes  arguments:
-%   POPT [STRING] (e.g., 'topo_config')
-%   --> the string for an alternative plotting parameter set
+%   muffingen(POPT)
+%   takes 1 argument:
+%   POPT [STRING] (e.g., 'muffingen_settings_BLANK')
+%   --> the string for the configuration parameter file
 %   --> if an empty (i.e., '') value is passed to this parameter
-%       then the default parameter set is used (make_topo_settings)
+%       then the default parameter set is used (muffingen_settings_BLANK)
 %
 %   NOTE: grid/matrix orientations are :: [LAT,LON] (rows x columns)
 %         (i.e., the orientation as you would view the raw data)
@@ -130,6 +130,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.58 ********************************************
 %   17/11/29: fixed erroreous default longitude of perihelion
 %             *** VERSION 0.59 ********************************************
+%   17/12/27: minor comment edits, plus corrected default parameter set
+%             *** VERSION 0.60 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -145,7 +147,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.59;
+par_muffingen_ver = 0.60;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -155,7 +157,7 @@ close all;
 ans = get(0,'Diary');
 if strcmp(ans,'on'), diary off; end
 % load options file
-if isempty(POPT), POPT='make_topogen_settings'; end
+if isempty(POPT), POPT='muffingen_settings_BLANK'; end
 eval(POPT);
 %
 % *** check / filter options ******************************************** %
