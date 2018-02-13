@@ -132,8 +132,7 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.59 ********************************************
 %   17/12/27: minor comment edits, plus corrected default parameter set
 %   18/02/13: changed log file name
-%             added adjustment of topo if mask land cells turned to ocean
-%             (for 'mask' option only)
+%             moved order of <RE-GRID TOPO> (later in sequence)
 %             *** VERSION 0.60 ********************************************
 %
 %   ***********************************************************************
@@ -323,9 +322,9 @@ disp([' ']);
 % (3) READ AXES INFORMATION
 % (4) LOAD TOPO & MASK DATA
 % (5) RE-GRID MASK
-% (6) RE-GRID TOPO
-% (7) FILTER MASK
-% (8) ADJUST MASK -- USER!
+% (6) FILTER MASK
+% (7) ADJUST MASK -- USER!
+% (8) RE-GRID TOPO
 % (9) RE-GRID VERTICALLY
 % (10) ADJUST TOPO -- AUTOMATIC BATHYMETRY FILTERING
 % (11) ADJUST TOPO -- USER!
@@ -460,39 +459,7 @@ end
 % plot & save initial mask re-grid
 plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']);
 %
-% *** (6) RE-GRID TOPO ************************************************** %
-%
-if opt_maketopo
-    %
-    disp(['>   6. RE-GRIDING TOPOGRAPHY ...']);
-    %
-    switch par_gcm
-        case {'hadcm3','foam'}
-            % initial re-gridding of topo
-            % NOTE: need to transpose around [gi_topo] to have correct input format
-            %       to make_regrid_2d
-            %       similarly, output needs to be transposed back again
-            % NOTE: pass edges of c-grid
-            [go_topo,go_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',go_lone,go_late,false);
-            disp(['       - Topography re-gridded.']);
-            go_topo = go_topo';
-            go_ftopo = go_ftopo';
-        case {'k1'}
-            % convert k1 to depth
-            [go_topo] = fun_conv_k1(go_de,go_k1);
-            disp(['         (Nothing to re-grid -- convertrf k1 file data.)']);
-        otherwise
-            go_topo = par_max_D*go_mask;
-            disp(['         (Nothing to re-grid -- set uniform ocean depth.)']);
-    end
-    % plot & save initial topo re-grid
-    if ~strcmp(par_gcm,'k1'),
-        plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']);
-    end
-    %
-end
-%
-% *** (7) FILTER MASK *************************************************** %
+% *** (6) FILTER MASK *************************************************** %
 %
 % filter mask if requested
 % NOTE: when loading in a default 'k1' file, best to skip this step
@@ -502,7 +469,7 @@ str_ver = num2str(grid_ver);
 %
 if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
     %
-    disp(['>   7. FILTERING MASK ...']);
+    disp(['>   6. FILTERING MASK ...']);
     %
     if opt_filtermask,
         %
@@ -543,11 +510,6 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         go_mask_fills = find_grid_poleopen(go_mask);
         % update mask
         go_mask = go_mask + go_mask_fills;
-        % update topo
-        switch par_gcm
-            case {'mask'}
-                go_topo = go_topo + par_max_D*go_mask_fills;
-        end
         %
         fprintf('       - Polar connections cleaned up.\n')
         % plot mask
@@ -579,11 +541,11 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
     %
 end
 %
-% *** (8) ADJUST MASK -- USER! ****************************************** %
+% *** (7) ADJUST MASK -- USER! ****************************************** %
 %
 if opt_user
     %
-    disp(['>   8. USER EDITING OF MASK ...']);
+    disp(['>   7. USER EDITING OF MASK ...']);
     %
     [go_mask]  = fun_grid_edit_mask(go_mask);
     % increment VERSION
@@ -609,6 +571,38 @@ plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_o
 % calculate new fractional area
 [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
 disp(['       * Final land area fraction   = ', num2str(1.0-so_farea)]);
+%
+% *** (8) RE-GRID TOPO ************************************************** %
+%
+if opt_maketopo
+    %
+    disp(['>   8. RE-GRIDING TOPOGRAPHY ...']);
+    %
+    switch par_gcm
+        case {'hadcm3','foam'}
+            % initial re-gridding of topo
+            % NOTE: need to transpose around [gi_topo] to have correct input format
+            %       to make_regrid_2d
+            %       similarly, output needs to be transposed back again
+            % NOTE: pass edges of c-grid
+            [go_topo,go_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',go_lone,go_late,false);
+            disp(['       - Topography re-gridded.']);
+            go_topo = go_topo';
+            go_ftopo = go_ftopo';
+        case {'k1'}
+            % convert k1 to depth
+            [go_topo] = fun_conv_k1(go_de,go_k1);
+            disp(['         (Nothing to re-grid -- convert k1 file data.)']);
+        otherwise
+            go_topo = par_max_D*go_mask;
+            disp(['         (Nothing to re-grid -- set uniform ocean depth.)']);
+    end
+    % plot & save initial topo re-grid
+    if ~strcmp(par_gcm,'k1'),
+        plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']);
+    end
+    %
+end
 %
 % *** (9) RE-GRID VERTICALLY ******************************************** %
 %
