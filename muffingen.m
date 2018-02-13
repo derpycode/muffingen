@@ -132,6 +132,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.59 ********************************************
 %   17/12/27: minor comment edits, plus corrected default parameter set
 %   18/02/13: changed log file name
+%             added adjustment of topo if mask land cells turned to ocean
+%             (for 'mask' option only)
 %             *** VERSION 0.60 ********************************************
 %
 %   ***********************************************************************
@@ -541,6 +543,11 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         go_mask_fills = find_grid_poleopen(go_mask);
         % update mask
         go_mask = go_mask + go_mask_fills;
+        % update topo
+        switch par_gcm
+            case {'mask'}
+                go_topo = go_topo + par_max_D*go_mask_fills;
+        end
         %
         fprintf('       - Polar connections cleaned up.\n')
         % plot mask
