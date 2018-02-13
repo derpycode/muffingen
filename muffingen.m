@@ -102,12 +102,12 @@ function [] = muffingen(POPT)
 %   17/08/04: added air-sea gas exchange parameter re-scaling (HadCM3 FOAM)
 %             *** VERSION 0.43 ********************************************
 %   17/08/15: edited output format for 2D albedo
-%   17/08/16: added minimum ocean k value parameter 
+%   17/08/16: added minimum ocean k value parameter
 %             (e.g. for flat-bottom ocean)
 %             *** VERSION 0.5 *********************************************
-%   17/08/22: added paleo Ca/Mg 
+%   17/08/22: added paleo Ca/Mg
 %             *** VERSION 0.51 ********************************************
-%   17/08/24: added max age (100 Ma) for paleo Ca/Mg 
+%   17/08/24: added max age (100 Ma) for paleo Ca/Mg
 %             *** VERSION 0.52 ********************************************
 %   17/08/25: fixed bug in written-out file input paths
 %             *** VERSION 0.53 ********************************************
@@ -126,7 +126,7 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.57 ********************************************
 %   17/10/22: added option to control assignment of zonal wind stress
 %             added calibrated air-sea gas exchange scaling parameter
-%             for zonal wind stress 
+%             for zonal wind stress
 %             *** VERSION 0.58 ********************************************
 %   17/11/29: fixed erroreous default longitude of perihelion
 %             *** VERSION 0.59 ********************************************
@@ -661,7 +661,7 @@ end
 %
 % *** (12) CALCULATE RUNOFF & COMPLETE k1 FILE ************************** %
 %
-% NOTE: ordering is a little illogical becasue 
+% NOTE: ordering is a little illogical becasue
 %       make_grid_runoff_rnd requires the extended grid, while
 %       make_grid_runoff_roof is easier done without ...
 if opt_makeocean
@@ -670,7 +670,7 @@ if opt_makeocean
     % (i) first, check for all ocean
     if (max(max(go_k1)) < 90), opt_makerunoff = false; end
     % (ii) create roof scheme (if selected)
-    if (opt_makerunoff && par_runoffopt == 0),        
+    if (opt_makerunoff && par_runoffopt == 0),
         [go_k1] = make_grid_runoff_roof(go_mask,go_k1,str);
         loc_k1 = go_k1;
         loc_k1(find(loc_k1 < 91)) = 95;
@@ -996,7 +996,7 @@ if opt_makewind
     end
     % air-sea gas exchange
     % NOTE: re-scale to give a modern global mean air-sea coefficient of
-    %       ~0.058 mol m-2 yr-1 uatm-1 
+    %       ~0.058 mol m-2 yr-1 uatm-1
     %       (default is bg_par_gastransfer_a=0.310)
     fprintf(fid,'%s\n','# BIOGEM MISC');
     switch par_gcm
@@ -1079,11 +1079,11 @@ if (par_age > 0.0) && (par_age <= 100.0),
     loc_Mg = 1E-3*(5.282E-02*1000 + 0.915*(-par_age) + 0.01308*(-par_age)^2 + 0.00008419*(-par_age)^3 + 0.000000201*(-par_age)^4);
     fprintf(fid,'%s\n','# Ocean Mg/Ca concentrations');
     fprintf(fid,'%s\n',['bg_ocn_init_35=',num2str(loc_Ca)]);
-    fprintf(fid,'%s\n',['bg_ocn_init_50=',num2str(loc_Mg)]);    
+    fprintf(fid,'%s\n',['bg_ocn_init_50=',num2str(loc_Mg)]);
 else
     fprintf(fid,'%s\n','# Ocean Mg/Ca concentrations (modern defaults, mol kg-1)');
     fprintf(fid,'%s\n',['bg_ocn_init_35=','1.028E-02']);
-    fprintf(fid,'%s\n',['bg_ocn_init_50=','5.282E-02']);    
+    fprintf(fid,'%s\n',['bg_ocn_init_50=','5.282E-02']);
 end
 % END
 fprintf(fid,'%s\n','##################################################################################');
