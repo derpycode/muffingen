@@ -130,6 +130,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.58 ********************************************
 %   17/11/29: fixed erroreous default longitude of perihelion
 %             *** VERSION 0.59 ********************************************
+%   18/02/13: changed log file name
+%             *** VERSION 0.60 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -145,7 +147,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.59;
+par_muffingen_ver = 0.60;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -293,7 +295,7 @@ str = setfield(str, {5}, 'nc', par_nc_coupl_name);
 copyfile([POPT '.m'],[str(2).dir '/' POPT '_' str_date '.m'])
 % start logging
 % NOTE: delete any existing (current date) log file in the directory first
-str_log = [str(2).dir '/' 'log_' str_date '.txt'];
+str_log = [str(2).dir '/' 'log.' str_function '.' str_date '.txt'];
 if (exist(str_log,'file') == 2), delete(str_log); end
 diary(str_log)
 % display warm and comforting welcoming message
