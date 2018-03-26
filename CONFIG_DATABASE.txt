@@ -71,12 +71,25 @@ fm0450ha    AR 170814           0.43        "CSO, ice free, 10 PAL"
 fm0450ia    AR 170814           0.43        "CSO, ice free, 8 PAL"
 fm0450ja    AR 170814           0.43        "CSO, ice free, 3 PAL"
 ----------------------------------------------------------------
-umtdqpoa    AR 170825           0.53        "Messinian (7.25-5.33), 400 ppm, assumed modern orbits"  
-umtdqpma    AR 170822           0.51        "Serravillian (13.82-11.63), 400 ppm, assumed modern orbits"  
-umtdqpmb    AR 170822           0.52        "as per umtdqpmb, but with SEDGEM/ROKGEM file output"  
-umtdqpja    AR 170825           0.53        "Aquitanian (23.03-20.44), 400 ppm, assumed modern orbits"  
+fm0680aa    AR 180325           0.6         "36x36x16, x3CO2, minimal land-sea mask alteration"
+fm0680ba    AR 180325           0.6         "36x36x16, x6CO2, minimal land-sea mask alteration"
+fm0680ca    AR 180325           0.6         "36x36x16, x12CO2, minimal land-sea mask alteration"
+fm0680da    AR 180325           0.6         "36x36x16, x24CO2, minimal land-sea mask alteration"
+fm0680ea    AR 180325           0.6         "36x36x16, x48CO2, minimal land-sea mask alteration"
+fm0680cb    AR 180325           0.6         "18x18x16, x12CO2, cells removed to open gateways"
+----------------------------------------------------------------
+umtdzoaa    AR 180306           0.6         "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits           
+----------------------------------------------------------------
+umtdqpoa    AR 170825           0.53        "Messinian (7.25-5.33), 400 ppm, assumed modern orbits"
+----------------------------------------------------------------
+umtdqpma    AR 170822           0.51        "Serravillian (13.82-11.63), 400 ppm, assumed modern orbits"
+umtdqpmb    AR 170822           0.52        "as per umtdqpma, but with SEDGEM/ROKGEM file output"
+---------------------------------------------------------------- 
+umtdqpja    AR 170825           0.53        "Aquitanian (23.03-20.44), 400 ppm, assumed modern orbits"
+----------------------------------------------------------------
 umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits"    
-umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits, NO drake passage gateway"  
+umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits, NO drake passage gateway"           
+----------------------------------------------------------------
 umtdzoaa    AR 180306           0.6         "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits           
 ----------------------------------------------------------------
 --- CONCEPTUAL -------------------------------------------------
