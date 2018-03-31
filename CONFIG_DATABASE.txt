@@ -88,9 +88,15 @@ umtdqpmb    AR 170822           0.52        "as per umtdqpma, but with SEDGEM/RO
 umtdqpja    AR 170825           0.53        "Aquitanian (23.03-20.44), 400 ppm, assumed modern orbits"
 ----------------------------------------------------------------
 umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits"    
-umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits, NO drake passage gateway"           
+umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits, NO drake passage gateway"
 ----------------------------------------------------------------
-umtdzoaa    AR 180306           0.6         "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits           
+umtdpwfa    AR 180331           0.6         "Turonian" (Mid Cretaceous) (93.5-89.3), minimal topo edits                 
+----------------------------------------------------------------
+umtdpwia    AR 180331           0.6         "Aptian" (Early Cretaceous) (125-112), opened 2 gateways                 
+----------------------------------------------------------------
+umtdzoaa    AR 180306           0.6         "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits        
+----------------------------------------------------------------
+umteboha    AR 180330           0.6         "Changhsingian" (Latest Permian) (254-251), no topo edits
 ----------------------------------------------------------------
 --- CONCEPTUAL -------------------------------------------------
 ----------------------------------------------------------------
