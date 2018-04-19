@@ -116,7 +116,7 @@ for islnd = 1:n_islands,
             if (gb_ex(loc_jj,loc_ii) == islnd) && ~gs_ex(loc_jj,loc_ii),
                 % record current location and direction to next cell
                 % directions: 1==S, 2==E, 3==N, 4==W
-                % reminder: 
+                % reminder:
                 %        2 == North
                 %       -2 == South
                 %        1 == East
@@ -127,11 +127,11 @@ for islnd = 1:n_islands,
                     case (1)
                         v_paths = [v_paths; -2 loc_i-1 loc_j-1];
                     case (2)
-                        v_paths = [v_paths;  1 loc_i-1 loc_j-1];                        
+                        v_paths = [v_paths;  1 loc_i-1 loc_j-1];
                     case (3)
-                        v_paths = [v_paths;  2 loc_i-1 loc_j-1];                        
+                        v_paths = [v_paths;  2 loc_i-1 loc_j-1];
                     case (4)
-                        v_paths = [v_paths; -1 loc_i-1 loc_j-1];                        
+                        v_paths = [v_paths; -1 loc_i-1 loc_j-1];
                 end
                 % update path length count
                 n_path = n_path + 1;
@@ -170,17 +170,17 @@ for islnd = 1:n_islands,
     %        1 == East
     %       -1 == West
     if ((loc_i-i+1) == imax) || ((loc_i-i) == -1), %East
-        v_paths = [v_paths;  1 loc_i-1 loc_j-1];        
+        v_paths = [v_paths;  1 loc_i-1 loc_j-1];
     elseif ((loc_i-i-1) == -imax) || ((loc_i-i) == 1), %West
-        v_paths = [v_paths; -1 loc_i-1 loc_j-1];         
+        v_paths = [v_paths; -1 loc_i-1 loc_j-1];
     elseif (loc_j-j) == 1, %North
-        v_paths = [v_paths;  2 loc_i-1 loc_j-1];         
+        v_paths = [v_paths;  2 loc_i-1 loc_j-1];
     elseif (loc_j-j) == -1, %South
-        v_paths = [v_paths; -2 loc_i-1 loc_j-1];         
+        v_paths = [v_paths; -2 loc_i-1 loc_j-1];
     else
         disp([' *** Failed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),').']);
         diary off;
-        return;        
+        return;
     end
     n_path = n_path + 1;
     % write out path length

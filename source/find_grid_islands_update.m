@@ -167,6 +167,9 @@ if isempty(find(grid_islands == -3))
         disp(['       * updated find: S pole island (currently uncounted)']);
     end
 else
+    % include in the count, a double polar-connected island
+    n_islands = n_islands + 1;
+    grid_islands(find(grid_islands == -3)) = n_islands;
     i_poles = [i_poles -3];
     disp(['       * updated find: N-S connected polar island']);
 end

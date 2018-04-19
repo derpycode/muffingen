@@ -134,6 +134,8 @@ function [] = muffingen(POPT)
 %   18/02/13: changed log file name
 %             moved order of <RE-GRID TOPO> (later in sequence)
 %             *** VERSION 0.60 ********************************************
+%   18/04/19: fixes for pole-to-pole continents
+%             *** VERSION 0.61 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -149,7 +151,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.60;
+par_muffingen_ver = 0.61;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows

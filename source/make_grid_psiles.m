@@ -76,16 +76,16 @@ else
     loc_isnl = max(gpsi(end,:));
 end
 gpsi(end,:) = loc_isnl;
-% (7) N-S connected island ...
-if ~isempty(find(i_poles == -3)),
-    loc_isnl = max(max(gpsi)) + 1;
-    gpsi(find(gpsi == -3)) = loc_isnl;
-    gpsi(1,:) = loc_isnl;
-    gpsi(end,:) = loc_isnl;
-end
+% % (7) N-S connected island ...
+% if ~isempty(find(i_poles == -3)),
+%     loc_isnl = max(max(gpsi)) + 1;
+%     gpsi(find(gpsi == -3)) = loc_isnl;
+%     gpsi(1,:) = loc_isnl;
+%     gpsi(end,:) = loc_isnl;
+% end
 % (8) return psiles grid
 grid_psiles = gpsi;
-n_islands   = loc_isnl;
+n_islands   = max(max(gpsi));
 %
 % *********************************************************************** %
 % *** END *************************************************************** %
