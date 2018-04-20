@@ -136,6 +136,9 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.60 ********************************************
 %   18/04/19: fixes for pole-to-pole continents
 %             *** VERSION 0.61 ********************************************
+%   18/04/19: added check and warning when trying to turn land cell to ocn,
+%             but when there is no ocean depth value available
+%             *** VERSION 0.62 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -151,7 +154,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.61;
+par_muffingen_ver = 0.62;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -439,10 +442,10 @@ switch par_gcm
         %       to make_regrid_2d
         %       similarly, output needs to be transposed back again
         % NOTE: pass edges of c-grid
-        [go_mask,go_fmask] = make_regrid_2d(gi_lonce,gi_latce,gi_mask',go_lone,go_late,false);
+        [go_mask,go_tmp] = make_regrid_2d(gi_lonce,gi_latce,gi_mask',go_lone,go_late,false);
         disp(['       - Mask re-gridded.']);
         go_mask = go_mask';
-        go_fmask = go_fmask';
+        go_fmask = go_mask;
         % create mask (<>= par_A_frac_threshold fractional area thresold)
         go_mask(find(go_mask>=par_A_frac_threshold)) = 1.0;
         go_mask(find(go_mask<par_A_frac_threshold))  = 0.0;
@@ -453,10 +456,11 @@ switch par_gcm
         disp(['       * Re-gridded land area fraction  = ', num2str(1.0-so_farea)]);
     case {'k1','mask'}
         disp(['         (Nothing to do ... k1/mask file already loaded.)']);
+        go_fmask = zeros(jmax,imax) + 1;
     otherwise
-        go_mask = zeros(jmax,imax);
-        go_mask = go_mask + 1;
+        go_mask = zeros(jmax,imax) + 1;
         disp(['       - Blank mask created (nothing to re-grid).']);
+        go_fmask = go_mask;
 end
 % plot & save initial mask re-grid
 plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']);
@@ -549,7 +553,7 @@ if opt_user
     %
     disp(['>   7. USER EDITING OF MASK ...']);
     %
-    [go_mask]  = fun_grid_edit_mask(go_mask);
+    [go_mask]  = fun_grid_edit_mask(go_mask,go_fmask);
     % increment VERSION
     grid_ver = grid_ver + 1;
     str_ver = num2str(grid_ver);
@@ -658,7 +662,7 @@ end
 %
 if opt_maketopo,
     % plot final k1
-    plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
+    plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
     % plot final topo
     plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
 end

@@ -94,7 +94,7 @@ umtdpwfa    AR 180331           0.6         "Turonian" (Mid Cretaceous) (93.5-89
 umtdpwfb    AR 180419           0.61        "Turonian" (Mid Cretaceous) (93.5-89.3), minimal topo edits            
 ----------------------------------------------------------------
 umtdpwia    AR 180331           0.6         "Aptian" (Early Cretaceous) (125-112), opened 2 gateways 
-umtdpwib    AR 180419           0.61        "Aptian" (Early Cretaceous) (125-112), opened 3 gateways                
+umtdpwib    AR 180419           0.62        "Aptian" (Early Cretaceous) (125-112), opened gateways, added 2 islands                
 ----------------------------------------------------------------
 umtdzoaa    AR 180306           0.6         "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits 
 umtdzoab    AR 180419           0.61        "Hettangian" (Early Jurassic) (201.6-197), opened up (a contiguous) Southern Ocean     

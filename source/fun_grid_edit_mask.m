@@ -1,4 +1,4 @@
-function [grid_mask]  = fun_grid_edit_mask(grid_mask)
+function [grid_mask]  = fun_grid_edit_mask(grid_mask,grid_fmask)
 %
 % basic mask alteration code after:
 % Andrew Yool (axy@soc.soton.ac.uk), October 2004.
@@ -17,6 +17,9 @@ function [grid_mask]  = fun_grid_edit_mask(grid_mask)
 gm_ex = grid_mask;
 gm_ex = [gm_ex gm_ex(:,end)];
 gm_ex = [gm_ex(1,:); gm_ex];
+gfm_ex = grid_fmask;
+gfm_ex = [gfm_ex gfm_ex(:,end)];
+gfm_ex = [gfm_ex(1,:); gfm_ex];
 % Do the topography alteration
 fprintf('       * Mask alteration procedure :\n');
 fprintf('         (1) left button to turn grid cell to ocean\n');
@@ -44,14 +47,18 @@ while flag == 0
         fprintf('       * Mask alteration complete\n');
     else
         loc_j = jmax-iy+2;
-        if button == 1
-            fprintf('         -> Cell at (%d, %d) now ocean\n', ix, iy);
-            gm_ex(loc_j, ix) = 1;
-        elseif button == 3
-            fprintf('         -> Cell at (%d, %d) now land\n', ix, iy);
-            gm_ex(loc_j, ix) = 0;
+        if (gfm_ex(loc_j,ix) == 0.0)
+            fprintf('       - Invalid choice: there is no ocean depth information available at cell (%d, %d)\n',ix,iy);
         else
-            fprintf('       - Cannot switch mask value of cell at (%d, %d)\n',ix,iy);
+            if button == 1
+                fprintf('         -> Cell at (%d, %d) now ocean\n', ix, iy);
+                gm_ex(loc_j,ix) = 1;
+            elseif button == 3
+                fprintf('         -> Cell at (%d, %d) now land\n', ix, iy);
+                gm_ex(loc_j,ix) = 0;
+            else
+                fprintf('       - Cannot switch mask value of cell at (%d, %d)\n',ix,iy);
+            end
         end
     end
     clf
