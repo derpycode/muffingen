@@ -97,7 +97,7 @@ umtdpwia    AR 180331           0.6         "Aptian" (Early Cretaceous) (125-112
 umtdpwib    AR 180419           0.62        "Aptian" (Early Cretaceous) (125-112), opened gateways, added 2 islands                
 ----------------------------------------------------------------
 umtdzoaa    AR 180306           0.6         "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits 
-umtdzoab    AR 180419           0.61        "Hettangian" (Early Jurassic) (201.6-197), opened up (a contiguous) Southern Ocean     
+umtdzoab    AR 180419           0.62        "Hettangian" (Early Jurassic) (201.6-197), minimal topo edits, made shallow SO    
 ----------------------------------------------------------------
 umteboha    AR 180330           0.6         "Changhsingian" (Latest Permian) (254-251), no topo edits
 umtebohb    AR 180419           0.61        "Changhsingian" (Latest Permian) (254-251), no topo edits
