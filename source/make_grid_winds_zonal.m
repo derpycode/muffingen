@@ -35,6 +35,7 @@ function [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_
 %             revised new algorithm for calculating wind stress
 %             removed un-used input parameters
 %   17/10/22: added new input parameter
+%   18/09/11: added minimum wind stress
 %
 %   ***********************************************************************
 
@@ -107,6 +108,9 @@ taux_u = zeros(jmax,imax);
 taux_u_1d = zeros(jmax,1);
 taux_v = zeros(jmax,imax);
 taux_v_1d = zeros(jmax,1);
+% set minimum tau (N m-2)
+% NOTE: derived from JOSEY et al. [2002]
+par_tau_min = 0.02;
 %
 % *********************************************************************** %
 
@@ -174,6 +178,16 @@ for j=(jmax/2+1):jmax,
     taux_u(j,:) = loc_amp*loc_tmp1*loc_tmp2^loc_modpower   + loc_offset*(90.0-abs(go_latm(j)))/90.0;
     taux_v(j,:) = loc_amp*loc_tmp1e*loc_tmp2e^loc_modpower + loc_offset*(90.0-abs(go_late(j+1)))/90.0;
 end
+% impose minimum magnitude of wind stress
+% NOTE: default value from JOSEY et al. [2002]
+loc_ans = intersect(find(abs(taux_u(:,:)) < par_tau_min),find(taux_u(:,:) > 0.0));
+taux_u(loc_ans) = par_tau_min;
+loc_ans = intersect(find(abs(taux_u(:,:)) < par_tau_min),find(taux_u(:,:) < 0.0));
+taux_u(loc_ans) = -par_tau_min;
+loc_ans = intersect(find(abs(taux_v(:,:)) < par_tau_min),find(taux_v(:,:) > 0.0));
+taux_v(loc_ans) = par_tau_min;
+loc_ans = intersect(find(abs(taux_v(:,:)) < par_tau_min),find(taux_v(:,:) < 0.0));
+taux_v(loc_ans) = -par_tau_min;
 %
 % *********************************************************************** %
 

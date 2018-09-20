@@ -139,6 +139,8 @@ function [] = muffingen(POPT)
 %   18/04/19: added check and warning when trying to turn land cell to ocn,
 %             but when there is no ocean depth value available
 %             *** VERSION 0.62 ********************************************
+%   18/09/19: added minimum wind stress value [make_grid_winds_zonal.m]
+%             *** VERSION 0.63 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -154,7 +156,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.62;
+par_muffingen_ver = 0.63;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -1037,6 +1039,7 @@ if opt_makewind
                 otherwise
                     % intermediate case
                     % (0.024903 mol m-2 yr-1 uatm-1 @ a=0.310)
+                    % NOTE: this is the 'automatically' determined case
                     fprintf(fid,'%s\n','# gas transfer coeff');
                     fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
             end
