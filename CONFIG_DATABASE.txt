@@ -1,65 +1,65 @@
-================================================================
-=== muffingen CONFIGURATIONS 'DATABASE' ========================
-================================================================
-
-                           
-================================================================
-=== KEY ========================================================
-================================================================
-
-The 'world' (.k1) filename can be up to 8 characters as of svn revision 10017.
-(This is backwards compatable and 6 can still be used.)
-
-The translation of the character positions is as follows:
-
-1-2 ==  GCM or input code:
-        um == UM / HadCM3(L)
-        fm == FOAM
-        k1 == k1-file input
-        ac == ascii file continental shape input
-        bl == blank
-3-7 ==  for UM: the 5 character UM code
-        for FOAM: age (4 figures) plus an experiment configuration identifier character
-8   ==  a configuration version character
-        (e.g. a,b,c might be a series of different gateway assumption configurations)
-        
-e.g.    umxbowla
-        character position 1-2 == 'um'      => the UM (here: HadCM3L) climate model
-        character position 3-7 == 'xbowl'   => the modern climate simulation with UM code xbowl
-        character position 8   == 'a'       => the first muffin configuration created
-                           
-================================================================
-=== CONFIGURATION LIST =========================================
-================================================================
-
-NOTE: order *alphabetically* in each section
-NOTE: full configuration notes should ideally appear in a README file in the configuration directory
-
-----------------------------------------------------------------
-----------------------------------------------------------------
-world   | created ...       | muffingen | *BRIEF* NOTES
-name    | by, on (dd/mm/yy) | version   | (enclosed in "")
-----------------------------------------------------------------
---- EXAMPLES ---------------------------------------------------
-----------------------------------------------------------------
-
-----------------------------------------------------------------
---- MODERN -----------------------------------------------------
-----------------------------------------------------------------
+% ==============================================================
+% === muffingen CONFIGURATIONS 'DATABASE' ======================
+% ==============================================================
+% 
+% 
+% ==============================================================
+% === KEY ======================================================
+% ==============================================================
+% 
+% The 'world' (.k1) filename can be up to 8 characters as of svn revision 10017.
+% (This is backwards compatable and 6 can still be used.)
+% 
+% The translation of the character positions is as follows:
+% 
+% 1-2 ==  GCM or input code:
+%         um == UM / HadCM3(L)
+%         fm == FOAM
+%        k1 == k1-file input
+%         ac == ascii file continental shape input
+%         bl == blank
+% 3-7 ==  for UM: the 5 character UM code
+%         for FOAM: age (4 figures) plus an experiment configuration identifier character
+% 8   ==  a configuration version character
+%         (e.g. a,b,c might be a series of different gateway assumption configurations)
+%         
+% e.g.    umxbowla
+%         character position 1-2 == 'um'      => the UM (here: HadCM3L) climate model
+%         character position 3-7 == 'xbowl'   => the modern climate simulation with UM code xbowl
+%         character position 8   == 'a'       => the first muffin configuration created
+%                            
+% ==============================================================
+% === CONFIGURATION LIST =======================================
+% ==============================================================
+% 
+% NOTE: order *alphabetically* in each section
+% NOTE: full configuration notes should ideally appear in a README file in the configuration directory
+% 
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% world   | created ...       | muffingen | *BRIEF* NOTES
+% name    | by, on (dd/mm/yy) | version   | (enclosed in "")
+% --------------------------------------------------------------
+% --- EXAMPLES -------------------------------------------------
+% --------------------------------------------------------------
+% 
+% --------------------------------------------------------------
+% --- MODERN ---------------------------------------------------
+% --------------------------------------------------------------
 fm0000aa    AR 170731           0.42        "(default) mask (ONLY) grid filtering, (default) 0.5 re-gridding area fraction, (default) roof runoff"
 fm0000ab    AR 170731           0.42        "(default) mask and grid filtering, (default) 0.5 re-gridding area fraction, (default) roof runoff"
 fm0000ac    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, (default) roof runoff"
 fm0000ad    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, edited gateways, (default) roof runoff"
 fm0000ae    AR 170731           0.42        "as fm0000aa, but random runoff"
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umxbowla    AR 170731           0.42        "(default) mask (ONLY) grid filtering, (default) 0.5 re-gridding area fraction, (default) roof runoff"
 umxbowlb    AR 170731           0.42        "(default) mask and grid filtering, (default) 0.5 re-gridding area fraction, (default) roof runoff"
 umxbowlc    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, (default) roof runoff"
 umxbowld    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, edited gateways, (default) roof runoff"
 umxbowle    AR 170731           0.42        "as umxbowla, but random runoff"
-----------------------------------------------------------------
---- PALEO ------------------------------------------------------
-----------------------------------------------------------------
+% --------------------------------------------------------------
+% --- PALEO ----------------------------------------------------
+% --------------------------------------------------------------
 fm0450aa    AR 170814           0.43        "HSO, ice free, 24 PAL"
 fm0450ba    AR 170814           0.43        "HSO, ice free, 16 PAL"
 fm0450ca    AR 170814           0.43        "HSO, ice free, 10 PAL"
@@ -70,46 +70,56 @@ fm0450ga    AR 170814           0.43        "CSO, ice free, 16 PAL"
 fm0450ha    AR 170814           0.43        "CSO, ice free, 10 PAL"
 fm0450ia    AR 170814           0.43        "CSO, ice free, 8 PAL"
 fm0450ja    AR 170814           0.43        "CSO, ice free, 3 PAL"
-----------------------------------------------------------------
+% --------------------------------------------------------------
 fm0680aa    AR 180325           0.6         "36x36x16, x3CO2, minimal land-sea mask alteration"
 fm0680ba    AR 180325           0.6         "36x36x16, x6CO2, minimal land-sea mask alteration"
 fm0680ca    AR 180325           0.6         "36x36x16, x12CO2, minimal land-sea mask alteration"
 fm0680da    AR 180325           0.6         "36x36x16, x24CO2, minimal land-sea mask alteration"
 fm0680ea    AR 180325           0.6         "36x36x16, x48CO2, minimal land-sea mask alteration"
 fm0680cb    AR 180325           0.6         "18x18x16, x12CO2, cells removed to open gateways"
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdzoaa    AR 180306           0.6         "Hettangian (Early Jurassic) (201.6-197), minimal topo edits"           
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdqpoa    AR 170825           0.53        "Messinian (7.25-5.33), 400 ppm, assumed modern orbits"
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdqpma    AR 170822           0.51        "Serravillian (13.82-11.63), 400 ppm, assumed modern orbits"
 umtdqpmb    AR 170822           0.52        "as per umtdqpma, but with SEDGEM/ROKGEM file output"
----------------------------------------------------------------- 
+% -------------------------------------------------------------- 
 umtdqpja    AR 170825           0.53        "Aquitanian (23.03-20.44), 400 ppm, assumed modern orbits"
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits"    
 umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits, NO drake passage gateway"
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdpwfa    AR 180331           0.6         "Turonian (Mid Cretaceous) (93.5-89.3), minimal topo edits"
 umtdpwfb    AR 180419           0.61        "Turonian (Mid Cretaceous) (93.5-89.3), minimal topo edits"         
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdpwia    AR 180331           0.6         "Aptian (Early Cretaceous) (125-112), opened 2 gateways" 
 umtdpwib    AR 180419           0.62        "Aptian (Early Cretaceous) (125-112), opened gateways, added 2 islands"                
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umtdzoaa    AR 180306           0.6         "Hettangian (Early Jurassic) (201.6-197), minimal topo edits" 
 umtdzoab    AR 180419           0.62        "Hettangian (Early Jurassic) (201.6-197), minimal topo edits, made shallow SO"    
-----------------------------------------------------------------
+% --------------------------------------------------------------
 umteboha    AR 180330           0.6         "Changhsingian (Latest Permian) (254-251), no topo edits"
 umtebohb    AR 180419           0.61        "Changhsingian (Latest Permian) (254-251), no topo edits"
-----------------------------------------------------------------
---- CONCEPTUAL -------------------------------------------------
-----------------------------------------------------------------
-
-
-----------------------------------------------------------------
---- Q10 PROJECT ------------------------------------------------
-----------------------------------------------------------------
-Q_xbowl0    AR 180920           0.63        "[MODERN]; 0.45 re-gridding area fraction -- CLOSED Panama; (default) roof runoff"
+% --------------------------------------------------------------
+% --- CONCEPTUAL -----------------------------------------------
+% --------------------------------------------------------------
+eg_dd_hi    AR 180919           0.63        "double-Drake @ 36x36x16"       
+eg_dd_lo    AR 180919           0.63        "double-Drake @ 18x18x16"
+eg_dw_hi    AR 180919           0.63        "Drake World @ 36x36x16"
+eg_dw_lo    AR 180919           0.63        "Drake World @ 18x18x16"
+eg_ee_hi    AR 180919           0.63        "double-Equatorial passage @ 36x36x16"
+eg_ee_lo    AR 180919           0.63        "double-Equatorial passage @ 18x18x16"
+eg_ep_hi    AR 180919           0.63        "Equatorial passage @ 36x36x16"
+eg_ep_lo    AR 180919           0.63        "Equatorial passage @ 18x18x16"
+eg_rw_hi    AR 180919           0.63        "ridge World @ 36x36x16"
+eg_rw_lo    AR 180919           0.63        "ridge World @ 18x18x16"
+eg_ww_hi    AR 180919           0.63        "water World @ 36x36x16"
+eg_ww_lo    AR 180919           0.63        "water World @ 18x18x16"
+% --------------------------------------------------------------
+% --- Q10 PROJECT ----------------------------------------------
+% --------------------------------------------------------------
+ Q_xbowl0    AR 180920           0.63        "[MODERN]; 0.45 re-gridding area fraction -- CLOSED Panama; (default) roof runoff"
 Q_tdzvg0    AR 180920           0.63        "Holocene; 0.45 re-gridding area fraction -- CLOSED Panama + made continuous tip of S America; (default) roof runoff"
 Q_tdqpq0    AR 180920           0.63        "Piacenzian (Late Pliocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
 Q_tdqpp0    AR 180921           0.63        "Zanclean (Early Pliocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
@@ -117,39 +127,34 @@ Q_tdqpo0    AR 180921           0.63        "Messinian (Miocene); 0.45 re-griddi
 Q_tdqpn0    AR 180921           0.63        "Tortonian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to preserve land fraction); (default) roof runoff"
 Q_tdqpm0    AR 180921           0.63        "Serravillian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic as before (but now land fraction too small); (default) roof runoff"
 Q_tdqpl0    AR 180921           0.63        "Langhian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to approx preserve land fraction); (default) roof runoff"
-
-
-----------------------------------------------------------------
-----------------------------------------------------------------
-
-
-================================================================
-=== CONFIG FILE NAMING =========================================
-================================================================
-
-format:
-
-muffin.x.y.z.config
-
-x -> a series of letters designating the modules: 
-    C == climate (eb_go_gs)
-    B == (ocean+atm) biogeochemsitry (ac_bg)
-    S == sediments (& weathering) (sg_rg)
-    G == gemlite (gl)
-    E == ecogem (eg)
-
-y -> the 'world' (continental configuration & physical boundary conditions) name (8 characters)
-
-z -> mnemonics for the biogeochem tracer selection (as before)
-
-================================================================
-=== MISC NOTES =================================================
-================================================================
-
-  
-
-
-
-================================================================
-================================================================
-================================================================
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+% 
+% ==============================================================
+% === CONFIG FILE NAMING =======================================
+% ==============================================================
+% 
+% format:
+% 
+% muffin.x.y.z.config
+% 
+% x -> a series of letters designating the modules: 
+%     C == climate (eb_go_gs)
+%     B == (ocean+atm) biogeochemsitry (ac_bg)
+%     S == sediments (& weathering) (sg_rg)
+%     G == gemlite (gl)
+%     E == ecogem (eg)
+% 
+% y -> the 'world' (continental configuration & physical boundary conditions) name (8 characters)
+% 
+% z -> mnemonics for the biogeochem tracer selection (as before)
+% 
+% =============================================================
+% === MISC NOTES ==============================================
+% =============================================================
+% 
+% 
+% 
+% =============================================================
+% =============================================================
+% =============================================================
