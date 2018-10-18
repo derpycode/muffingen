@@ -70,6 +70,7 @@ fm0450ga    AR 170814           0.43        "CSO, ice free, 16 PAL"
 fm0450ha    AR 170814           0.43        "CSO, ice free, 10 PAL"
 fm0450ia    AR 170814           0.43        "CSO, ice free, 8 PAL"
 fm0450ja    AR 170814           0.43        "CSO, ice free, 3 PAL"
+fm0450ab    AR 171017           0.44        "HSO, ice free, 24 PAL -- 48x40 non equal area -- very minor mask adjusments to help paths generation"
 % --------------------------------------------------------------
 fm0680aa    AR 180325           0.6         "36x36x16, x3CO2, minimal land-sea mask alteration"
 fm0680ba    AR 180325           0.6         "36x36x16, x6CO2, minimal land-sea mask alteration"

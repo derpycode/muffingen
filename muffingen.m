@@ -141,6 +141,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.62 ********************************************
 %   18/09/19: added minimum wind stress value [make_grid_winds_zonal.m]
 %             *** VERSION 0.63 ********************************************
+%   18/10/17: minor messaging changes
+%             *** VERSION 0.64 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -156,7 +158,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.63;
+par_muffingen_ver = 0.64;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows

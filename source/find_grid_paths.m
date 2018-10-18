@@ -51,6 +51,8 @@ end
 %
 % LOOP >>>
 for islnd = 1:n_islands,
+    %
+    disp(['       * Creating raw path #' num2str(islnd) ' ...']);
     % find top LH border cell of the current island border
     % raster left-to-right, top-to-bottom
     corner = false;
@@ -225,6 +227,7 @@ end
 %
 if n_islands >= 2,
     for islnd = 2:n_islands,
+        %
         disp(['       * Building path #' num2str(islnd) ' ...']);
         %
         pmin = sum(n_paths(1:islnd-1))+1;
