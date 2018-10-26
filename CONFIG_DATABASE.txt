@@ -120,7 +120,7 @@ eg_ww_lo    AR 180919           0.63        "water World @ 18x18x16"
 % --------------------------------------------------------------
 % --- Q10 PROJECT ----------------------------------------------
 % --------------------------------------------------------------
- Q_xbowl0    AR 180920           0.63        "[MODERN]; 0.45 re-gridding area fraction -- CLOSED Panama; (default) roof runoff"
+Q_xbowl0    AR 180920           0.63        "[MODERN]; 0.45 re-gridding area fraction -- CLOSED Panama; (default) roof runoff"
 Q_tdzvg0    AR 180920           0.63        "Holocene; 0.45 re-gridding area fraction -- CLOSED Panama + made continuous tip of S America; (default) roof runoff"
 Q_tdqpq0    AR 180920           0.63        "Piacenzian (Late Pliocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
 Q_tdqpp0    AR 180921           0.63        "Zanclean (Early Pliocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
