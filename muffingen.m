@@ -143,6 +143,10 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.63 ********************************************
 %   18/10/17: minor messaging changes
 %             *** VERSION 0.64 ********************************************
+%   19/01/29: added a parameter to enable n ocean layers to be selected,
+%             but with maximum depth scaled such that surface ocean layer
+%             is the same (this is the parameter -- par_sur_D)
+%             *** VERSION 0.65 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -158,7 +162,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.64;
+par_muffingen_ver = 0.65;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -171,12 +175,15 @@ if strcmp(ans,'on'), diary off; end
 if isempty(POPT), POPT='muffingen_settings_BLANK'; end
 eval(POPT);
 %
+% *** backwards compatability ******************************************* %
+% 
+% zonal wind-stress generaton parameter
+if ~exist('par_tauopt','var'), par_tauopt = 0; end
+% surface layer reference thickness (m)
+if ~exist('par_sur_D','var'),  par_sur_D  = 80.841; end
+%
 % *** check / filter options ******************************************** %
 %
-% zonal wind-stress generaton parameter
-if ~exist('par_tauopt','var'),
-    par_tauopt = 0;
-end
 % age parameter
 if ~exist('par_age','var'),
     par_age = 0.0;
@@ -382,7 +389,7 @@ end
 %
 disp(['>   2. CREATING GENIE GRID ...']);
 % create GENIE grid
-[go_lonm,go_lone,go_latm,go_late,go_dm,go_de] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea);
+[go_lonm,go_lone,go_latm,go_late,go_dm,go_de,par_max_D] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_sur_D);
 disp(['       - GENIE grid generated.']);
 %
 % *** (3) LOAD GRID (AXES) DATA ***************************************** %
@@ -957,11 +964,11 @@ fprintf(fid,'%s\n',['go_1=''../../cgenie.muffin/genie-paleo/',par_wor_name,'''']
 fprintf(fid,'%s\n',['gs_1=''../../cgenie.muffin/genie-paleo/',par_wor_name,'''']);
 % Grid resolution
 fprintf(fid,'%s\n','# Grid resolution');
-fprintf(fid,'%s\n',['GENIENXOPTS=''$(DEFINE)GENIENX=',num2str(par_max_i),'''']);
-fprintf(fid,'%s\n',['GENIENYOPTS=''$(DEFINE)GENIENY=',num2str(par_max_j),'''']);
-fprintf(fid,'%s\n',['GOLDSTEINNLONSOPTS=''$(DEFINE)GOLDSTEINNLONS=',num2str(par_max_i),'''']);
-fprintf(fid,'%s\n',['GOLDSTEINNLATSOPTS=''$(DEFINE)GOLDSTEINNLATS=',num2str(par_max_j),'''']);
-fprintf(fid,'%s\n',['GOLDSTEINNLEVSOPTS=''$(DEFINE)GOLDSTEINNLEVS=',num2str(par_max_k),'''']);
+fprintf(fid,'%s\n',['GENIENXOPTS=''$(DEFINE)GENIENX=',num2str(imax),'''']);
+fprintf(fid,'%s\n',['GENIENYOPTS=''$(DEFINE)GENIENY=',num2str(jmax),'''']);
+fprintf(fid,'%s\n',['GOLDSTEINNLONSOPTS=''$(DEFINE)GOLDSTEINNLONS=',num2str(imax),'''']);
+fprintf(fid,'%s\n',['GOLDSTEINNLATSOPTS=''$(DEFINE)GOLDSTEINNLATS=',num2str(jmax),'''']);
+fprintf(fid,'%s\n',['GOLDSTEINNLEVSOPTS=''$(DEFINE)GOLDSTEINNLEVS=',num2str(kmax),'''']);
 % Topography
 fprintf(fid,'%s\n','# Topography');
 fprintf(fid,'%s\n',['ma_fname_topo=''',par_wor_name,'''']);
@@ -974,6 +981,9 @@ if ~opt_equalarea,
     fprintf(fid,'%s\n',['go_grid=1']);
     fprintf(fid,'%s\n',['gs_grid=1']);
 end
+% Ocean depth scalar (dsc)
+fprintf(fid,'%s\n','# Ocean depth scalar (m) [internally, parameter: dsc]');
+fprintf(fid,'%s\n',['go_par_dsc=',num2str(par_max_D)]);
 % Boundary conditions: EMBM
 fprintf(fid,'%s\n','# Boundary conditions: EMBM');
 fprintf(fid,'%s\n',['ea_topo=''',par_wor_name,'''']);
@@ -1051,10 +1061,10 @@ end
 if opt_makeseds
     % Grid resolution of solid Earth components
     fprintf(fid,'%s\n','# Grid resolution of solid Earth components');
-    fprintf(fid,'%s\n',['SEDGEMNLONSOPTS=''$(DEFINE)SEDGEMNLONS=',num2str(par_max_i),'''']);
-    fprintf(fid,'%s\n',['SEDGEMNLATSOPTS=''$(DEFINE)SEDGEMNLATS=',num2str(par_max_j),'''']);
-    fprintf(fid,'%s\n',['ROKGEMNLONSOPTS=''$(DEFINE)ROKGEMNLONS=',num2str(par_max_i),'''']);
-    fprintf(fid,'%s\n',['ROKGEMNLATSOPTS=''$(DEFINE)ROKGEMNLATS=',num2str(par_max_j),'''']);
+    fprintf(fid,'%s\n',['SEDGEMNLONSOPTS=''$(DEFINE)SEDGEMNLONS=',num2str(imax),'''']);
+    fprintf(fid,'%s\n',['SEDGEMNLATSOPTS=''$(DEFINE)SEDGEMNLATS=',num2str(jmax),'''']);
+    fprintf(fid,'%s\n',['ROKGEMNLONSOPTS=''$(DEFINE)ROKGEMNLONS=',num2str(imax),'''']);
+    fprintf(fid,'%s\n',['ROKGEMNLATSOPTS=''$(DEFINE)ROKGEMNLATS=',num2str(jmax),'''']);
     % Topography for solid Earth components
     fprintf(fid,'%s\n','# Topography for solid Earth components');
     fprintf(fid,'%s\n',['sg_par_pindir_name=''../../cgenie.muffin/genie-paleo/',par_wor_name,'/''']);

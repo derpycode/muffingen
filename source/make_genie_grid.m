@@ -1,4 +1,4 @@
-function [axis_imid,axis_iedge,axis_jmid,axis_jedge,axis_kmid,axis_kedge] = make_genie_grid(DUM_NI,DUM_NJ,DUM_NK,DUM_MAXD,DUM_OFF,DUM_EA);
+function [axis_imid,axis_iedge,axis_jmid,axis_jedge,axis_kmid,axis_kedge,par_max_D] = make_genie_grid(DUM_NI,DUM_NJ,DUM_NK,DUM_MAXD,DUM_OFF,DUM_EA,DUM_SURD);
 % MAKE_GENIE_GRID
 %
 %   ***********************************************************************
@@ -35,9 +35,10 @@ close all;
 n_i = DUM_NI;
 n_j = DUM_NJ;
 n_k = DUM_NK;
-par_grid_k_max = DUM_MAXD;
+par_max_D            = DUM_MAXD;
 par_grid_i_offset_in = DUM_OFF;
-par_grid_equalarea = DUM_EA;
+par_grid_equalarea   = DUM_EA;
+par_sur_D            = DUM_SURD;
 % local constants
 par_ez0 = 0.1;
 %
@@ -85,6 +86,7 @@ tv2 = 0;
 tv1 = 0;
 zro(n_k) = -tv4;
 zw(n_k+1) = tv2;
+%
 for k=1:1:n_k
     if par_ez0 > 0
         tv3 = par_ez0*((z1/par_ez0+1)^k-1);
@@ -110,12 +112,21 @@ end
 % set depth grid bounds
 % NOTE: k counts from TOP to BOTTOM; 
 %       bnd #1 is top
-axis_kmid(1:n_k)    = -par_grid_k_max*zro(:);
-axis_kbnds(1:n_k,1) = -par_grid_k_max*zw(2:n_k+1);
-axis_kbnds(1:n_k,2) = -par_grid_k_max*zw(1:n_k);
-axis_kbnds          = axis_kbnds';
-axis_kedge(1:n_k+1) = -par_grid_k_max*zw(1:n_k+1);
-axis_kth(1:n_k)     = -par_grid_k_max*dz(1:n_k);
+axis_kmid(1:n_k)    = -par_max_D*zro(:);
+axis_kbnds(1:n_k,1) = -par_max_D*zw(2:n_k+1);
+axis_kbnds(1:n_k,2) = -par_max_D*zw(1:n_k);
+axis_kedge(1:n_k+1) = -par_max_D*zw(1:n_k+1);
+axis_kth(1:n_k)     = -par_max_D*dz(1:n_k);
+% re-scale depths
+if (par_sur_D > 0.0),
+    par_max_D = par_max_D*par_sur_D/axis_kbnds(n_k,2);
+    axis_kmid(1:n_k)    = -par_max_D*zro(:);
+    axis_kbnds(1:n_k,1) = -par_max_D*zw(2:n_k+1);
+    axis_kbnds(1:n_k,2) = -par_max_D*zw(1:n_k);
+    axis_kedge(1:n_k+1) = -par_max_D*zw(1:n_k+1);
+    axis_kth(1:n_k)     = -par_max_D*dz(1:n_k);
+end
+axis_kbnds = axis_kbnds';
 %
 % END
 %%%disp(['       <<< END [make_genie_grid]'])
