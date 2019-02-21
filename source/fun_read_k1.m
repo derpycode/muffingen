@@ -16,9 +16,17 @@ function [k1,mask,imax,jmax]  = fun_read_k1(str)
 % Create filename
 switch str(1).gcm
     case ('k1')
-        loc_str_file = [str(1).path '/' str(1).exp '.k1'];
+        if isempty(str(1).path),
+            loc_str_file = [str(1).exp '.k1'];
+        else
+            loc_str_file = [str(1).path '/' str(1).exp '.k1'];
+        end
     case ('mask')
-        loc_str_file = [str(1).path '/' str(1).exp '.dat'];
+        if isempty(str(1).path),
+            loc_str_file = [str(1).exp '.dat'];
+        else
+            loc_str_file = [str(1).path '/' str(1).exp '.dat'];
+        end
     otherwise
         disp(['       ERROR: Impossible error!']);
         disp(['--------------------------------------------------------']);

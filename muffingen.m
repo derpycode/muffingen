@@ -147,6 +147,8 @@ function [] = muffingen(POPT)
 %             but with maximum depth scaled such that surface ocean layer
 %             is the same (this is the parameter -- par_sur_D)
 %             *** VERSION 0.65 ********************************************
+%   19/02/21: fixed missing pass of par_sur_D in 2nd make_genie_grid call
+%             *** VERSION 0.66 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -162,7 +164,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.65;
+par_muffingen_ver = 0.66;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -435,7 +437,7 @@ switch par_gcm
         % re-create GENIE grid with derived (/updated?) grid dimensions
         % NOTE: the value of kmax is taken from the config file
         %      (while imax and jmax are deduced from the file)
-        [go_lonm,go_lone,go_latm,go_late,go_dm,go_de] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea);
+        [go_lonm,go_lone,go_latm,go_late,go_dm,go_de] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_sur_D);
         disp(['       - GENIE grid re-generated.']);
     otherwise
         % DO NOTHING
