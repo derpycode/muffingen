@@ -149,6 +149,11 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.65 ********************************************
 %   19/02/21: fixed missing pass of par_sur_D in 2nd make_genie_grid call
 %             *** VERSION 0.66 ********************************************
+%   19/02/25: made distinction between HadCM3 and HadCM3L
+%             (including moving sed grid generation earlier)
+%             added option not to create and show plots [MUCH FASTER!!]
+%             rationalized stage numbering
+%             *** VERSION 0.67 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -164,7 +169,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.66;
+par_muffingen_ver = 0.67;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -183,6 +188,8 @@ eval(POPT);
 if ~exist('par_tauopt','var'), par_tauopt = 0; end
 % surface layer reference thickness (m)
 if ~exist('par_sur_D','var'),  par_sur_D  = 80.841; end
+% create plots?
+if ~exist('opt_plots','var'),  opt_plots  = true; end
 %
 % *** check / filter options ******************************************** %
 %
@@ -194,11 +201,12 @@ else
     par_age_emty = false;
 end
 % process GCM name string
-if strcmp(par_gcm,'hadcm3l'), par_gcm = 'hadcm3'; end
+if strcmp(par_gcm,'hadcm3l'), par_gcm = 'hadcm3l'; end
+if strcmp(par_gcm,'HadCM3L'), par_gcm = 'hadcm3l'; end
+if strcmp(par_gcm,'HADCM3L'), par_gcm = 'hadcm3l'; end
+if strcmp(par_gcm,'hadcm3'),  par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'HadCM3'),  par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'HadCM3L'), par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'HADCM3'),  par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'HADCM3L'), par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'um'),      par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'UM'),      par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'FOAM'),    par_gcm = 'foam';   end
@@ -214,7 +222,7 @@ if strcmp(par_gcm,'none'),    par_gcm = 'blank';  end
 if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';  end
 % adjust options accroding to input (GCM) type
 switch par_gcm
-    case {'hadcm3','foam'}
+    case {'hadcm3','hadcm3l','foam'}
     case {'k1','mask'}
     otherwise
         opt_makeall=false;
@@ -244,23 +252,23 @@ str_nameout = par_wor_name;
 % initialize optional netCDF filenames
 % -> set default variable names
 switch par_gcm
-    case ('hadcm3')
-        if ~exist('par_nc_topo_name','var'), par_nc_topo_name = [par_expid '.qrparm.omask']; end
-        if ~exist('par_nc_axes_name','var'), par_nc_axes_name = [par_expid 'a.pdclann']; end
+    case {'hadcm3','hadcm3l'}
+        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = [par_expid '.qrparm.omask']; end
+        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
         if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = [par_expid '_sed']; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
+        if ~exist('par_nc_ocean_name','var'), par_nc_mask_name  = [par_expid '.qrparm.mask']; end
         if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = [par_expid 'a.pdclann']; end
     case ('foam')
-        if ~exist('par_nc_topo_name','var'), par_nc_topo_name = 'topo'; end
-        if ~exist('par_nc_axes_name','var'), par_nc_axes_name = par_nc_topo_name; end
+        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = 'topo'; end
+        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = par_nc_topo_name; end
         if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = 'atmos'; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
+        if ~exist('par_nc_ocean_name','var'), par_nc_mask_name  = ''; end
         if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
     otherwise
         par_nc_topo_name  = '';
         par_nc_axes_name  = '';
         par_nc_atmos_name = '';
-        par_nc_ocean_name = '';
+        par_nc_mask_name  = '';
         par_nc_coupl_name = '';
 end
 %
@@ -306,11 +314,13 @@ str = setfield(str, {2}, 'dir', str_dirout);
 str = setfield(str, {1}, 'nc', par_nc_axes_name);
 str = setfield(str, {2}, 'nc', par_nc_topo_name);
 str = setfield(str, {3}, 'nc', par_nc_atmos_name);
-str = setfield(str, {4}, 'nc', par_nc_ocean_name);
+str = setfield(str, {4}, 'nc', par_nc_mask_name);
 str = setfield(str, {5}, 'nc', par_nc_coupl_name);
 %
 % *** initialize reporting ********************************************** %
 %
+% initialize muffingen step number
+n_step = 0;
 % create copy of .m file options
 copyfile([POPT '.m'],[str(2).dir '/' POPT '_' str_date '.m'])
 % start logging
@@ -334,33 +344,34 @@ disp([' ']);
 %
 % %%% SUMMARY OF STEP SEQUENCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % NOTE: not all of these steps are carried out, depending on the options
-% (0) (initialize)
-% (1) CONFIRM OPTIONS
-% (2) CREATING GENIE GRID
-% (3) READ AXES INFORMATION
-% (4) LOAD TOPO & MASK DATA
-% (5) RE-GRID MASK
-% (6) FILTER MASK
-% (7) ADJUST MASK -- USER!
-% (8) RE-GRID TOPO
-% (9) RE-GRID VERTICALLY
-% (10) ADJUST TOPO -- AUTOMATIC BATHYMETRY FILTERING
-% (11) ADJUST TOPO -- USER!
-% (12) CALCULATE RUNOFF & COMPLETE k1 FILE
-% (13) IDENTIFY ISLANDS
-% (14) UPDATE ISLANDS AND ISLAND PATHS
-% (15) GENERATE ISLAND PATHS
-% (16) GENERATE PSI ISLANDS
-% (17) RE-GRID WIND SPEED/STRESS DATA
-% (18) LOAD ALBEDO DATA
-% (19) RE-GRID & PROCESS ALBEDO
-% (20) GENERATE SEDIMENT GRID
-% (21) GENERATE CONFIG FILE PARAMETER LINES
+% (initialize)
+% CONFIRM OPTIONS
+% CREATING GENIE GRID
+% READ AXES INFORMATION
+% LOAD TOPO & MASK DATA
+% RE-GRID MASK
+% FILTER MASK
+% ADJUST MASK -- USER!
+% RE-GRID TOPO
+% RE-GRID VERTICALLY
+% ADJUST TOPO -- AUTOMATIC BATHYMETRY FILTERING
+% ADJUST TOPO -- USER!
+% CALCULATE RUNOFF & COMPLETE k1 FILE
+% IDENTIFY ISLANDS
+% UPDATE ISLANDS AND ISLAND PATHS
+% GENERATE ISLAND PATHS
+% GENERATE PSI ISLANDS
+% GENERATE SEDIMENT GRID
+% RE-GRID WIND SPEED/STRESS DATA
+% LOAD ALBEDO DATA
+% RE-GRID & PROCESS ALBEDO
+% GENERATE CONFIG FILE PARAMETER LINES
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% *** (1) CONFIRM OPTIONS *********************************************** %
+% *** CONFIRM OPTIONS *************************************************** %
 %
-disp(['>   1. CHECKING PRIMARY OPTIONS ...']);
+n_step = n_step+1;
+disp(['>   ' num2str(n_step) '. CHECKING PRIMARY OPTIONS ...']);
 % check world name
 if (length(par_wor_name) ~= 8),
     disp(['       * ERROR: World name (par_wor_name) must be 8 characters long.']);
@@ -371,7 +382,7 @@ if (length(par_wor_name) ~= 8),
 end
 % check GCM options
 switch str(1).gcm
-    case ('hadcm3')
+    case {'hadcm3','hadcm3l'}
         disp(['       * GCM == ' str(1).gcm ' (OK)']);
     case ('foam')
         disp(['       * GCM == ' str(1).gcm ' (OK)']);
@@ -387,22 +398,27 @@ switch str(1).gcm
         return;
 end
 %
-% *** (2) SET UP OUTPUT GRID ******************************************** %
+% *** SET UP OUTPUT GRID ************************************************ %
 %
-disp(['>   2. CREATING GENIE GRID ...']);
+n_step = n_step+1;
+disp(['>   ' num2str(n_step) '. CREATING GENIE GRID ...']);
 % create GENIE grid
 [go_lonm,go_lone,go_latm,go_late,go_dm,go_de,par_max_D] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_sur_D);
 disp(['       - GENIE grid generated.']);
 %
-% *** (3) LOAD GRID (AXES) DATA ***************************************** %
+% *** LOAD GRID (AXES) DATA ********************************************* %
 %
-disp(['>   3. READING AXES INFORMATION ...']);
+n_step = n_step+1;
+disp(['>   ' num2str(n_step) '. READING AXES INFORMATION ...']);
 %
 switch par_gcm
-    case {'hadcm3','foam'}
+    case {'hadcm3','hadcm3l','foam'}
         % read axes
         if strcmp(par_gcm,'hadcm3')
-            [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_hadcm3(str);
+            % NOTE: axes need to be re-generated later (for winds etc.)
+            [gi_loncm,gi_lonce,gi_latcm,gi_latce] = fun_read_axes_hadcm3(str);
+        elseif strcmp(par_gcm,'hadcm3l')
+            [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_hadcm3x(str);
         else
             [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_foam(str);
         end
@@ -412,24 +428,26 @@ switch par_gcm
         disp(['         (Nothing to load.)']);
 end
 %
-% *** (4) LOAD TOPO & MASK DATA ***************************************** %
+% *** LOAD TOPO & MASK DATA ********************************************* %
 %
 % NOTE: mask is defined with '1' for ocean
 %
-disp(['>   4. READING MASK & TOPO GRIDS ...']);
+n_step = n_step+1;
+disp(['>   ' num2str(n_step) '. READING MASK & TOPO GRIDS ...']);
 %
 switch par_gcm
-    case {'hadcm3','foam'}
+    case {'hadcm3','hadcm3l','foam'}
         % read topo
-        if strcmp(par_gcm,'hadcm3')
-            [gi_topo,gi_mask] = fun_read_topo_hadcm3(str);
+        if strcmp(par_gcm(1:6),'hadcm3')
+            [gi_mask] = fun_read_omask_hadcm3x(str);
+            [gi_topo] = fun_read_topo_hadcm3x(str);
         else
-            [gi_topo,gi_mask] = fun_read_topo_foam(str);
+            [gi_topo,gi_mask] = fun_read_topomask_foam(str);
         end
         disp(['       - Mask & topo info read.']);
         % plot input mask & topo
-        plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']);
-        plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']);
+        if (opt_plots), plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']); end
+        if (opt_plots), plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']); end
     case {'k1','mask'}
         % load topo directly
         [go_k1,go_mask,imax,jmax] = fun_read_k1(str);
@@ -444,12 +462,13 @@ switch par_gcm
         disp(['         (Nothing to load.)']);
 end
 %
-% *** (5) RE-GRID MASK ************************************************** %
+% *** RE-GRID MASK ****************************************************** %
 %
-disp(['>   5. RE-GRIDING MASK ...']);
+n_step = n_step+1;
+disp(['>   ' num2str(n_step) '. RE-GRIDING MASK ...']);
 %
 switch par_gcm
-    case {'hadcm3','foam'}
+    case {'hadcm3','hadcm3l','foam'}
         % initial re-gridding of mask
         % NOTE: need to transpose around [gi_mask] to have correct input format
         %       to make_regrid_2d
@@ -476,10 +495,11 @@ switch par_gcm
         go_fmask = go_mask;
 end
 % plot & save initial mask re-grid
-plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']);
+if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']); end
 %
-% *** (6) FILTER MASK *************************************************** %
+% *** FILTER MASK ******************************************************* %
 %
+n_step = n_step+1;
 % filter mask if requested
 % NOTE: when loading in a default 'k1' file, best to skip this step
 % set VERSION 0 (raw)
@@ -488,7 +508,7 @@ str_ver = num2str(grid_ver);
 %
 if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
     %
-    disp(['>   6. FILTERING MASK ...']);
+    disp(['>   ' num2str(n_step) '. FILTERING MASK ...']);
     %
     if opt_filtermask,
         %
@@ -514,7 +534,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         % <<< LOOP
         fprintf('       - Single cell embayments filtered out.\n')
         % plot mask
-        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
         %
     end
     %
@@ -532,7 +552,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         %
         fprintf('       - Polar connections cleaned up.\n')
         % plot mask
-        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
         %
     end
     %
@@ -542,7 +562,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         %
         [go_oceans,n_oceans,i_oceans] = find_grid_oceans(go_mask);
         % plot oceans!
-        plot_2dgridded(flipud(go_oceans),999,'',[[str_dirout '/' str_nameout] '.ocean_out.INIT'],['oceans out -- INITIAL']);
+        if (opt_plots), plot_2dgridded(flipud(go_oceans),999,'',[[str_dirout '/' str_nameout] '.ocean_out.INIT'],['oceans out -- INITIAL']); end
         % increment VERSION
         grid_ver = grid_ver + 1;
         str_ver = num2str(grid_ver);
@@ -550,7 +570,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         [go_mask,go_oceans,n_oceans] = find_grid_oceans_update(go_mask,go_oceans,n_oceans,par_min_oceann);
         fprintf('       - Small water bodies cleaned up.\n')
         % plot mask
-        plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
         %
     end
     %
@@ -560,18 +580,20 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
     %
 end
 %
-% *** (7) ADJUST MASK -- USER! ****************************************** %
+% *** ADJUST MASK -- USER! ********************************************** %
+%
+n_step = n_step+1;
 %
 if opt_user
     %
-    disp(['>   7. USER EDITING OF MASK ...']);
+    disp(['>   ' num2str(n_step) '. USER EDITING OF MASK ...']);
     %
     [go_mask]  = fun_grid_edit_mask(go_mask,go_fmask);
     % increment VERSION
     grid_ver = grid_ver + 1;
     str_ver = num2str(grid_ver);
     % plot mask
-    plot_2dgridded(flipud(go_mask),2,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]);
+    if (opt_plots), plot_2dgridded(flipud(go_mask),2,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
     % calculate new fractional area
     [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
     disp(['       * Revised land area fraction = ', num2str(1.0-so_farea)]);
@@ -585,20 +607,22 @@ go_masknan = go_mask;
 go_masknan(find(go_masknan == 0)) = NaN;
 %
 % plot final mask
-plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']);
+if (opt_plots), plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']); end
 %
 % calculate new fractional area
 [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
 disp(['       * Final land area fraction   = ', num2str(1.0-so_farea)]);
 %
-% *** (8) RE-GRID TOPO ************************************************** %
+% *** RE-GRID TOPO ****************************************************** %
+%
+n_step = n_step+1;
 %
 if opt_maketopo
     %
-    disp(['>   8. RE-GRIDING TOPOGRAPHY ...']);
+    disp(['>   ' num2str(n_step) '. RE-GRIDING TOPOGRAPHY ...']);
     %
     switch par_gcm
-        case {'hadcm3','foam'}
+        case {'hadcm3','hadcm3l','foam'}
             % initial re-gridding of topo
             % NOTE: need to transpose around [gi_topo] to have correct input format
             %       to make_regrid_2d
@@ -618,16 +642,18 @@ if opt_maketopo
     end
     % plot & save initial topo re-grid
     if ~strcmp(par_gcm,'k1'),
-        plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']);
+        if (opt_plots), plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']); end
     end
     %
 end
 %
-% *** (9) RE-GRID VERTICALLY ******************************************** %
+% *** RE-GRID VERTICALLY ************************************************ %
+%
+n_step = n_step+1;
 %
 if opt_maketopo,
     %
-    disp(['>   9. RE-GRIDING OCEAN BATHYMETRY ...']);
+    disp(['>   ' num2str(n_step) '. RE-GRIDING OCEAN BATHYMETRY ...']);
     %
     switch par_gcm
         case {'k1'}
@@ -640,32 +666,36 @@ if opt_maketopo,
     % filter min k value
     go_k1(find(go_k1 < par_min_k)) = par_min_k;
     % plot initial k1 re-grid
-    plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '/' str_nameout] '.k1_out.RAW'],['k1 out -- RAW re-gridded']);
+    if (opt_plots), plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '/' str_nameout] '.k1_out.RAW'],['k1 out -- RAW re-gridded']); end
     %
 end
 %
-% *** (10) ADJUST TOPO -- AUTOMATIC BATHYMETRY FILTERING **************** %
+% *** ADJUST TOPO -- AUTOMATIC BATHYMETRY FILTERING ********************* %
+%
+n_step = n_step+1;
 %
 % carry out basic automatic topo filtering
 if opt_maketopo && opt_filtertopo,
     %
-    disp(['>  10. FILTERING BATHYMETRY ...']);
+    disp(['>  ' num2str(n_step) '. FILTERING BATHYMETRY ...']);
     %
     [go_k1] = fun_grid_topo_filter(go_k1);
     fprintf('       - Topography filtered.\n')
     % plot adjusted k1 re-grid
-    plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '/' str_nameout] '.k1_out.FILTERED'],['k1 out -- auto filtered']);
+    if (opt_plots), plot_2dgridded(flipud(go_k1),89.0,'',[[str_dirout '/' str_nameout] '.k1_out.FILTERED'],['k1 out -- auto filtered']); end
 end
 %
-% *** (11) ADJUST TOPO -- USER! ***************************************** %
+% *** ADJUST TOPO -- USER! ********************************************** %
+%
+n_step = n_step+1;
 %
 if opt_maketopo && opt_user
     %
-    disp(['>  11. USER EDITING OF TOPO ...']);
+    disp(['>  ' num2str(n_step) '. USER EDITING OF TOPO ...']);
     % user-editing! what can go wrong?
     [go_k1] = fun_grid_edit_k1(go_k1,kmax);
     % plot mask
-    plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.USEREDITED'],['k1 out -- user edited version']);
+    if (opt_plots), plot_2dgridded(flipud(go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.USEREDITED'],['k1 out -- user edited version']); end
     % convert k-levels back to depth
     [go_topo] = fun_conv_k1(go_de,go_k1);
     %
@@ -675,19 +705,21 @@ end
 %
 if opt_maketopo,
     % plot final k1
-    plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']);
+    if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']); end
     % plot final topo
-    plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
+    if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']); end
 end
 %
-% *** (12) CALCULATE RUNOFF & COMPLETE k1 FILE ************************** %
+% *** CALCULATE RUNOFF & COMPLETE k1 FILE ******************************* %
+%
+n_step = n_step+1;
 %
 % NOTE: ordering is a little illogical becasue
 %       make_grid_runoff_rnd requires the extended grid, while
 %       make_grid_runoff_roof is easier done without ...
 if opt_makeocean
     %
-    disp(['>  12. CALCULATING RUN-OFF AND GENERATE .k1 FILE ...']);
+    disp(['>  ' num2str(n_step) '. CALCULATING RUN-OFF AND GENERATE .k1 FILE ...']);
     % (i) first, check for all ocean
     if (max(max(go_k1)) < 90), opt_makerunoff = false; end
     % (ii) create roof scheme (if selected)
@@ -695,7 +727,7 @@ if opt_makeocean
         [go_k1] = make_grid_runoff_roof(go_mask,go_k1,str);
         loc_k1 = go_k1;
         loc_k1(find(loc_k1 < 91)) = 95;
-        plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']);
+        if (opt_plots), plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']); end
     end
     % (iii) extend k1 grid
     % NOTE: mark first row: maxk+1, last as maxk+2
@@ -711,7 +743,7 @@ if opt_makeocean
         [goex_k1] = make_grid_runoff_rnd(goex_k1,str,opt_debug);
         loc_k1 = goex_k1(2:end-1,2:end-1);
         loc_k1(find(loc_k1 < 91)) = 95;
-        plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']);
+        if (opt_plots), plot_2dgridded(flipud(loc_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.RUNOFF'],['k1 out -- RUNOFF']); end
     end
     % (v) save .k1 file
     fprint_2DM(goex_k1(:,:),[],[[str_dirout '/' str_nameout] '.k1'],'%3i','%3i',true,false);
@@ -719,37 +751,41 @@ if opt_makeocean
     %
 end
 %
-% *** (13) IDENTIFY ISLANDS ********************************************* %
+% *** IDENTIFY ISLANDS ************************************************** %
+%
+n_step = n_step+1;
 %
 if opt_makeocean
     %
-    disp(['>  13. IDENTIFY ISLANDS ...']);
+    disp(['>  ' num2str(n_step) '. IDENTIFY ISLANDS ...']);
     % initial islands count
     [go_islands,n_islands,i_islands] = find_grid_islands(go_mask);
     % plot islands
-    plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '/' str_nameout] '.islnd_out.INIT'],['island out -- INITIAL']);
+    if (opt_plots), plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '/' str_nameout] '.islnd_out.INIT'],['island out -- INITIAL']); end
     %
 end
 %
-% *** (14) UPDATE ISLANDS AND ISLAND PATHS ****************************** %
+% *** UPDATE ISLANDS AND ISLAND PATHS *********************************** %
+%
+n_step = n_step+1;
 %
 if opt_makeocean
     %
-    disp(['>  14. UPDATING ISLANDS & PATHS ...']);
+    disp(['>  ' num2str(n_step) '. UPDATING ISLANDS & PATHS ...']);
     % NOTE: generate all possible paths initially (and filter later)
     % (1) generate generic borders around all (initial) islands
     [go_borders] = find_grid_borders(go_mask);
-    plot_2dgridded(flipud(go_borders),99999.0,'',[[str_dirout '/' str_nameout] '.brds_out.INIT'],['borders out -- INITIAL']);
+    if (opt_plots), plot_2dgridded(flipud(go_borders),99999.0,'',[[str_dirout '/' str_nameout] '.brds_out.INIT'],['borders out -- INITIAL']); end
     % (2) update islands count
     %     identify islands that are insufficiently seperated (and combined)
     %     identify polar islands
     %     re-number all
     [go_islands,n_islands,i_islands,i_poles] = find_grid_islands_update(go_islands,n_islands,i_islands,go_borders,opt_makepoleswide);
-    plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '/' str_nameout] '.islnd_out.FINAL'],['islands out -- FINAL']);
+    if (opt_plots), plot_2dgridded(flipud(go_islands),999,'',[[str_dirout '/' str_nameout] '.islnd_out.FINAL'],['islands out -- FINAL']); end
     % (3) update borders
     %     number borders as per bordering islands
     [go_borders] = find_grid_borders_update(go_borders,go_islands,go_mask,n_islands);
-    plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FILTERED'],['borders out -- FILTERED']);
+    if (opt_plots), plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FILTERED'],['borders out -- FILTERED']); end
     % (4) border check
     [opt_user] = find_grid_borders_check(go_borders,opt_user);
     % (5) user editing of borders
@@ -757,37 +793,41 @@ if opt_makeocean
         % user-editing! what can go wrong?
         [go_borders] = fun_grid_edit_borders(go_borders,go_mask);
         % plot mask
-        plot_2dgridded(flipud(go_borders),999,'',[str_dirout '/' str_nameout '.brds_out.USEREDITED'],['borders out -- user edited version']);
+        if (opt_plots), plot_2dgridded(flipud(go_borders),999,'',[str_dirout '/' str_nameout '.brds_out.USEREDITED'],['borders out -- user edited version']); end
     end
     % plot final borders
-    plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FINAL'],['borders out -- FINAL']);
+    if (opt_plots), plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FINAL'],['borders out -- FINAL']); end
     %
 end
 %
-% *** (15) GENERATE ISLAND PATHS **************************************** %
+% *** GENERATE ISLAND PATHS ********************************************* %
+%
+n_step = n_step+1;
 %
 if opt_makeocean
     %
-    disp(['>  15. GENERATING .paths FILE ...']);
+    disp(['>  ' num2str(n_step) '. GENERATING .paths FILE ...']);
     % create paths
     [n_paths,v_paths,n_islands,go_paths] = find_grid_paths(go_borders,n_islands,i_poles);
     % plot paths data
-    plot_2dgridded(flipud(go_paths),999,'',[[str_dirout '/' str_nameout] '.paths_out.FINAL'],['Paths file -- FINAL']);
+    if (opt_plots), plot_2dgridded(flipud(go_paths),999,'',[[str_dirout '/' str_nameout] '.paths_out.FINAL'],['Paths file -- FINAL']); end
     % save .paths file
     fprint_paths(n_paths,v_paths,[[str_dirout '/' str_nameout] '.paths']);
     fprintf('       - .paths file saved\n')
     %
 end
 %
-% *** (16) GENERATE PSI ISLANDS ***************************************** %
+% *** GENERATE PSI ISLANDS ********************************************** %
+%
+n_step = n_step+1;
 %
 if opt_makeocean
     %
-    disp(['>  16. GENERATING .psiles FILE ...']);
+    disp(['>  ' num2str(n_step) '. GENERATING .psiles FILE ...']);
     % generate PSI islands data
     [go_psiles,n_islands_recnt] = make_grid_psiles(go_islands,i_poles);
     % plot PSI islands data
-    plot_2dgridded(flipud(go_psiles),999,'',[[str_dirout '/' str_nameout] '.psiles_out.FINAL'],['PSI islands file -- FINAL']);
+    if (opt_plots), plot_2dgridded(flipud(go_psiles),999,'',[[str_dirout '/' str_nameout] '.psiles_out.FINAL'],['PSI islands file -- FINAL']); end
     % save .psiles file
     fprint_2DM(go_psiles(:,:),[],[[str_dirout '/' str_nameout] '.psiles'],'%3i','%3i',true,false);
     fprintf('       - .psiles file saved\n')
@@ -798,111 +838,20 @@ if opt_makeocean
     %
 end
 %
-% *** (17) RE-GRID WIND SPEED/STRESS DATA ******************************* %
+% *** GENERATE SEDIMENT GRID ******************************************** %
 %
-if opt_makewind
-    %
-    disp(['>  17. CREATING WIND PRODUCTS ...']);
-    % create GENIE grid wind products
-    switch par_gcm
-        case {'hadcm3','foam'}
-            % re-grid winds from GCM
-            % NOTE: the sets of grids and their edges required differ
-            %       between hadcm3 and foam
-            if strcmp(par_gcm,'hadcm3')
-                [wstr,wspd,g_wspd] = make_grid_winds_hadcm3(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str);
-            else
-                [wstr,wspd,g_wspd] = make_grid_winds_foam(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str);
-            end
-            disp(['       - Re-grided GCM wind products.']);
-        otherwise
-            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
-            disp(['       - Generated zonal wind products.']);
-    end
-end
-%
-% *** (18) LOAD ALBEDO DATA ********************************************* %
-%
-if opt_makealbedo
-    %
-    disp(['>  18. LOADING ALBEDO DATA ...']);
-    %
-    switch par_gcm
-        case {'hadcm3','foam'}
-            % read albedo
-            if strcmp(par_gcm,'hadcm3')
-                [gi_albd] = fun_read_albd_hadcm3(str);
-            else
-                [gi_albd] = fun_read_albd_foam(str);
-            end
-            disp(['       - Read GCM albedo data.']);
-            % plot input albedo
-            plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_in'],['albedo in']);
-        otherwise
-            disp(['         (Nothing to load.)']);
-    end
-    %
-end
-%
-% *** (19) RE-GRID & PROCESS ALBEDO ************************************* %
-%
-if opt_makealbedo
-    %
-    disp(['>  19. CREATING ALBEDO DATA ...']);
-    %
-    switch par_gcm
-        case {'hadcm3','foam'}
-            % re-grid
-            [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,false);
-            go_albd  = go_albd';
-            go_falbd = go_falbd';
-            disp(['       - Re-gridded GCM albedo data.']);
-            % plot output albedo
-            plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_out'],['albedo out']);
-            % save 2D file
-            fprint_2DM(go_albd(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd.dat'],'%8.4f','%8.4f',true,false);
-            fprintf('       - 2D albedo file saved\n')
-            % create zonal mean
-            vo_albd = mean(go_albd');
-            disp(['       - Generated zonal mean albedo profile.']);
-        otherwise;
-            % NOTE: if age == 0, then default (modern) GENIE,
-            %       otherwise for generic ice-free world
-            vo_albd = make_grid_albd(go_latm,par_age);
-            disp(['       - Created generic zonal mean albedo profile.'])
-            % plot output albedo profile
-            figure;
-            scatter(go_latm,vo_albd);
-            axis([-90 90 0.0 1.0]);
-            xlabel('Latitude');
-            ylabel('Albedo');
-            title('Zonally averaged albedo profile');
-            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd.' str_date '.ps']);
-            % reorientate albedo vector for saving
-            vo_albd = fliplr(vo_albd);
-    end
-    % save albedo vector
-    % NOTE: when the file is read in by GENIE, it counrs down in j value:
-    %       such that the N pole is the first element in file;
-    %       fprint_1Dn saves the 2st row at the top, hence the vector
-    %       must be orientated as in a map orientation (N at top)
-    fprint_1Dn(vo_albd(:),[[str_dirout '/' str_nameout] '.albd.dat'],'%8.4f','%8.4f',true,false);
-    fprintf('       - .albd.dat file saved\n')
-    %
-end
-%
-% *** (20) GENERATE SEDIMENT GRID *************************************** %
+n_step = n_step+1;
 %
 if opt_makeseds
     %
-    disp(['>  20. GENERATING SEDIMENT TOPO ...']);
+    disp(['>  ' num2str(n_step) '. GENERATING SEDIMENT TOPO ...']);
     %
     % check sed topo re-gridding options
     switch par_sedsopt
         case 1
             % option %1 -- re-grid sediment topography
             switch par_gcm
-                case {'hadcm3','foam'}
+                case {'hadcm3','hadcm3l','foam'}
                     % if 'high res' sed grid is requested => assume twice ocean resolution
                     % + generate new vectors of grid properties
                     if opt_highresseds,
@@ -936,7 +885,7 @@ if opt_makeseds
     end
     %
     % plot sediment topo
-    plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']);
+    if (opt_plots), plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']); end
     % save sediment topo
     fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%8.2f','%8.2f',true,false);
     fprintf('       - .depth.dat saved\n')
@@ -951,9 +900,129 @@ if opt_makeseds
     fprintf('       - template file .reefmask.dat saved\n')
 end
 %
-% *** (21) GENERATE CONFIG FILE PARAMETER LINES ************************* %
+% *** SWITCH GRIDS ****************************************************** %
 %
-disp(['>  21. GENERATING CONFIG FILE PARAMETER LINES ...']);
+n_step = n_step+1;
+%
+disp(['>  ' num2str(n_step) '. SWITCH GRIDS ...']);
+% NOTE: only with HadCM3 do we need to switch from ocean to atm grid
+switch par_gcm
+    case {'hadcm3'}
+        % re-read axes
+        [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_hadcm3x(str);
+        disp(['       - Axis info re-read.']);
+        % re-read (atmopshere) mask
+        [gi_mask] = fun_read_amask_hadcm3x(str);
+        disp(['       - Mask info re-read.']);
+    otherwise
+        % DO NOTHING
+        disp(['         (Nothing to re-read.)']);
+end
+%
+% *** RE-GRID WIND SPEED/STRESS DATA ************************************ %
+%
+n_step = n_step+1;
+%
+if opt_makewind
+    %
+    disp(['>  ' num2str(n_step) '. CREATING WIND PRODUCTS ...']);
+    % create GENIE grid wind products
+    switch par_gcm
+        case {'hadcm3','hadcm3l','foam'}
+            % re-grid winds from GCM
+            % NOTE: the sets of grids and their edges required differ
+            %       between hadcm3 and foam
+            if strcmp(par_gcm(1:6),'hadcm3')
+                [wstr,wspd,g_wspd] = make_grid_winds_hadcm3x(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+            else
+                [wstr,wspd,g_wspd] = make_grid_winds_foam(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+            end
+            disp(['       - Re-grided GCM wind products.']);
+        otherwise
+            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
+            disp(['       - Generated zonal wind products.']);
+    end
+end
+%
+% *** LOAD ALBEDO DATA ************************************************** %
+%
+n_step = n_step+1;
+%
+if opt_makealbedo
+    %
+    disp(['>  ' num2str(n_step) '. LOADING ALBEDO DATA ...']);
+    %
+    switch par_gcm
+        case {'hadcm3','hadcm3l','foam'}
+            % read albedo
+            if strcmp(par_gcm(1:6),'hadcm3')
+                [gi_albd] = fun_read_albd_hadcm3x(str);
+            else
+                [gi_albd] = fun_read_albd_foam(str);
+            end
+            disp(['       - Read GCM albedo data.']);
+            % plot input albedo
+            if (opt_plots), plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_in'],['albedo in']); end
+        otherwise
+            disp(['         (Nothing to load.)']);
+    end
+    %
+end
+%
+% *** RE-GRID & PROCESS ALBEDO ****************************************** %
+%
+n_step = n_step+1;
+%
+if opt_makealbedo
+    %
+    disp(['>  ' num2str(n_step) '. CREATING ALBEDO DATA ...']);
+    %
+    switch par_gcm
+        case {'hadcm3','hadcm3l','foam'}
+            % re-grid
+            [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,false);
+            go_albd  = go_albd';
+            go_falbd = go_falbd';
+            disp(['       - Re-gridded GCM albedo data.']);
+            % plot output albedo
+            if (opt_plots), plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_out'],['albedo out']); end
+            % save 2D file
+            fprint_2DM(go_albd(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd.dat'],'%8.4f','%8.4f',true,false);
+            fprintf('       - 2D albedo file saved\n')
+            % create zonal mean
+            vo_albd = mean(go_albd');
+            disp(['       - Generated zonal mean albedo profile.']);
+        otherwise;
+            % NOTE: if age == 0, then default (modern) GENIE,
+            %       otherwise for generic ice-free world
+            vo_albd = make_grid_albd(go_latm,par_age);
+            disp(['       - Created generic zonal mean albedo profile.'])
+            % plot output albedo profile
+            figure;
+            scatter(go_latm,vo_albd);
+            axis([-90 90 0.0 1.0]);
+            xlabel('Latitude');
+            ylabel('Albedo');
+            title('Zonally averaged albedo profile');
+            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd.' str_date '.ps']);
+            % reorientate albedo vector for saving
+            vo_albd = fliplr(vo_albd);
+    end
+    % save albedo vector
+    % NOTE: when the file is read in by GENIE, it counrs down in j value:
+    %       such that the N pole is the first element in file;
+    %       fprint_1Dn saves the 2st row at the top, hence the vector
+    %       must be orientated as in a map orientation (N at top)
+    fprint_1Dn(vo_albd(:),[[str_dirout '/' str_nameout] '.albd.dat'],'%8.4f','%8.4f',true,false);
+    fprintf('       - .albd.dat file saved\n')
+    %
+end
+%
+% *** GENERATE CONFIG FILE PARAMETER LINES ****************************** %
+%
+n_step = n_step+1;
+%
+disp(['>  ' num2str(n_step) '. GENERATING CONFIG FILE PARAMETER LINES ...']);
 %
 fid = fopen([str_dirout '/' 'config_' str_date '.txt'],'w');
 % START

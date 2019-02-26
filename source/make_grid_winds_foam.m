@@ -1,4 +1,4 @@
-function [wstress,wvelocity,wspeed] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str);
+function [wstress,wvelocity,wspeed] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str,optplots);
 % make_grid_winds_foam
 %
 %   *********************************************************
@@ -169,8 +169,8 @@ gm(find(gm == 0)) = NaN;
 % NOTE: don't forget to flip the re-gridded orientation back around again
 %
 % plot raw wind stress
-plot_2dgridded(flipud(giwtauu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_u.IN'],['wind stress in -- u']);
-plot_2dgridded(flipud(giwtauv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_v.IN'],['wind stress in -- v']);
+if (optplots), plot_2dgridded(flipud(giwtauu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_u.IN'],['wind stress in -- u']); end
+if (optplots), plot_2dgridded(flipud(giwtauv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_v.IN'],['wind stress in -- v']); end
 % 
 % -> wind stress @ u point
 % NOTE: GENIE u-grid: (golatue,golonue) == jmax   x imax+1
@@ -183,14 +183,14 @@ fprintf('       - Regridding wind stress (x) to GOLDSTEIN u-grid\n');
 gowtauuu(find(isnan(gowtauuu))) = 0.0;
 gowtauuu = gowtauuu'; 
 gowtauuu = gomask.*gowtauuu;
-plot_2dgridded(flipud(gm.*gowtauuu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATu.out'],['wind stress out -- x @ u']);
+if (optplots), plot_2dgridded(flipud(gm.*gowtauuu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATu.out'],['wind stress out -- x @ u']); end
 % v
 fprintf('       - Regridding wind stress (y) to GOLDSTEIN u-grid\n');
 [gowtauvu,gofwtauvu] = make_regrid_2d(gilonpe,gilatpe,(gimaskp.*giwtauv)',golonue,golatue,false);
 gowtauvu(find(isnan(gowtauvu))) = 0.0;
 gowtauvu = gowtauvu';
 gowtauvu = gomask.*gowtauvu;
-plot_2dgridded(flipud(gm.*gowtauvu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATu.out'],['wind stress out -- y @ u'])
+if (optplots), plot_2dgridded(flipud(gm.*gowtauvu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATu.out'],['wind stress out -- y @ u']); and
 % 
 % -> wind stress @ v point
 % NOTE: GENIE v-grid: (golatve,golonve) == jmax+1 x imax
@@ -203,14 +203,14 @@ fprintf('       - Regridding wind stress (x) to GOLDSTEIN v-grid\n');
 gowtauuv(find(isnan(gowtauuv))) = 0.0;
 gowtauuv = gowtauuv'; 
 gowtauuv = gomask.*gowtauuv;
-plot_2dgridded(flipud(gm.*gowtauuv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATv.out'],['wind stress out -- x @ v']);
+if (optplots), plot_2dgridded(flipud(gm.*gowtauuv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATv.out'],['wind stress out -- x @ v']); end
 % v
 fprintf('       - Regridding wind stress (y) to GOLDSTEIN v-grid\n');
 [gowtauvv,gofwtauvv] = make_regrid_2d(gilonpe,gilatpe,(gimaskp.*giwtauv)',golonve,golatve,false);
 gowtauvv(find(isnan(gowtauvv))) = 0.0;
 gowtauvv = gowtauvv';
 gowtauvv = gomask.*gowtauvv;
-plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATv.out'],['wind stress out -- y @ v'])
+if (optplots), plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_yATv.out'],['wind stress out -- y @ v']); end
 % 
 % -> wind velocity
 % NOTE: GENIE c-grid: (golate,golone) == jmax+1 x imax+1
@@ -219,20 +219,20 @@ plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau
 % replace NaNs with zeros
 % u
 fprintf('       - Regridding wind velocity (x) to GOLDSTEIN c-grid\n');
-plot_2dgridded(flipud(giwvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.IN'],['wind velocity in -- x']);
+if (optplots), plot_2dgridded(flipud(giwvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.IN'],['wind velocity in -- x']); end
 [gowvelu,gofwvelu] = make_regrid_2d(gilonae,gilatae,giwvelu',golone,golate,false);
 gowvelu(find(isnan(gowvelu))) = 0.0;
 gowvelu = gowvelu'; 
 gofwvelu = gofwvelu';
-plot_2dgridded(flipud(gowvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.OUT'],['wind velocity out -- x']);
+if (optplots), plot_2dgridded(flipud(gowvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.OUT'],['wind velocity out -- x']); end
 % v
 fprintf('       - Regridding wind velocity (y) to GOLDSTEIN c-grid\n');
-plot_2dgridded(flipud(giwvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.IN'],['wind velocity in -- y']);
+if (optplots), plot_2dgridded(flipud(giwvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.IN'],['wind velocity in -- y']); end
 [gowvelv,gofwvelv] = make_regrid_2d(gilonae,gilatae,giwvelv',golone,golate,false);
 gowvelv(find(isnan(gowvelv))) = 0.0;
 gowvelv = gowvelv';
 gofwvelv = gofwvelv';
-plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.OUT'],['wind velocity out -- y']);
+if (optplots), plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.OUT'],['wind velocity out -- y']); end
 %
 % -> wind speed
 % NOTE: GENIE c-grid: (golate,golone) == jmax+1 x imax+1
@@ -245,7 +245,7 @@ plot_2dgridded(flipud(giwspd2),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.IN']
 [gowspd2all,gofwspd2all] = make_regrid_2d(gilonae,gilatae,giwspd2',golone,golate,false);
 gowspd2all = gowspd2all';
 gofwspd2all = gofwspd2all';
-plot_2dgridded(flipud(gowspd2all),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.OUTALL'],['wind speed out -- no mask']);
+if (optplots), plot_2dgridded(flipud(gowspd2all),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.OUTALL'],['wind speed out -- no mask']); end
 wspeed = gomask.*gowspd2all;
 wspeed(find(isnan(wspeed))) = 0.0;
 %

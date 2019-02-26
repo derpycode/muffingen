@@ -1,4 +1,4 @@
-function [grid_albd]  = fun_read_albd_hadcm3(str)
+function [grid_albd]  = fun_read_albd_hadcm3x(str)
 %
 %%
 
