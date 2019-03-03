@@ -268,37 +268,37 @@ wvelocity(:,:,2) = flipud(gowvelv);
 %
 % Save regridded data to file
 % Taux at u point (g_taux_u == gowtauuu)
-outname = [str(2).dir '/' str(2).exp '_taux_u.dat'];
+outname = [str(2).dir '/' str(2).exp '.taux_u.dat'];
 c = wstress(:,:,1); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written tau u (u point) data to %s\n',outname);
 % Taux at v point (g_taux_v == gowtauuv)
-outname = [str(2).dir '/' str(2).exp '_taux_v.dat'];
+outname = [str(2).dir '/' str(2).exp '.taux_v.dat'];
 c = wstress(:,:,2); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written tau u (v point) data to %s\n',outname);
 % Tauy at u point (g_tauy_u == gowtauvu)
-outname = [str(2).dir '/' str(2).exp '_tauy_u.dat'];
+outname = [str(2).dir '/' str(2).exp '.tauy_u.dat'];
 c = wstress(:,:,3); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written tau v (u point) data to %s\n',outname);
 % Tauy at v point (g_tauy_v == gowtauvv)
-outname = [str(2).dir '/' str(2).exp '_tauy_v.dat'];
+outname = [str(2).dir '/' str(2).exp '.tauy_v.dat'];
 c = wstress(:,:,4); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written tau v (v point) data to %s\n',outname);
 % U wind velocity 
-outname = [str(2).dir '/' str(2).exp '_wvelx.dat'];
+outname = [str(2).dir '/' str(2).exp '.wvelx.dat'];
 c = wvelocity(:,:,1); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written u wind speed data to %s\n',outname);
 % V wind speed
-outname = [str(2).dir '/' str(2).exp '_wvely.dat'];
+outname = [str(2).dir '/' str(2).exp '.wvely.dat'];
 c = wvelocity(:,:,2); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written v wind speed data to %s\n',outname);
 % Save 2-D ASCII wind speed scalar for BIOGEM
-outname = [str(2).dir '/' str(2).exp '_windspeed.dat'];
+outname = [str(2).dir '/' str(2).exp '.windspeed.dat'];
 a = wspeed;
 save(outname,'a','-ascii');
 fprintf('       - Written BIOGEM windspeed data to %s\n',outname);

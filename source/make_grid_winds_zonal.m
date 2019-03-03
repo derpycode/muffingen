@@ -219,7 +219,7 @@ axis([-90 90 -0.1 0.2]);
 hold on;
 scatter(go_latm(:),taux_u_1d(:));
 % save figure
-print('-dpsc2', [str_nameout, '_taux_u.interp.ps']);
+print('-dpsc2', [str_nameout, '.taux_u.ps']);
 % plot figure -- v grid
 figure;
 plot(go_late(2:end),taux_v_1d(:));
@@ -227,12 +227,12 @@ axis([-90 90 -0.1 0.2]);
 hold on;
 scatter(go_late(2:end),taux_v_1d(:));
 % save figure
-print('-dpsc2', [str_nameout, '_taux_v.interp.ps']);
+print('-dpsc2', [str_nameout, '.taux_v.ps']);
 %
 % *** SAVE FILES ******************************************************** %
 %
 % open file
-fid = fopen([str_nameout, '_taux_u.dat'],'w');
+fid = fopen([str_nameout, '.taux_u.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,
@@ -243,7 +243,7 @@ end
 % close file
 fclose(fid);
 % open file
-fid = fopen([str_nameout, '_tauy_u.dat'],'w');
+fid = fopen([str_nameout, '.tauy_u.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,
@@ -255,7 +255,7 @@ end
 fclose(fid);
 %
 % open file
-fid = fopen([str_nameout, '_taux_v.dat'],'w');
+fid = fopen([str_nameout, '.taux_v.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,
@@ -266,7 +266,7 @@ end
 % close file
 fclose(fid);
 % open file
-fid = fopen([str_nameout, '_tauy_v.dat'],'w');
+fid = fopen([str_nameout, '.tauy_v.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,
@@ -278,7 +278,7 @@ end
 fclose(fid);
 %
 % open file
-fid = fopen([str_nameout, '_wvelx.dat'],'w');
+fid = fopen([str_nameout, '.wvelx.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,
@@ -289,7 +289,7 @@ end
 % close file
 fclose(fid);
 % open file
-fid = fopen([str_nameout, '_wvely.dat'],'w');
+fid = fopen([str_nameout, '.wvely.dat'],'w');
 % write data
 for j=1:jmax,
     for i=1:imax,

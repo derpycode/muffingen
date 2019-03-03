@@ -154,6 +154,11 @@ function [] = muffingen(POPT)
 %             added option not to create and show plots [MUCH FASTER!!]
 %             rationalized stage numbering
 %             *** VERSION 0.67 ********************************************
+%   19/02/28: added option for zonal rather than GCM winds for GCM configs
+%             fixed issues with hadcm3/hadcm3l distinction
+%             name more consistent wind product file naming convention
+%             (replacing '_' with '.')
+%             *** VERSION 0.68 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -169,7 +174,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.67;
+par_muffingen_ver = 0.68;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -190,6 +195,8 @@ if ~exist('par_tauopt','var'), par_tauopt = 0; end
 if ~exist('par_sur_D','var'),  par_sur_D  = 80.841; end
 % create plots?
 if ~exist('opt_plots','var'),  opt_plots  = true; end
+% make zonal winds (rather than re-grid GCM)?
+if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 %
 % *** check / filter options ******************************************** %
 %
@@ -923,7 +930,13 @@ end
 %
 n_step = n_step+1;
 %
-if opt_makewind
+if (opt_makezonalwind),
+    %
+    disp(['>  ' num2str(n_step) '. CREATING ZONAL-ONLY WIND PRODUCTS ...']);
+    % create GENIE grid wind products
+    [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
+    disp(['       - Generated zonal wind products.']);
+elseif (opt_makewind),
     %
     disp(['>  ' num2str(n_step) '. CREATING WIND PRODUCTS ...']);
     % create GENIE grid wind products
@@ -931,7 +944,7 @@ if opt_makewind
         case {'hadcm3','hadcm3l','foam'}
             % re-grid winds from GCM
             % NOTE: the sets of grids and their edges required differ
-            %       between hadcm3 and foam
+            %       between hadcm3/hadcm3l and foam
             if strcmp(par_gcm(1:6),'hadcm3')
                 [wstr,wspd,g_wspd] = make_grid_winds_hadcm3x(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             else
@@ -1058,12 +1071,12 @@ fprintf(fid,'%s\n',['go_par_dsc=',num2str(par_max_D)]);
 % Boundary conditions: EMBM
 fprintf(fid,'%s\n','# Boundary conditions: EMBM');
 fprintf(fid,'%s\n',['ea_topo=''',par_wor_name,'''']);
-fprintf(fid,'%s\n',['ea_taux_u=''',par_wor_name,'_taux_u.dat''']);
-fprintf(fid,'%s\n',['ea_tauy_u=''',par_wor_name,'_tauy_u.dat''']);
-fprintf(fid,'%s\n',['ea_taux_v=''',par_wor_name,'_taux_v.dat''']);
-fprintf(fid,'%s\n',['ea_tauy_v=''',par_wor_name,'_tauy_v.dat''']);
-fprintf(fid,'%s\n',['ea_adv_u=''',par_wor_name,'_wvelx.dat''']);
-fprintf(fid,'%s\n',['ea_adv_v=''',par_wor_name,'_wvely.dat''']);
+fprintf(fid,'%s\n',['ea_taux_u=''',par_wor_name,'.taux_u.dat''']);
+fprintf(fid,'%s\n',['ea_tauy_u=''',par_wor_name,'.tauy_u.dat''']);
+fprintf(fid,'%s\n',['ea_taux_v=''',par_wor_name,'.taux_v.dat''']);
+fprintf(fid,'%s\n',['ea_tauy_v=''',par_wor_name,'.tauy_v.dat''']);
+fprintf(fid,'%s\n',['ea_adv_u=''',par_wor_name,'.wvelx.dat''']);
+fprintf(fid,'%s\n',['ea_adv_v=''',par_wor_name,'.wvely.dat''']);
 % Boundary conditions: GOLDSTEIN
 fprintf(fid,'%s\n','# Boundary conditions: GOLDSTEIN');
 fprintf(fid,'%s\n',['go_topo=''',par_wor_name,'''']);
@@ -1076,14 +1089,18 @@ if opt_makealbedo,
     fprintf(fid,'%s\n',['ea_par_albedo1d_name=''',par_wor_name,'.albd.dat''']);
 end
 % Boundary conditions: BIOGEM
-if opt_makewind
+if (opt_makezonalwind),
+    fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false']);
+    fprintf(fid,'%s\n','# gas transfer coeff');
+    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
+elseif (opt_makewind),
     % windspeed
     % NOTE: bg_ctrl_force_windspeed is .true. by default
     switch par_gcm
-        case {'hadcm3','foam'}
+        case {'hadcm3','hadcm3l','foam'}
             fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
             fprintf(fid,'%s\n',['bg_par_pindir_name=''../../cgenie.muffin/genie-paleo/',par_wor_name,'/''']);
-            fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'_windspeed.dat''']);
+            fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'.windspeed.dat''']);
         otherwise
             fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false']);
     end
@@ -1093,7 +1110,7 @@ if opt_makewind
     %       (default is bg_par_gastransfer_a=0.310)
     fprintf(fid,'%s\n','# BIOGEM MISC');
     switch par_gcm
-        case {'hadcm3'}
+        case {'hadcm3','hadcm3l'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.904)]);
         case {'foam'}
