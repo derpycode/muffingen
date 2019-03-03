@@ -58,6 +58,15 @@ umxbowlc    AR 170731           0.42        "(default) mask and grid filtering, 
 umxbowld    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, edited gateways, (default) roof runoff"
 umxbowle    AR 170731           0.42        "as umxbowla, but random runoff"
 % --------------------------------------------------------------
+% --- GLACIAL-INTERGLACIAL -------------------------------------
+% --------------------------------------------------------------
+GIteiia0    AR 190301           0.68        "HadCM3: 0 ka -- teiia, -260E grid origin, only modification is closing N-S America"
+GIteiia_    AR 190301           0.68        "HadCM3: 0 ka -- teiia, -260E grid origin, only modification is closing N-S America, zonal winds"
+GIteiiv0    AR 190301           0.68        "HadCM3: 21 ka -- teiiv, -260E grid origin, only modification is closing N-S America"
+GIteiiv_    AR 190301           0.68        "HadCM3: 21 ka -- teiiv, -260E grid origin, only modification is closing N-S America, zonal winds"
+GIxbowl0    AR 190301           0.68        "HadCM3l: modern -- xbowl, -260E grid origin, only modification is closing N-S America"
+GIxbowl_    AR 190301           0.68        "HadCM3l: modern -- xbowl, -260E grid origin, only modification is closing N-S America, zonal winds"
+% --------------------------------------------------------------
 % --- PALEO ----------------------------------------------------
 % --------------------------------------------------------------
 fm0450aa    AR 170814           0.43        "HSO, ice free, 24 PAL"
