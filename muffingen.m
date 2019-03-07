@@ -159,6 +159,10 @@ function [] = muffingen(POPT)
 %             name more consistent wind product file naming convention
 %             (replacing '_' with '.')
 %             *** VERSION 0.68 ********************************************
+%   19/03/03: changed detault of surface layer depth scaling [par_sur_D]
+%             to zero (to disable non conventional grid creation)
+%             NOTE: scale depth for a 5000 m 16-level ocean, is 80.840706 m
+%             *** VERSION 0.69 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -192,7 +196,7 @@ eval(POPT);
 % zonal wind-stress generaton parameter
 if ~exist('par_tauopt','var'), par_tauopt = 0; end
 % surface layer reference thickness (m)
-if ~exist('par_sur_D','var'),  par_sur_D  = 80.841; end
+if ~exist('par_sur_D','var'),  par_sur_D  = 0.0; end
 % create plots?
 if ~exist('opt_plots','var'),  opt_plots  = true; end
 % make zonal winds (rather than re-grid GCM)?
