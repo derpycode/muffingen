@@ -1,4 +1,4 @@
-function [wstress,wvelocity,wspeed] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str,optplots);
+function [wstress,wvelocity,wspeed] = make_grid_winds_cesm(gilone,gilate,gimask,golonm,golone,golatm,golate,gomask,str,optplots);
 % make_grid_winds_foam
 %
 %   *********************************************************
@@ -41,7 +41,7 @@ function [wstress,wvelocity,wspeed] = make_grid_winds_foam(gilonpm,gilonpe,gilat
 % *** SET UP GRID ******************************************************* %
 % *********************************************************************** %
 %
-% NOTE: the u, v winds are on a different grid to the wind stress
+% NOTE: wind stress is NEGATIVE
 %
 % *** load data -- wind stress ****************************************** %
 %
@@ -70,6 +70,9 @@ end
 % re-orientate
 giwtauu = flipud(giwtauu');
 giwtauv = flipud(giwtauv');
+% correct sign
+giwtauu = -giwtauu;
+giwtauv = -giwtauv;
 %
 % *** load data -- wind velocity **************************************** %
 %
@@ -88,13 +91,13 @@ netcdf.close(ncid);
 %
 % *** process data -- wind velocity ************************************* %
 %
-% NOTE: atmosphere has 18 levels -- #18 is 'surface' (992 mbar)
+% NOTE: atmosphere has 1 levels -- #1 is 'surface' (992 mbar)
 % create annual averages
-giwvelu = 0.0*locwvelu(:,:,18,1);
-giwvelv = 0.0*locwvelv(:,:,18,1);
+giwvelu = 0.0*locwvelu(:,:,1,1);
+giwvelv = 0.0*locwvelv(:,:,1,1);
 for t=1:12,
-    giwvelu = giwvelu + locwvelu(:,:,18,t)/12.0;
-    giwvelv = giwvelv + locwvelv(:,:,18,t)/12.0;
+    giwvelu = giwvelu + locwvelu(:,:,1,t)/12.0;
+    giwvelv = giwvelv + locwvelv(:,:,1,t)/12.0;
 end
 % re-orientate
 giwvelu = flipud(giwvelu');
@@ -102,32 +105,13 @@ giwvelv = flipud(giwvelv');
 % calculate wind speed
 giwspd2 = (giwvelu.^2 + giwvelv.^2).^0.5;
 %
-% *** load mask -- wind stress ****************************************** %
+% *** set wind stress mask ********************************************** %
 %
-% open netCDF file
-ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(5).nc '.nc'],'nowrite');
-% read netCDf information
-[ndims,nvars,ngatts,unlimdimid] = netcdf.inq(ncid);
-% load MASK
-varid  = netcdf.inqVarID(ncid,'ORO');
-locmask(:,:,:) = netcdf.getVar(ncid,varid);
-% close netCDF file
-netcdf.close(ncid);
-%
-% *** process data -- wind stress mask ********************************** %
-%
-% create annual averages (of mask!!!)
-gimaskp = 0.0*locmask(:,:,1);
-for t=1:12,
-    gimaskp = gimaskp + locmask(:,:,t)/12.0;
-end
-% re-orientate
-gimaskp = flipud(gimaskp');
+% copy wind stress mask from ocean mask
+gimaskp = gimask;
+% % re-orientate
+% gimaskp = flipud(gimaskp');
 % derive mask values (ocean == 1, land == NaN)
-% NOTE: FOAM mask is odd ... land is not quite equal to 1,
-%       more like 0.999999999 something ... unclear!
-gimaskp(find(gimaskp<0.999)) = 1.0;
-gimaskp(find(gimaskp>1.0))   = 1.0;
 gimaskp(find(gimaskp~=1.0))  = NaN;
 %
 % *********************************************************************** %
@@ -148,7 +132,7 @@ gimaskp(find(gimaskp~=1.0))  = NaN;
 %   ---------
 % 
 % remember: [rows columns] == [j i]
-% grid doudaries are as follows:
+% grid boudaries are as follows:
 % GENIE c-grid: (golate,golone)   == jmax+1 x imax+1
 % GENIE u-grid: (golatue,golonue) == jmax   x imax+1
 % GENIE v-grid: (golatve,golonve) == jmax+1 x imax
@@ -179,14 +163,14 @@ if (optplots), plot_2dgridded(flipud(giwtauv),999.0,'',[[str(2).dir '/' str(2).e
 % apply GENIE mask to output wind stress
 % u
 fprintf('       - Regridding wind stress (x) to GOLDSTEIN u-grid\n');
-[gowtauuu,gofwtauuu] = make_regrid_2d(gilonpe,gilatpe,(gimaskp.*giwtauu)',golonue,golatue,false);
+[gowtauuu,gofwtauuu] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauu)',golonue,golatue,false);
 gowtauuu(find(isnan(gowtauuu))) = 0.0;
 gowtauuu = gowtauuu'; 
 gowtauuu = gomask.*gowtauuu;
 if (optplots), plot_2dgridded(flipud(gm.*gowtauuu),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATu.out'],['wind stress out -- x @ u']); end
 % v
 fprintf('       - Regridding wind stress (y) to GOLDSTEIN u-grid\n');
-[gowtauvu,gofwtauvu] = make_regrid_2d(gilonpe,gilatpe,(gimaskp.*giwtauv)',golonue,golatue,false);
+[gowtauvu,gofwtauvu] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauv)',golonue,golatue,false);
 gowtauvu(find(isnan(gowtauvu))) = 0.0;
 gowtauvu = gowtauvu';
 gowtauvu = gomask.*gowtauvu;
@@ -199,14 +183,14 @@ if (optplots), plot_2dgridded(flipud(gm.*gowtauvu),999.0,'',[[str(2).dir '/' str
 % apply GENIE mask to output wind stress
 % u
 fprintf('       - Regridding wind stress (x) to GOLDSTEIN v-grid\n');
-[gowtauuv,gofwtauuv] = make_regrid_2d(gilonpe,gilatpe,(gimaskp.*giwtauu)',golonve,golatve,false);
+[gowtauuv,gofwtauuv] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauu)',golonve,golatve,false);
 gowtauuv(find(isnan(gowtauuv))) = 0.0;
 gowtauuv = gowtauuv'; 
 gowtauuv = gomask.*gowtauuv;
 if (optplots), plot_2dgridded(flipud(gm.*gowtauuv),999.0,'',[[str(2).dir '/' str(2).exp] '.wtau_xATv.out'],['wind stress out -- x @ v']); end
 % v
 fprintf('       - Regridding wind stress (y) to GOLDSTEIN v-grid\n');
-[gowtauvv,gofwtauvv] = make_regrid_2d(gilonpe,gilatpe,(gimaskp.*giwtauv)',golonve,golatve,false);
+[gowtauvv,gofwtauvv] = make_regrid_2d(gilone,gilate,(gimaskp.*giwtauv)',golonve,golatve,false);
 gowtauvv(find(isnan(gowtauvv))) = 0.0;
 gowtauvv = gowtauvv';
 gowtauvv = gomask.*gowtauvv;
@@ -220,7 +204,7 @@ if (optplots), plot_2dgridded(flipud(gm.*gowtauvv),999.0,'',[[str(2).dir '/' str
 % u
 fprintf('       - Regridding wind velocity (x) to GOLDSTEIN c-grid\n');
 if (optplots), plot_2dgridded(flipud(giwvelu),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_x.IN'],['wind velocity in -- x']); end
-[gowvelu,gofwvelu] = make_regrid_2d(gilonae,gilatae,giwvelu',golone,golate,false);
+[gowvelu,gofwvelu] = make_regrid_2d(gilone,gilate,giwvelu',golone,golate,false);
 gowvelu(find(isnan(gowvelu))) = 0.0;
 gowvelu = gowvelu'; 
 gofwvelu = gofwvelu';
@@ -228,7 +212,7 @@ if (optplots), plot_2dgridded(flipud(gowvelu),999.0,'',[[str(2).dir '/' str(2).e
 % v
 fprintf('       - Regridding wind velocity (y) to GOLDSTEIN c-grid\n');
 if (optplots), plot_2dgridded(flipud(giwvelv),999.0,'',[[str(2).dir '/' str(2).exp] '.wvel_y.IN'],['wind velocity in -- y']); end
-[gowvelv,gofwvelv] = make_regrid_2d(gilonae,gilatae,giwvelv',golone,golate,false);
+[gowvelv,gofwvelv] = make_regrid_2d(gilone,gilate,giwvelv',golone,golate,false);
 gowvelv(find(isnan(gowvelv))) = 0.0;
 gowvelv = gowvelv';
 gofwvelv = gofwvelv';
@@ -242,7 +226,7 @@ if (optplots), plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).e
 % apply GENIE mask to output wind speed
 fprintf('       - Regridding wind speed to GOLDSTEIN c-grid\n');
 plot_2dgridded(flipud(giwspd2),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.IN'],['wind speed in']);
-[gowspd2all,gofwspd2all] = make_regrid_2d(gilonae,gilatae,giwspd2',golone,golate,false);
+[gowspd2all,gofwspd2all] = make_regrid_2d(gilone,gilate,giwspd2',golone,golate,false);
 gowspd2all = gowspd2all';
 gofwspd2all = gofwspd2all';
 if (optplots), plot_2dgridded(flipud(gowspd2all),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.OUTALL'],['wind speed out -- no mask']); end

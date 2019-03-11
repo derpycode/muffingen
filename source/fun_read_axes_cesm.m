@@ -1,4 +1,4 @@
-function [axisloncm,axislonce,axislatcm,axislatce] = fun_read_axes_hadcm3(str)
+function [axisloncm,axislonce,axislatcm,axislatce,axislonam,axislonae,axislatam,axislatae] = fun_read_axes_cesm(str)
 %
 %%
 
@@ -23,19 +23,26 @@ function [axisloncm,axislonce,axislatcm,axislatce] = fun_read_axes_hadcm3(str)
 ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(2).nc '.nc'],'nowrite');
 % latitude
 % read latitude mid-point axis -- c
-varid     = netcdf.inqVarID(ncid,'latitude');
+varid     = netcdf.inqVarID(ncid,'lat');
 axislatcm = netcdf.getVar(ncid,varid);
 %%%axislatcm = flipud(axislatcm);
 % create latitude edge axis - c
-axislatce = [axislatcm-180/length(axislatcm)/2; 90.0];
+axislatce = [-90.0; axislatcm(2:end)-180/length(axislatcm(2:end))/2; 90.0];
 % longitude
 % read longitude mid-point axis -- c
-varid  = netcdf.inqVarID(ncid,'longitude');
+varid  = netcdf.inqVarID(ncid,'lon');
 axisloncm = netcdf.getVar(ncid,varid);
 % create longitude edge axis - c
 axislonce = [axisloncm-360/length(axisloncm)/2; 360.0-360/length(axisloncm)/2];
 % close netCDF file
 netcdf.close(ncid);
+%
+% *** ATMOSPHERE GRID *************************************************** %
+%
+axislonam = axisloncm;
+axislonae = axislonce;
+axislatam = axislatcm;
+axislatae = axislatce;
 %
 % *********************************************************************** %
 
@@ -46,4 +53,3 @@ netcdf.close(ncid);
 %%%
 %
 % *********************************************************************** %
-

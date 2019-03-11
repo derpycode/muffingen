@@ -163,6 +163,9 @@ function [] = muffingen(POPT)
 %             to zero (to disable non conventional grid creation)
 %             NOTE: scale depth for a 5000 m 16-level ocean, is 80.840706 m
 %             *** VERSION 0.69 ********************************************
+%   19/03/11: added option for CESM input
+%             also tidied up the HadCM3/HadCM3l options a little
+%             *** VERSION 0.70 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -221,6 +224,7 @@ if strcmp(par_gcm,'HADCM3'),  par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'um'),      par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'UM'),      par_gcm = 'hadcm3'; end
 if strcmp(par_gcm,'FOAM'),    par_gcm = 'foam';   end
+if strcmp(par_gcm,'CESM'),    par_gcm = 'cesm';   end
 if strcmp(par_gcm,'K1'),      par_gcm = 'k1';     end
 if strcmp(par_gcm,'.k1'),     par_gcm = 'k1';     end
 if strcmp(par_gcm,'.K1'),     par_gcm = 'k1';     end
@@ -233,14 +237,14 @@ if strcmp(par_gcm,'none'),    par_gcm = 'blank';  end
 if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';  end
 % adjust options accroding to input (GCM) type
 switch par_gcm
-    case {'hadcm3','hadcm3l','foam'}
+    case {'hadcm3','hadcm3l','foam','cesm'}
     case {'k1','mask'}
     otherwise
         opt_makeall=false;
         opt_user=true;
 end
 % deal with meta selections
-if opt_makeall,
+if opt_makeall
     opt_makemask=true;    %
     opt_maketopo=true;    %
     opt_makeocean=true;   %
@@ -251,7 +255,7 @@ if opt_makeall,
     opt_filtermask=true;  %
     opt_filtertopo=true;  %
 end
-if opt_makeseds,
+if opt_makeseds
     opt_maketopo=true;
 end
 % rename variables
@@ -275,6 +279,12 @@ switch par_gcm
         if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = 'atmos'; end
         if ~exist('par_nc_ocean_name','var'), par_nc_mask_name  = ''; end
         if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
+    case {'cesm'}
+        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = 'climo'; end
+        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = par_nc_topo_name; end
+        if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = par_nc_topo_name; end
+        if ~exist('par_nc_ocean_name','var'), par_nc_mask_name  = par_nc_topo_name; end
+        if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = par_nc_topo_name; end
     otherwise
         par_nc_topo_name  = '';
         par_nc_axes_name  = '';
@@ -384,7 +394,7 @@ disp([' ']);
 n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. CHECKING PRIMARY OPTIONS ...']);
 % check world name
-if (length(par_wor_name) ~= 8),
+if (length(par_wor_name) ~= 8)
     disp(['       * ERROR: World name (par_wor_name) must be 8 characters long.']);
     disp(['--------------------------------------------------------']);
     disp([' ']);
@@ -393,9 +403,7 @@ if (length(par_wor_name) ~= 8),
 end
 % check GCM options
 switch str(1).gcm
-    case {'hadcm3','hadcm3l'}
-        disp(['       * GCM == ' str(1).gcm ' (OK)']);
-    case ('foam')
+    case {'hadcm3','hadcm3l','foam','cesm'}
         disp(['       * GCM == ' str(1).gcm ' (OK)']);
     case {'k1','mask'}
         disp(['       * GENIE grid will be loaded directly from k1 or mask text file: ' str(1).exp]);
@@ -422,16 +430,23 @@ disp(['       - GENIE grid generated.']);
 n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. READING AXES INFORMATION ...']);
 %
-switch par_gcm
-    case {'hadcm3','hadcm3l','foam'}
+switch str(1).gcm
+    case {'hadcm3','hadcm3l','foam','cesm'}
         % read axes
-        if strcmp(par_gcm,'hadcm3')
+        if strcmp(str(1).gcm,'hadcm3')
             % NOTE: axes need to be re-generated later (for winds etc.)
             [gi_loncm,gi_lonce,gi_latcm,gi_latce] = fun_read_axes_hadcm3(str);
-        elseif strcmp(par_gcm,'hadcm3l')
+        elseif strcmp(str(1).gcm,'hadcm3l')
             [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_hadcm3x(str);
-        else
+        elseif strcmp(str(1).gcm,'foam')
             [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_foam(str);
+        elseif strcmp(str(1).gcm,'cesm')
+             [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_cesm(str);
+        else
+            disp(['       * ERROR: Unknown error.']);
+            disp([' ']);
+            diary off;
+            return;
         end
         disp(['       - Axis info read.']);
     otherwise
@@ -446,14 +461,16 @@ end
 n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. READING MASK & TOPO GRIDS ...']);
 %
-switch par_gcm
-    case {'hadcm3','hadcm3l','foam'}
+switch str(1).gcm
+    case {'hadcm3','hadcm3l','foam','cesm'}
         % read topo
-        if strcmp(par_gcm(1:6),'hadcm3')
+        if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
             [gi_mask] = fun_read_omask_hadcm3x(str);
             [gi_topo] = fun_read_topo_hadcm3x(str);
-        else
+        elseif strcmp(str(1).gcm,'foam')
             [gi_topo,gi_mask] = fun_read_topomask_foam(str);
+        elseif strcmp(str(1).gcm,'cesm')
+            [gi_topo,gi_mask] = fun_read_topomask_cesm(str);
         end
         disp(['       - Mask & topo info read.']);
         % plot input mask & topo
@@ -478,8 +495,8 @@ end
 n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. RE-GRIDING MASK ...']);
 %
-switch par_gcm
-    case {'hadcm3','hadcm3l','foam'}
+switch str(1).gcm
+    case {'hadcm3','hadcm3l','foam','cesm'}
         % initial re-gridding of mask
         % NOTE: need to transpose around [gi_mask] to have correct input format
         %       to make_regrid_2d
@@ -632,8 +649,8 @@ if opt_maketopo
     %
     disp(['>   ' num2str(n_step) '. RE-GRIDING TOPOGRAPHY ...']);
     %
-    switch par_gcm
-        case {'hadcm3','hadcm3l','foam'}
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l','foam','cesm'}
             % initial re-gridding of topo
             % NOTE: need to transpose around [gi_topo] to have correct input format
             %       to make_regrid_2d
@@ -652,7 +669,7 @@ if opt_maketopo
             disp(['         (Nothing to re-grid -- set uniform ocean depth.)']);
     end
     % plot & save initial topo re-grid
-    if ~strcmp(par_gcm,'k1'),
+    if ~strcmp(str(1).gcm,'k1')
         if (opt_plots), plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']); end
     end
     %
@@ -666,7 +683,7 @@ if opt_maketopo,
     %
     disp(['>   ' num2str(n_step) '. RE-GRIDING OCEAN BATHYMETRY ...']);
     %
-    switch par_gcm
+    switch str(1).gcm
         case {'k1'}
             disp(['         (Nothing to re-grid as k1 file already loaded.)']);
         otherwise
@@ -700,7 +717,7 @@ end
 %
 n_step = n_step+1;
 %
-if opt_maketopo && opt_user
+if (opt_maketopo && opt_user)
     %
     disp(['>  ' num2str(n_step) '. USER EDITING OF TOPO ...']);
     % user-editing! what can go wrong?
@@ -714,7 +731,7 @@ if opt_maketopo && opt_user
     %
 end
 %
-if opt_maketopo,
+if opt_maketopo
     % plot final k1
     if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']); end
     % plot final topo
@@ -861,8 +878,8 @@ if opt_makeseds
     switch par_sedsopt
         case 1
             % option %1 -- re-grid sediment topography
-            switch par_gcm
-                case {'hadcm3','hadcm3l','foam'}
+            switch str(1).gcm
+                case {'hadcm3','hadcm3l','foam','cesm'}
                     % if 'high res' sed grid is requested => assume twice ocean resolution
                     % + generate new vectors of grid properties
                     if opt_highresseds,
@@ -917,7 +934,7 @@ n_step = n_step+1;
 %
 disp(['>  ' num2str(n_step) '. SWITCH GRIDS ...']);
 % NOTE: only with HadCM3 do we need to switch from ocean to atm grid
-switch par_gcm
+switch str(1).gcm
     case {'hadcm3'}
         % re-read axes
         [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_hadcm3x(str);
@@ -934,25 +951,27 @@ end
 %
 n_step = n_step+1;
 %
-if (opt_makezonalwind),
+if (opt_makezonalwind)
     %
     disp(['>  ' num2str(n_step) '. CREATING ZONAL-ONLY WIND PRODUCTS ...']);
     % create GENIE grid wind products
     [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
     disp(['       - Generated zonal wind products.']);
-elseif (opt_makewind),
+elseif (opt_makewind)
     %
     disp(['>  ' num2str(n_step) '. CREATING WIND PRODUCTS ...']);
     % create GENIE grid wind products
-    switch par_gcm
-        case {'hadcm3','hadcm3l','foam'}
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l','foam','cesm'}
             % re-grid winds from GCM
             % NOTE: the sets of grids and their edges required differ
             %       between hadcm3/hadcm3l and foam
-            if strcmp(par_gcm(1:6),'hadcm3')
+            if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
                 [wstr,wspd,g_wspd] = make_grid_winds_hadcm3x(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
-            else
+            elseif (strcmp(str(1).gcm,'foam'))
                 [wstr,wspd,g_wspd] = make_grid_winds_foam(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+            elseif (strcmp(str(1).gcm,'cesm'))
+                [wstr,wspd,g_wspd] = make_grid_winds_cesm(gi_lonce,gi_latce,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             end
             disp(['       - Re-grided GCM wind products.']);
         otherwise
@@ -969,13 +988,15 @@ if opt_makealbedo
     %
     disp(['>  ' num2str(n_step) '. LOADING ALBEDO DATA ...']);
     %
-    switch par_gcm
-        case {'hadcm3','hadcm3l','foam'}
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l','foam','cesm'}
             % read albedo
-            if strcmp(par_gcm(1:6),'hadcm3')
+            if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
                 [gi_albd] = fun_read_albd_hadcm3x(str);
-            else
+            elseif (strcmp(str(1).gcm,'foam'))
                 [gi_albd] = fun_read_albd_foam(str);
+            elseif (strcmp(str(1).gcm,'cesm'))
+                [gi_albd] = fun_read_albd_cesm(str);
             end
             disp(['       - Read GCM albedo data.']);
             % plot input albedo
@@ -994,8 +1015,8 @@ if opt_makealbedo
     %
     disp(['>  ' num2str(n_step) '. CREATING ALBEDO DATA ...']);
     %
-    switch par_gcm
-        case {'hadcm3','hadcm3l','foam'}
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l','foam','cesm'}
             % re-grid
             [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,false);
             go_albd  = go_albd';
@@ -1009,7 +1030,7 @@ if opt_makealbedo
             % create zonal mean
             vo_albd = mean(go_albd');
             disp(['       - Generated zonal mean albedo profile.']);
-        otherwise;
+        otherwise
             % NOTE: if age == 0, then default (modern) GENIE,
             %       otherwise for generic ice-free world
             vo_albd = make_grid_albd(go_latm,par_age);
@@ -1088,20 +1109,20 @@ fprintf(fid,'%s\n',['go_topo=''',par_wor_name,'''']);
 fprintf(fid,'%s\n','# Boundary conditions: GOLDSTEIN sea-ice');
 fprintf(fid,'%s\n',['gs_topo=''',par_wor_name,'''']);
 % Boundary conditions: ALBEDO!
-if opt_makealbedo,
+if opt_makealbedo
     fprintf(fid,'%s\n','# Boundary conditions: ALBEDO!');
     fprintf(fid,'%s\n',['ea_par_albedo1d_name=''',par_wor_name,'.albd.dat''']);
 end
 % Boundary conditions: BIOGEM
-if (opt_makezonalwind),
+if (opt_makezonalwind)
     fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false']);
     fprintf(fid,'%s\n','# gas transfer coeff');
     fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
-elseif (opt_makewind),
+elseif (opt_makewind)
     % windspeed
     % NOTE: bg_ctrl_force_windspeed is .true. by default
-    switch par_gcm
-        case {'hadcm3','hadcm3l','foam'}
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l','foam','cesm'}
             fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
             fprintf(fid,'%s\n',['bg_par_pindir_name=''../../cgenie.muffin/genie-paleo/',par_wor_name,'/''']);
             fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'.windspeed.dat''']);
@@ -1113,13 +1134,26 @@ elseif (opt_makewind),
     %       ~0.058 mol m-2 yr-1 uatm-1
     %       (default is bg_par_gastransfer_a=0.310)
     fprintf(fid,'%s\n','# BIOGEM MISC');
-    switch par_gcm
+    switch str(1).gcm
         case {'hadcm3','hadcm3l'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.904)]);
         case {'foam'}
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.044)]);
+        case {'cesm'}
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
+            fprintf(fid,'%s\n','# gas transfer coeff');
+            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.310)]);
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            
         otherwise
             % zonal field
             % NOTE: for now: don't distinguish between different zonal
