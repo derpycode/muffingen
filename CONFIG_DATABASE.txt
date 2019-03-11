@@ -58,6 +58,8 @@ umxbowlc    AR 170731           0.42        "(default) mask and grid filtering, 
 umxbowld    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, edited gateways, (default) roof runoff"
 umxbowle    AR 170731           0.42        "as umxbowla, but random runoff"
 % --------------------------------------------------------------
+cesm_pi1    AR 190311           0.70        "CESM -- b.e12.B1850C5CN.f19_g16.iPI.01.cam.h0.0400-0499, 0.475 re-gridding area fraction, closed Panama, (default) roof runoff"
+% --------------------------------------------------------------
 % --- GLACIAL-INTERGLACIAL -------------------------------------
 % --------------------------------------------------------------
 GIteiia0    AR 190301           0.68        "HadCM3: 0 ka -- teiia, -260E grid origin, only modification is closing N-S America"
