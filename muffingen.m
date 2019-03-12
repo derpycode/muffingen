@@ -166,7 +166,7 @@ function [] = muffingen(POPT)
 %   19/03/11: added option for CESM input
 %             also tidied up the HadCM3/HadCM3l options a little
 %             *** VERSION 0.70 ********************************************
-%   19/03/11: fixed FOAM nc name
+%   19/03/11: fixed FOAM nc name bug
 %             *** VERSION 0.71 ********************************************
 %
 %   ***********************************************************************
