@@ -166,6 +166,8 @@ function [] = muffingen(POPT)
 %   19/03/11: added option for CESM input
 %             also tidied up the HadCM3/HadCM3l options a little
 %             *** VERSION 0.70 ********************************************
+%   19/03/11: fixed FOAM nc name
+%             *** VERSION 0.71 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -181,7 +183,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.68;
+par_muffingen_ver = 0.71;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -204,6 +206,8 @@ if ~exist('par_sur_D','var'),  par_sur_D  = 0.0; end
 if ~exist('opt_plots','var'),  opt_plots  = true; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
+% set dummy mask nc name
+if ~exist('par_nc_mask_name','var'), par_nc_mask_name = ''; end
 %
 % *** check / filter options ******************************************** %
 %
