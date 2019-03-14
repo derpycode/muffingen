@@ -168,6 +168,12 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.70 ********************************************
 %   19/03/11: fixed FOAM nc name bug
 %             *** VERSION 0.71 ********************************************
+%   19/03/12: further back-compatability
+%             added new option for specifying how wind speed is
+%             averaged/calculated
+%             *** VERSION 0.72 ********************************************
+%   19/03/13: added new mask option for modifying FINAL mask
+%             *** VERSION 0.73 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -183,7 +189,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.71;
+par_muffingen_ver = 0.73;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -202,12 +208,16 @@ eval(POPT);
 if ~exist('par_tauopt','var'), par_tauopt = 0; end
 % surface layer reference thickness (m)
 if ~exist('par_sur_D','var'),  par_sur_D  = 0.0; end
+% minimum k level
+if ~exist('par_min_k','var'),  par_min_k  = 1; end
 % create plots?
 if ~exist('opt_plots','var'),  opt_plots  = true; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 % set dummy mask nc name
 if ~exist('par_nc_mask_name','var'), par_nc_mask_name = ''; end
+% mask mask!
+if ~exist('par_mask_mask_name','var'), par_mask_mask_name = ''; end
 %
 % *** check / filter options ******************************************** %
 %
@@ -296,6 +306,17 @@ switch par_gcm
         par_nc_mask_name  = '';
         par_nc_coupl_name = '';
 end
+% set default annual wind averaging to not based on monthly winds
+switch par_gcm
+    case {'hadcm3'}
+        if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'uvaa'; end
+    case {'hadcm3l'}
+        if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'uvaa'; end
+    case ('foam')
+        if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'uvaa'; end
+    case {'cesm'}
+        if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'wsma'; end
+end
 %
 % *** initialize I/O **************************************************** %
 %
@@ -341,6 +362,8 @@ str = setfield(str, {2}, 'nc', par_nc_topo_name);
 str = setfield(str, {3}, 'nc', par_nc_atmos_name);
 str = setfield(str, {4}, 'nc', par_nc_mask_name);
 str = setfield(str, {5}, 'nc', par_nc_coupl_name);
+str = setfield(str, {1}, 'wspd', par_wspeed_avstr);
+str = setfield(str, {1}, 'mask', par_mask_mask_name);
 %
 % *** initialize reporting ********************************************** %
 %
@@ -511,6 +534,7 @@ switch str(1).gcm
         go_mask = go_mask';
         go_fmask = go_mask;
         % create mask (<>= par_A_frac_threshold fractional area thresold)
+        % NOTE: 1.0 == 100% ocean
         go_mask(find(go_mask>=par_A_frac_threshold)) = 1.0;
         go_mask(find(go_mask<par_A_frac_threshold))  = 0.0;
         % calculate respective fractional areas
@@ -634,12 +658,29 @@ if opt_user
     %
 end
 %
+% *** CREATE FINAL MASK ************************************************* %
+%
+n_step = n_step+1;
+%
+disp(['>   ' num2str(n_step) '. CREATE FINAL MASK ...']);
+%
+% load and apply mask mask to ocean mask!
+if ~isempty(str(1).mask)
+    loc_mask = fun_read_mask(str);    
+    go_mask(find(loc_mask == 1))  = 1;
+    go_mask(find(loc_mask == -1)) = 0;
+end
+%
 % create GENIE NaN mask
 go_masknan = go_mask;
 go_masknan(find(go_masknan == 0)) = NaN;
 %
 % plot final mask
 if (opt_plots), plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']); end
+%
+% save mask
+fprint_2DM(go_mask(:,:),[],[[str_dirout '/' str_nameout] '.mask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
+fprintf('       - .mask_out.FINAL.dat saved\n')
 %
 % calculate new fractional area
 [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
@@ -916,10 +957,13 @@ if opt_makeseds
             disp(['       - Converted k1 file data (nothing to re-grid).']);
     end
     %
+    % filter topo
+    gos_topo(find(gos_topo < -9.9E9)) = 0.0;    
+    %
     % plot sediment topo
     if (opt_plots), plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']); end
     % save sediment topo
-    fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%8.2f','%8.2f',true,false);
+    fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%10.2f','%10.2f',true,false);
     fprintf('       - .depth.dat saved\n')
     % save other sediment files
     gos_mask = gos_topo;
@@ -971,15 +1015,15 @@ elseif (opt_makewind)
             % NOTE: the sets of grids and their edges required differ
             %       between hadcm3/hadcm3l and foam
             if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
-                [wstr,wspd,g_wspd] = make_grid_winds_hadcm3x(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+                make_grid_winds_hadcm3x(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             elseif (strcmp(str(1).gcm,'foam'))
-                [wstr,wspd,g_wspd] = make_grid_winds_foam(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+                make_grid_winds_foam(gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonam,gi_lonae,gi_latam,gi_latae,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             elseif (strcmp(str(1).gcm,'cesm'))
-                [wstr,wspd,g_wspd] = make_grid_winds_cesm(gi_lonce,gi_latce,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
+                make_grid_winds_cesm(gi_lonce,gi_latce,gi_mask,go_lonm,go_lone,go_latm,go_late,go_mask,str,opt_plots);
             end
             disp(['       - Re-grided GCM wind products.']);
         otherwise
-            [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
+            make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
             disp(['       - Generated zonal wind products.']);
     end
 end
@@ -1125,11 +1169,12 @@ if (opt_makezonalwind)
 elseif (opt_makewind)
     % windspeed
     % NOTE: bg_ctrl_force_windspeed is .true. by default
+    % NOTE: par_wspeed_avstr is the averaging product code
     switch str(1).gcm
         case {'hadcm3','hadcm3l','foam','cesm'}
             fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
             fprintf(fid,'%s\n',['bg_par_pindir_name=''../../cgenie.muffin/genie-paleo/',par_wor_name,'/''']);
-            fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'.windspeed.dat''']);
+            fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'.windspeed_' str(1).wspd '.dat''']);
         otherwise
             fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false']);
     end

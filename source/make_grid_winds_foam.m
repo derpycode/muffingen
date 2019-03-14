@@ -1,4 +1,4 @@
-function [wstress,wvelocity,wspeed] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str,optplots);
+function [] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str,optplots);
 % make_grid_winds_foam
 %
 %   *********************************************************
@@ -92,15 +92,27 @@ netcdf.close(ncid);
 % create annual averages
 giwvelu = 0.0*locwvelu(:,:,18,1);
 giwvelv = 0.0*locwvelv(:,:,18,1);
-for t=1:12,
+for t=1:12
     giwvelu = giwvelu + locwvelu(:,:,18,t)/12.0;
     giwvelv = giwvelv + locwvelv(:,:,18,t)/12.0;
 end
 % re-orientate
 giwvelu = flipud(giwvelu');
 giwvelv = flipud(giwvelv');
-% calculate wind speed
-giwspd2 = (giwvelu.^2 + giwvelv.^2).^0.5;
+%
+% *** process data -- wind speed **************************************** %
+%
+% calculate wind speed -- annual average from uv
+% (for backwards-compatability) 
+giwspd_uvaa = (giwvelu.^2 + giwvelv.^2).^0.5;
+% calculate wind speed -- monthly average from uv
+% [better averaging] 
+giwspd_uvma = zeros(size(locwvelu(:,:,18,1)));
+for t=1:12
+    giwspd_uvma = giwspd_uvma + (locwvelu(:,:,18,t).^2 + locwvelv(:,:,18,t).^2).^0.5/12.0;
+end
+% re-orientate
+giwspd_uvma = flipud(giwspd_uvma');
 %
 % *** load mask -- wind stress ****************************************** %
 %
@@ -241,13 +253,22 @@ if (optplots), plot_2dgridded(flipud(gowvelv),999.0,'',[[str(2).dir '/' str(2).e
 % replace NaNs with zeros
 % apply GENIE mask to output wind speed
 fprintf('       - Regridding wind speed to GOLDSTEIN c-grid\n');
-plot_2dgridded(flipud(giwspd2),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.IN'],['wind speed in']);
-[gowspd2all,gofwspd2all] = make_regrid_2d(gilonae,gilatae,giwspd2',golone,golate,false);
-gowspd2all = gowspd2all';
-gofwspd2all = gofwspd2all';
-if (optplots), plot_2dgridded(flipud(gowspd2all),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd.OUTALL'],['wind speed out -- no mask']); end
-wspeed = gomask.*gowspd2all;
-wspeed(find(isnan(wspeed))) = 0.0;
+% wspeed_uvaa
+plot_2dgridded(flipud(giwspd_uvaa),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvaa.IN'],['wind speed in']);
+[gowspdall,gofwspdall] = make_regrid_2d(gilonae,gilatae,giwspd_uvaa',golone,golate,false);
+gowspdall = gowspdall';
+gofwspdall = gofwspdall';
+if (optplots), plot_2dgridded(flipud(gowspdall),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvaa.OUTALL'],['wind speed out -- no mask']); end
+wspeed_uvaa = gomask.*gowspdall;
+wspeed_uvaa(find(isnan(wspeed_uvaa))) = 0.0;
+% wspeed_uvma
+plot_2dgridded(flipud(giwspd_uvma),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.IN'],['wind speed in']);
+[gowspdall,gofwspdall] = make_regrid_2d(gilonae,gilatae,giwspd_uvma',golone,golate,false);
+gowspdall = gowspdall';
+gofwspdall = gofwspdall';
+if (optplots), plot_2dgridded(flipud(gowspdall),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.OUTALL'],['wind speed out -- no mask']); end
+wspeed_uvma = gomask.*gowspdall;
+wspeed_uvma(find(isnan(wspeed_uvma))) = 0.0;
 %
 % *** Copy to output arrays ********************************************* %
 %
@@ -298,8 +319,11 @@ c = wvelocity(:,:,2); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written v wind speed data to %s\n',outname);
 % Save 2-D ASCII wind speed scalar for BIOGEM
-outname = [str(2).dir '/' str(2).exp '.windspeed.dat'];
-a = wspeed;
+outname = [str(2).dir '/' str(2).exp '.windspeed_uvaa.dat'];
+a = wspeed_uvaa;
+save(outname,'a','-ascii');
+outname = [str(2).dir '/' str(2).exp '.windspeed_uvma.dat'];
+a = wspeed_uvma;
 save(outname,'a','-ascii');
 fprintf('       - Written BIOGEM windspeed data to %s\n',outname);
 %

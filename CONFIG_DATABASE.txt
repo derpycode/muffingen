@@ -58,7 +58,7 @@ umxbowlc    AR 170731           0.42        "(default) mask and grid filtering, 
 umxbowld    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, edited gateways, (default) roof runoff"
 umxbowle    AR 170731           0.42        "as umxbowla, but random runoff"
 % --------------------------------------------------------------
-cesm_pi1    AR 190311           0.70        "CESM -- b.e12.B1850C5CN.f19_g16.iPI.01.cam.h0.0400-0499, 0.475 re-gridding area fraction, closed Panama, (default) roof runoff"
+cesm_pi1    AR 190313           0.72        "CESM -- b.e12.B1850C5CN.f19_g16.iPI.01.cam.h0.0400-0499, 0.475 re-gridding area fraction, closed Panama, (default) roof runoff"
 % --------------------------------------------------------------
 % --- GLACIAL-INTERGLACIAL -------------------------------------
 % --------------------------------------------------------------
@@ -68,6 +68,8 @@ GIteiiv0    AR 190301           0.68        "HadCM3: 21 ka -- teiiv, -260E grid 
 GIteiiv_    AR 190301           0.68        "HadCM3: 21 ka -- teiiv, -260E grid origin, only modification is closing N-S America, zonal winds"
 GIxbowl0    AR 190301           0.68        "HadCM3l: modern -- xbowl, -260E grid origin, only modification is closing N-S America"
 GIxbowl_    AR 190301           0.68        "HadCM3l: modern -- xbowl, -260E grid origin, only modification is closing N-S America, zonal winds"
+GIteiia0    AR 190313           0.72        "HadCM3: 0 ka -- teiia, -260E grid origin, modifications via mask: closing N-S America, openign Med, adding NZ island"
+GIteiiv0    AR 190313           0.72        "HadCM3: 21 ka -- teiiv, -260E grid origin, modifications via mask: closing N-S America, openign Med, adding NZ island"
 % --------------------------------------------------------------
 % --- PALEO ----------------------------------------------------
 % --------------------------------------------------------------
@@ -82,6 +84,10 @@ fm0450ha    AR 170814           0.43        "CSO, ice free, 10 PAL"
 fm0450ia    AR 170814           0.43        "CSO, ice free, 8 PAL"
 fm0450ja    AR 170814           0.43        "CSO, ice free, 3 PAL"
 fm0450ab    AR 171017           0.44        "HSO, ice free, 24 PAL -- 48x40 non equal area -- very minor mask adjusments to help paths generation"
+fm0450bb    AR 190311           0.44        "HSO, ice free, 16 PAL -- 48x40 non equal area -- very minor mask adjusments to help paths generation"
+fm0450cb    AR 190311           0.44        "HSO, ice free, 10 PAL -- 48x40 non equal area -- very minor mask adjusments to help paths generation"
+fm0450db    AR 190311           0.44        "HSO, ice free,  8 PAL -- 48x40 non equal area -- very minor mask adjusments to help paths generation"
+fm0450eb    AR 190311           0.44        "HSO, ice free,  3 PAL -- 48x40 non equal area -- very minor mask adjusments to help paths generation"
 % --------------------------------------------------------------
 fm0680aa    AR 180325           0.6         "36x36x16, x3CO2, minimal land-sea mask alteration"
 fm0680ba    AR 180325           0.6         "36x36x16, x6CO2, minimal land-sea mask alteration"

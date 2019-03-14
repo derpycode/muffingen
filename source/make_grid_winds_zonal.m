@@ -1,4 +1,4 @@
-function [wstr,wspd,g_wspd] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout,par_tauopt)
+function [] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout,par_tauopt)
 % make_grid_winds_zonal
 %
 %   *********************************************************
@@ -299,12 +299,6 @@ for j=1:jmax,
 end
 % close file
 fclose(fid);
-%
-% *** RETURN DATA ******************************************************* %
-%
-wstr   = [];
-wspd   = [];
-g_wspd = [];
 %
 % *********************************************************************** %
 
