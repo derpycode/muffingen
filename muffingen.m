@@ -174,6 +174,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.72 ********************************************
 %   19/03/13: added new mask option for modifying FINAL mask
 %             *** VERSION 0.73 ********************************************
+%   19/03/17: finalized CESM air-sea gas transfer coefficient settings
+%             *** VERSION 0.73 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -189,7 +191,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.73;
+par_muffingen_ver = 0.74;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -1191,18 +1193,18 @@ elseif (opt_makewind)
             fprintf(fid,'%s\n','# gas transfer coeff');
             fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(1.044)]);
         case {'cesm'}
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
             fprintf(fid,'%s\n','# gas transfer coeff');
-            fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.310)]);
-            
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            
+            switch str(1).wspd
+                case {'uvaa'}
+                    % NOTE: @ 0.310 --> 0.027482 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.6542)]);
+                case {'uvma'}
+                    % NOTE: @ 0.310 --> 0.031064 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.5788)]);
+                case {'wsma'}
+                    % NOTE: @ 0.310 --> 0.051051 mol m-2 yr-1 uatm-1
+                    fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.3522)]);
+            end
         otherwise
             % zonal field
             % NOTE: for now: don't distinguish between different zonal
