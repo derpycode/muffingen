@@ -122,6 +122,10 @@ umtdzoab    AR 180419           0.62        "Hettangian (Early Jurassic) (201.6-
 umteboha    AR 180330           0.6         "Changhsingian (Latest Permian) (254-251), no topo edits"
 umtebohb    AR 180419           0.61        "Changhsingian (Latest Permian) (254-251), no topo edits"
 % --------------------------------------------------------------
+csmPEx3a    AR 190319           0.74        "b.e12.B1850C5CN.f19_g16.iPETM03x.02.cam.h0.1901-2000 -- added New Zealand (single cell)"
+csmPEx6a    AR 190319           0.74        "b.e12.B1850C5CN.f19_g16.iPETM06x.02.cam.h0.1901-2000 -- added New Zealand (single cell)"
+csmPEx9a    AR 190319           0.74        "b.e12.B1850C5CN.f19_g16.iPETM09x.02.cam.h0.1901-2000 -- added New Zealand (single cell)"
+% --------------------------------------------------------------
 % --- CONCEPTUAL -----------------------------------------------
 % --------------------------------------------------------------
 eg_dd_hi    AR 180919           0.63        "double-Drake @ 36x36x16"       
