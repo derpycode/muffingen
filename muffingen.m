@@ -175,7 +175,7 @@ function [] = muffingen(POPT)
 %   19/03/13: added new mask option for modifying FINAL mask
 %             *** VERSION 0.73 ********************************************
 %   19/03/17: finalized CESM air-sea gas transfer coefficient settings
-%             *** VERSION 0.73 ********************************************
+%             *** VERSION 0.74 ********************************************
 %
 %   ***********************************************************************
 %%

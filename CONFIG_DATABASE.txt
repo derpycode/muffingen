@@ -51,6 +51,8 @@ fm0000ab    AR 170731           0.42        "(default) mask and grid filtering, 
 fm0000ac    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, (default) roof runoff"
 fm0000ad    AR 170731           0.42        "(default) mask and grid filtering, 0.475 re-gridding area fraction, edited gateways, (default) roof runoff"
 fm0000ae    AR 170731           0.42        "as fm0000aa, but random runoff"
+fm0000ba    AR 190319           0.74        "equal area -- closed Panama, opened Arctic "
+fm0000bb    AR 190319           0.74        "non equal area -- opened Bearing Strait"
 % --------------------------------------------------------------
 umxbowla    AR 170731           0.42        "(default) mask (ONLY) grid filtering, (default) 0.5 re-gridding area fraction, (default) roof runoff"
 umxbowlb    AR 170731           0.42        "(default) mask and grid filtering, (default) 0.5 re-gridding area fraction, (default) roof runoff"
