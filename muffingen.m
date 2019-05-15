@@ -176,6 +176,9 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.73 ********************************************
 %   19/03/17: finalized CESM air-sea gas transfer coefficient settings
 %             *** VERSION 0.74 ********************************************
+%   19/05/15: fix for incorrect (sign, NaN) SEDGEM topo
+%             and shitty SEDGEM mask output
+%             *** VERSION 0.75 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -191,7 +194,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.74;
+par_muffingen_ver = 0.75;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -929,7 +932,7 @@ if opt_makeseds
                 case {'hadcm3','hadcm3l','foam','cesm'}
                     % if 'high res' sed grid is requested => assume twice ocean resolution
                     % + generate new vectors of grid properties
-                    if opt_highresseds,
+                    if opt_highresseds
                         [gos_lonm,gos_lone,gos_latm,gos_late,gos_dm,gos_de] = make_genie_grid(2*imax,2*jmax,kmax,par_max_D,par_lon_off,opt_equalarea);
                     else
                         gos_lone = go_lone;
@@ -959,22 +962,31 @@ if opt_makeseds
             disp(['       - Converted k1 file data (nothing to re-grid).']);
     end
     %
+    % set mask
+    if opt_highresseds
+        gos_mask = gos_topo;
+        gos_mask(find(gos_mask > 0.0)) = 1.0;
+    else
+        gos_mask = go_mask;
+    end
     % filter topo
-    gos_topo(find(gos_topo < -9.9E9)) = 0.0;    
-    %
+    gos_topo(isnan(gos_topo))         = 0.0;
+    gos_topo(find(gos_topo < -9.9E9)) = 0.0;
+    % invert to depth (rather than height)
+    gos_topo = -gos_topo;
+    % apply mask
+    gos_topo = gos_mask.*gos_topo;
     % plot sediment topo
     if (opt_plots), plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']); end
     % save sediment topo
     fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%10.2f','%10.2f',true,false);
     fprintf('       - .depth.dat saved\n')
     % save other sediment files
-    gos_mask = gos_topo;
-    gos_mask(find(gos_mask > 0)) = 1;
     gos_sedc = 0.0*gos_mask;
-    fprint_2DM(gos_sedc(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.sedcoremask.dat'],'%4.1f','%4i',true,false);
+    fprint_2DM(gos_sedc(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.sedcoremask.dat'],'%5.1f','%5i',true,false);
     fprintf('       - template file .sedcoremask.dat saved\n')
     gos_reef = 0.0*gos_mask;
-    fprint_2DM(gos_reef(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.reefmask.dat'],'%4.1f','%4i',true,false);
+    fprint_2DM(gos_reef(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.reefmask.dat'],'%5.1f','%5i',true,false);
     fprintf('       - template file .reefmask.dat saved\n')
 end
 %
