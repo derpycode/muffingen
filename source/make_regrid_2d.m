@@ -37,6 +37,8 @@ function [zo fao] = make_regrid_2d(PLONI,PLATI,PZI,PLONO,PLATO,PPLOT)
 %   14/12/12: updated plotting output
 %             set zero 'hit' output cells to NaN (rather than zero)
 %             added fractional area function return
+%   19/06/29: generalized the calculation of out grid to account for
+%             possibilty of non equal area grid
 %
 %   ***********************************************************************
 
@@ -52,7 +54,7 @@ lat_out = PLATO;
 gi_z = PZI;
 opt_plot = PPLOT;
 % report debug information?
-opt_debug=false;
+opt_debug = false;
 %
 % *** misc (local) parameters ******************************************* %
 %
@@ -85,16 +87,18 @@ go_fa = zeros(n_lon_out,n_lat_out);
 [go_latn go_lone] = meshgrid(lat_out(2:end),lon_out(2:end));
 [go_lats go_lonw] = meshgrid(lat_out(1:end-1),lon_out(1:end-1));
 % area (in)
-gi_area = zeros(n_lon_in,n_lat_in);
 gi_area(:,:) = 2.0*pi*(par_rEarth^2)*(sin((pi/180.0)*gi_latn) - sin((pi/180.0)*gi_lats)).*((gi_lone-gi_lonw)/360.0);
-if (opt_debug),
+if (opt_debug)
     figure;
     plot_2dgridded(flipud(gi_area(:,:)'),0.9E19,'','gi_area','gi_area');
 end
 % area (out)
-go_area = zeros(n_lon_out,n_lat_out);
-go_area(:,:) = 4.0*pi*(par_rEarth^2)*(1.0/n_lon_out)*(1.0/n_lat_out);
-if (opt_debug),
+% % OLD: equal area assuption
+% go_area = zeros(n_lon_out,n_lat_out);
+% go_area(:,:) = 4.0*pi*(par_rEarth^2)*(1.0/n_lon_out)*(1.0/n_lat_out);
+% NEW: non-equal area assumption
+go_area(:,:) = 2.0*pi*(par_rEarth^2)*(sin((pi/180.0)*go_latn) - sin((pi/180.0)*go_lats)).*((go_lone-go_lonw)/360.0);
+if (opt_debug)
     figure;
     plot_2dgridded(flipud(go_area(:,:)'),0.9E19,'','go_area','go_area');
 end

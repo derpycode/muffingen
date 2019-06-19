@@ -183,6 +183,8 @@ function [] = muffingen(POPT)
 %             NOTE: no air-sea gas exchange calibration yet
 %                   (or any testing ...)
 %             *** VERSION 0.76 ********************************************
+%   19/06/19: generalized out grid in make_regrid_2d
+%             *** VERSION 0.77 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -198,7 +200,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.76;
+par_muffingen_ver = 0.77;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -221,6 +223,8 @@ if ~exist('par_sur_D','var'),  par_sur_D  = 0.0; end
 if ~exist('par_min_k','var'),  par_min_k  = 1; end
 % create plots?
 if ~exist('opt_plots','var'),  opt_plots  = true; end
+% debug?
+if ~exist('opt_debug','var'),  opt_debug  = false; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 % set dummy mask nc name
@@ -557,7 +561,7 @@ switch str(1).gcm
         %       to make_regrid_2d
         %       similarly, output needs to be transposed back again
         % NOTE: pass edges of c-grid
-        [go_mask,go_tmp] = make_regrid_2d(gi_lonce,gi_latce,gi_mask',go_lone,go_late,false);
+        [go_mask,go_tmp] = make_regrid_2d(gi_lonce,gi_latce,gi_mask',go_lone,go_late,opt_debug);
         disp(['       - Mask re-gridded.']);
         go_mask = go_mask';
         go_fmask = go_mask;
@@ -729,7 +733,7 @@ if opt_maketopo
             %       to make_regrid_2d
             %       similarly, output needs to be transposed back again
             % NOTE: pass edges of c-grid
-            [go_topo,go_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',go_lone,go_late,false);
+            [go_topo,go_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',go_lone,go_late,opt_debug);
             disp(['       - Topography re-gridded.']);
             go_topo = go_topo';
             go_ftopo = go_ftopo';
@@ -962,7 +966,7 @@ if opt_makeseds
                         gos_late = go_late;
                     end
                     % re-grid
-                    [gos_topo,gos_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',gos_lone,gos_late,false);
+                    [gos_topo,gos_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',gos_lone,gos_late,opt_debug);
                     gos_topo  = gos_topo';
                     gos_ftopo = gos_ftopo';
                     disp(['       - Re-gridded sediment topo from GCM bathymetry.']);
@@ -1107,7 +1111,7 @@ if opt_makealbedo
     switch str(1).gcm
         case {'hadcm3','hadcm3l','foam','cesm','rockee'}
             % re-grid
-            [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,false);
+            [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,opt_debug);
             go_albd  = go_albd';
             go_falbd = go_falbd';
             disp(['       - Re-gridded GCM albedo data.']);
