@@ -343,6 +343,8 @@ switch par_gcm
         if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'wsma'; end
     case {'rockee'}
         if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = 'wsaa'; end
+    otherwise
+        if ~exist('par_wspeed_avstr','var'), par_wspeed_avstr = ''; end
 end
 %
 % *** initialize I/O **************************************************** %
