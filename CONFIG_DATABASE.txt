@@ -108,8 +108,9 @@ umtdqpma    AR 170822           0.51        "Serravillian (13.82-11.63), 400 ppm
 umtdqpmb    AR 170822           0.52        "as per umtdqpma, but with SEDGEM/ROKGEM file output"
 % -------------------------------------------------------------- 
 umtdqpja    AR 170825           0.53        "Aquitanian (23.03-20.44), 400 ppm, assumed modern orbits"
+% -------------------------------------------------------------- 
+S_tdqlur0   AR 190704           0.78        "Lutetian (48.6-40.4), 1120 ppm, assumed modern orbits, partially filled Arctic"
 % --------------------------------------------------------------
-umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits"    
 umtdluda    AR 170822           0.51        "Ypresian (56.0-47.8), 1120 ppm, assumed modern orbits, NO drake passage gateway"
 % --------------------------------------------------------------
 umtdpwfa    AR 180331           0.6         "Turonian (Mid Cretaceous) (93.5-89.3), minimal topo edits"

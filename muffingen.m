@@ -185,6 +185,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.76 ********************************************
 %   19/06/19: generalized out grid in make_regrid_2d
 %             *** VERSION 0.77 ********************************************
+%   19/07/04: initialization bug-fix
+%             *** VERSION 0.78 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -200,7 +202,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.77;
+par_muffingen_ver = 0.78;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -300,7 +302,7 @@ switch par_gcm
         if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = par_nc_topo_name; end
         if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
         if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = [par_expid '_sed']; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_mask_name  = [par_expid '.qrparm.mask']; end
+        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = [par_expid '.qrparm.mask']; end
         if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = [par_expid 'a.pdclann']; end
     case ('foam')
         if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = 'topo'; end
@@ -314,7 +316,7 @@ switch par_gcm
         if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = par_nc_topo_name; end
         if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = par_nc_topo_name; end
         if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = par_nc_topo_name; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_mask_name  = par_nc_topo_name; end
+        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = par_nc_topo_name; end
         if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = par_nc_topo_name; end
     case ('rockee')
         if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = ''; end
