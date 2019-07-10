@@ -21,6 +21,12 @@ switch str(1).gcm
         else
             loc_str_file = [str(1).path '/' str(1).exp '.k1'];
         end
+    case ('k2')
+        if isempty(str(1).path),
+            loc_str_file = [str(1).exp '.k2'];
+        else
+            loc_str_file = [str(1).path '/' str(1).exp '.k2'];
+        end
     case ('mask')
         if isempty(str(1).path),
             loc_str_file = [str(1).exp '.dat'];
@@ -39,7 +45,7 @@ if (exist(loc_str_file, 'file') == 2)
     loc_k1 = load(loc_str_file);
 else
     disp(['       ERROR: k1 file: ', str(1).exp, ' does not exist (at location ' str(1).path ').']);
-    disp(['              Problem with correct extension? (k1 file extension must be .k1, and mask file .dat)']);
+    disp(['              Problem with correct extension? (k1 file extension must be .k1, and mask/k2 file .dat)']);
     disp(['--------------------------------------------------------']);
     disp([' ']);
     return;
@@ -54,7 +60,7 @@ switch str(1).gcm
     case ('k1')
         % extract core data
         gk1 = loc_k1(2:end-1,2:end-1);
-    case ('mask')
+    case {'mask','k2'}
         gk1 = loc_k1;
     otherwise
         % DO NOTHING!

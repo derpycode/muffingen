@@ -187,6 +187,9 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.77 ********************************************
 %   19/07/04: initialization bug-fix
 %             *** VERSION 0.78 ********************************************
+%   19/07/08: added an alt 'k1' format -- 'k2'
+%             (as per k1, but without the 'borders' / data buffer)
+%             *** VERSION 0.78 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -202,7 +205,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.78;
+par_muffingen_ver = 0.79;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -258,6 +261,7 @@ if strcmp(par_gcm,'ROCKEE'),  par_gcm = 'rockee'; end
 if strcmp(par_gcm,'K1'),      par_gcm = 'k1';     end
 if strcmp(par_gcm,'.k1'),     par_gcm = 'k1';     end
 if strcmp(par_gcm,'.K1'),     par_gcm = 'k1';     end
+if strcmp(par_gcm,'K2'),      par_gcm = 'k2';   end
 if strcmp(par_gcm,'MASK'),    par_gcm = 'mask';   end
 if strcmp(par_gcm,'dat'),     par_gcm = 'mask';   end
 if strcmp(par_gcm,'.dat'),    par_gcm = 'mask';   end
@@ -268,7 +272,7 @@ if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';  end
 % adjust options accroding to input (GCM) type
 switch par_gcm
     case {'hadcm3','hadcm3l','foam','cesm','rockee'}
-    case {'k1','mask'}
+    case {'k1','mask','k2'}
     otherwise
         opt_makeall=false;
         opt_user=true;
@@ -464,8 +468,8 @@ end
 switch str(1).gcm
     case {'hadcm3','hadcm3l','foam','cesm','rockee'}
         disp(['       * GCM == ' str(1).gcm ' (OK)']);
-    case {'k1','mask'}
-        disp(['       * GENIE grid will be loaded directly from k1 or mask text file: ' str(1).exp]);
+    case {'k1','mask','k2'}
+        disp(['       * GENIE grid will be loaded directly from k1, mask, or k2 text file: ' str(1).exp]);
     case {'blank'}
         disp(['       * A blank template grid will be generated: ' str(1).exp]);
     otherwise
@@ -539,7 +543,7 @@ switch str(1).gcm
         % plot input mask & topo
         if (opt_plots), plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']); end
         if (opt_plots), plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']); end
-    case {'k1','mask'}
+    case {'k1','mask','k2'}
         % load topo directly
         [go_k1,go_mask,imax,jmax] = fun_read_k1(str);
         disp(['       - k1 read.']);
@@ -578,8 +582,8 @@ switch str(1).gcm
         [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
         disp(['       * Original land area fraction    = ', num2str(1.0-si_farea)]);
         disp(['       * Re-gridded land area fraction  = ', num2str(1.0-so_farea)]);
-    case {'k1','mask'}
-        disp(['         (Nothing to do ... k1/mask file already loaded.)']);
+    case {'k1','mask','k2'}
+        disp(['         (Nothing to do ... k1/mask/k2 file already loaded.)']);
         go_fmask = zeros(jmax,imax) + 1;
     otherwise
         go_mask = zeros(jmax,imax) + 1;
@@ -741,7 +745,7 @@ if opt_maketopo
             disp(['       - Topography re-gridded.']);
             go_topo = go_topo';
             go_ftopo = go_ftopo';
-        case {'k1'}
+        case {'k1','k2'}
             % convert k1 to depth
             [go_topo] = fun_conv_k1(go_de,go_k1);
             disp(['         (Nothing to re-grid -- convert k1 file data.)']);
@@ -750,7 +754,7 @@ if opt_maketopo
             disp(['         (Nothing to re-grid -- set uniform ocean depth.)']);
     end
     % plot & save initial topo re-grid
-    if ~strcmp(str(1).gcm,'k1')
+    if ( ~strcmp(str(1).gcm,'k1') || ~strcmp(str(1).gcm,'k2') )
         if (opt_plots), plot_2dgridded(flipud(go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.RAW'],['topo out -- RAW']); end
     end
     %
@@ -765,7 +769,7 @@ if opt_maketopo,
     disp(['>   ' num2str(n_step) '. RE-GRIDING OCEAN BATHYMETRY ...']);
     %
     switch str(1).gcm
-        case {'k1'}
+        case {'k1','k2'}
             disp(['         (Nothing to re-grid as k1 file already loaded.)']);
         otherwise
             % convert depth into k levels (and create k1 grid)
@@ -974,7 +978,7 @@ if opt_makeseds
                     gos_topo  = gos_topo';
                     gos_ftopo = gos_ftopo';
                     disp(['       - Re-gridded sediment topo from GCM bathymetry.']);
-                case {'k1'}
+                case {'k1','grid'}
                     % convert k1 to depth
                     [gos_topo] = fun_conv_k1(go_de,go_k1);
                     disp(['       - Converted k1 file data (nothing to re-grid).']);
