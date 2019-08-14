@@ -7,7 +7,7 @@ function [mask]  = fun_read_amask_hadcm3x(str)
 % *********************************************************************** %
 %
 % open netCDF file and load variables
-% NOTE: add legacy / traceabile variable reading
+% NOTE: 'lsm' == 'land-sea mask'
 %
 % str input KEY:
 % str(1).nc == par_nc_axes_name
@@ -18,7 +18,7 @@ function [mask]  = fun_read_amask_hadcm3x(str)
 %
 % open netCDF file
 ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(4).nc '.nc'],'nowrite');
-% load OCEAN MASK
+% load MASK
 varid  = netcdf.inqVarID(ncid,'lsm');
 mask(:,:) = netcdf.getVar(ncid,varid);
 mask = double(mask);

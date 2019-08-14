@@ -189,7 +189,9 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.78 ********************************************
 %   19/07/08: added an alt 'k1' format -- 'k2'
 %             (as per k1, but without the 'borders' / data buffer)
-%             *** VERSION 0.78 ********************************************
+%             *** VERSION 0.79 ********************************************
+%   19/08/14: minor netCDF name bug-fixes
+%             *** VERSION 0.80 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -205,7 +207,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.79;
+par_muffingen_ver = 0.80;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -233,7 +235,9 @@ if ~exist('opt_debug','var'),  opt_debug  = false; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 % set dummy mask nc name
-if ~exist('par_nc_mask_name','var'), par_nc_mask_name = ''; end
+% NOTE: backwards compatability provided by
+%       subsequent default variable name setting
+%if ~exist('par_nc_mask_name','var'), par_nc_mask_name = ''; end
 % mask mask!
 if ~exist('par_mask_mask_name','var'), par_mask_mask_name = ''; end
 %
@@ -303,7 +307,7 @@ str_nameout = par_wor_name;
 switch par_gcm
     case {'hadcm3','hadcm3l'}
         if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = [par_expid '.qrparm.omask']; end
-        if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = par_nc_topo_name; end
+        if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = [par_expid '.qrparm.mask']; end
         if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
         if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = [par_expid '_sed']; end
         if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = [par_expid '.qrparm.mask']; end

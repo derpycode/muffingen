@@ -74,6 +74,8 @@ GIteiiaa    AR 190313           0.72        "HadCM3: 0 ka -- teiia, -260E grid o
 GIteiiva    AR 190313           0.72        "HadCM3: 21 ka -- teiiv, -260E grid origin, modifications via mask: closing N-S America, opening Med, adding NZ island"
 GIteiiab    AR 190324           0.74        "HadCM3: 0 ka -- teiia, -260E grid origin, modifications via mask: closing N-S America, opening Med, adding NZ island, made continuous Antarctica"
 GIteiivb    AR 190324           0.74        "HadCM3: 21 ka -- teiiv, -260E grid origin, modifications via mask: closing N-S America, opening Med, adding NZ island, made continuous Antarctica"
+GIteiiac    AR 190814           0.80        "HadCM3: 0 ka -- teiia, REPEAT/TEST RECONSTRUCTION OF GIteiiaa"
+GIteiivc    AR 190814           0.80        "HadCM3: 21 ka -- teiiv, REPEAT/TEST RECONSTRUCTION OF GIteiiva"
 % --------------------------------------------------------------
 % --- PALEO ----------------------------------------------------
 % --------------------------------------------------------------
