@@ -162,6 +162,13 @@ Q_tdqpo0    AR 180921           0.63        "Messinian (Miocene); 0.45 re-griddi
 Q_tdqpn0    AR 180921           0.63        "Tortonian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to preserve land fraction); (default) roof runoff"
 Q_tdqpm0    AR 180921           0.63        "Serravillian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic as before (but now land fraction too small); (default) roof runoff"
 Q_tdqpl0    AR 180921           0.63        "Langhian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to approx preserve land fraction); (default) roof runoff"
+Q10_00p0    AR 191015           0.80        "REPEAT/RECONSTRUCTION -- Holocene; 0.45 re-gridding area fraction -- CLOSED Panama + made continuous tip of S America; (default) roof runoff"
+Q10_02p5    AR                  0.80        "REPEAT/RECONSTRUCTION -- Piacenzian (Late Pliocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
+Q10_04p5    AR                  0.80        "REPEAT/RECONSTRUCTION -- Zanclean (Early Pliocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
+Q10_07p5    AR                  0.80        "REPEAT/RECONSTRUCTION -- Messinian (Miocene); 0.45 re-gridding area fraction -- NO alterations; (default) roof runoff"
+Q10_10p0    AR                  0.80        "REPEAT/RECONSTRUCTION -- Tortonian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to preserve land fraction); (default) roof runoff"
+Q10_12p5    AR                  0.80        "REPEAT/RECONSTRUCTION -- Serravillian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic as before (but now land fraction too small); (default) roof runoff"
+Q10_15p0    AR                  0.80        "REPEAT/RECONSTRUCTION -- Langhian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to approx preserve land fraction); (default) roof runoff"
 % --------------------------------------------------------------
 % --------------------------------------------------------------
 % 
