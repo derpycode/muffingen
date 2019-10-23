@@ -192,6 +192,9 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.79 ********************************************
 %   19/08/14: minor netCDF name bug-fixes
 %             *** VERSION 0.80 ********************************************
+%   19/10/23: change to how missing and empty parameter options are handled
+%             for GCM netCDF file names
+%             *** VERSION 0.81 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -207,7 +210,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.80;
+par_muffingen_ver = 0.81;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -303,43 +306,42 @@ jmax = par_max_j;
 kmax = par_max_k;
 str_nameout = par_wor_name;
 % initialize optional netCDF filenames
+if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = ''; end
+if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = ''; end
+if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = ''; end
+if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = ''; end
+if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
+if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
 % -> set default variable names
 switch par_gcm
     case {'hadcm3','hadcm3l'}
-        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = [par_expid '.qrparm.omask']; end
-        if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = [par_expid '.qrparm.mask']; end
-        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
-        if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = [par_expid '_sed']; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = [par_expid '.qrparm.mask']; end
-        if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = [par_expid 'a.pdclann']; end
+        if isempty(par_nc_topo_name),  par_nc_topo_name  = [par_expid '.qrparm.omask']; end
+        if isempty(par_nc_mask_name),  par_nc_mask_name  = [par_expid '.qrparm.mask']; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
+        if isempty(par_nc_atmos_name), par_nc_atmos_name = [par_expid '_sed']; end
+        if isempty(par_nc_ocean_name), par_nc_ocean_name = [par_expid '.qrparm.mask']; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = [par_expid 'a.pdclann']; end
     case ('foam')
-        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = 'topo'; end
-        if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = par_nc_topo_name; end
-        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = par_nc_topo_name; end
-        if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = 'atmos'; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
-        if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
+        if isempty(par_nc_topo_name),  par_nc_topo_name  = 'topo'; end
+        if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; end
+        if isempty(par_nc_atmos_name), par_nc_atmos_name = 'atmos'; end
+        if isempty(par_nc_ocean_name), par_nc_ocean_name = ''; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = ''; end
     case {'cesm'}
-        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = 'climo'; end
-        if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = par_nc_topo_name; end
-        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = par_nc_topo_name; end
-        if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = par_nc_topo_name; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = par_nc_topo_name; end
-        if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = par_nc_topo_name; end
+        if isempty(par_nc_topo_name),  par_nc_topo_name  = 'climo'; end
+        if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; end
+        if isempty(par_nc_atmos_name), par_nc_atmos_name = par_nc_topo_name; end
+        if isempty(par_nc_ocean_name), par_nc_ocean_name = par_nc_topo_name; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = par_nc_topo_name; end
     case ('rockee')
-        if ~exist('par_nc_topo_name','var'),  par_nc_topo_name  = ''; end
-        if ~exist('par_nc_mask_name','var'),  par_nc_mask_name  = par_nc_topo_name; end
-        if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = ''; end
-        if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
-        if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = par_nc_ocean_name; end
-        if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
-    otherwise
-        par_nc_topo_name  = '';
-        par_nc_mask_name  = '';
-        par_nc_axes_name  = '';
-        par_nc_atmos_name = '';
-        par_nc_ocean_name = '';
-        par_nc_coupl_name = '';
+        if isempty(par_nc_topo_name),  par_nc_topo_name  = ''; end
+        if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
+        if isempty(par_nc_atmos_name), par_nc_atmos_name = ''; end
+        if isempty(par_nc_ocean_name), par_nc_ocean_name = ''; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_ocean_name; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = ''; end
 end
 % set default annual wind averaging to not based on monthly winds
 switch par_gcm
