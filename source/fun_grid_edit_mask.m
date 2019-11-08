@@ -48,17 +48,16 @@ while flag == 0
     else
         loc_j = jmax-iy+2;
         if (gfm_ex(loc_j,ix) == 0.0)
-            fprintf('       - Invalid choice: there is no ocean depth information available at cell (%d, %d)\n',ix,iy);
+            fprintf('       - WARNING: there is no ocean depth information available at cell (%d, %d)\n',ix,iy);
+        end
+        if button == 1
+            fprintf('         -> Cell at (%d, %d) now ocean\n', ix, iy);
+            gm_ex(loc_j,ix) = 1;
+        elseif button == 3
+            fprintf('         -> Cell at (%d, %d) now land\n', ix, iy);
+            gm_ex(loc_j,ix) = 0;
         else
-            if button == 1
-                fprintf('         -> Cell at (%d, %d) now ocean\n', ix, iy);
-                gm_ex(loc_j,ix) = 1;
-            elseif button == 3
-                fprintf('         -> Cell at (%d, %d) now land\n', ix, iy);
-                gm_ex(loc_j,ix) = 0;
-            else
-                fprintf('       - Cannot switch mask value of cell at (%d, %d)\n',ix,iy);
-            end
+            fprintf('       - Cannot switch mask value of cell at (%d, %d)\n',ix,iy);
         end
     end
     clf
