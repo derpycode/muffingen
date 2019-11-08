@@ -196,6 +196,8 @@ function [] = muffingen(POPT)
 %             for GCM netCDF file names
 %             *** VERSION 0.81 ********************************************
 %   19/11/08: added mask editing modifications
+%             added new default of not forcing tripple junctions to be
+%             corrected manually ... (may ... not always be safe?)
 %             *** VERSION 0.82 ********************************************
 %   ***********************************************************************
 %%

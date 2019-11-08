@@ -37,9 +37,13 @@ for i = 2:imax+1
             end
             % report issue
             % NOTE: IRNORE the first border as this will not become a path
-            if ((isrch >= 3) && (gb_ex(j,i) > 1)),
-                disp([' *** User intevention required @ (',num2str(loc_i),',',num2str(jmax-loc_j+2),') to resolve problem with island path (illegal tripple junction found).']);
-                opt_user = true;
+            if ((isrch >= 3) && (gb_ex(j,i) > 1))
+                disp([' *** User intevention required @ (',num2str(loc_i),',',num2str(jmax-loc_j+2),') to resolve problem with island path.']);
+                if (isrch == 3)
+                    disp(['     (junction is only a tripple junction -- you may be OK and could risk not correcting it ...)']);
+                else
+                    opt_user = true;
+                end
             end
         end
     end
