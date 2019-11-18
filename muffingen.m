@@ -195,6 +195,8 @@ function [] = muffingen(POPT)
 %   19/10/23: change to how missing and empty parameter options are handled
 %             for GCM netCDF file names
 %             *** VERSION 0.81 ********************************************
+%   19/11/17: cosmetic changes ...
+%             *** VERSION 0.82 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -210,7 +212,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.81;
+par_muffingen_ver = 0.82;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -1035,24 +1037,22 @@ end
 %
 n_step = n_step+1;
 %
-disp(['>  ' num2str(n_step) '. SWITCH GRIDS ...']);
 % NOTE: only with HadCM3 do we need to switch from ocean to atm grid
 switch str(1).gcm
     case {'hadcm3'}
+        %
+        disp(['>  ' num2str(n_step) '. SWITCH GRIDS ...']);
         % re-read axes
         [gi_loncm,gi_lonce,gi_latcm,gi_latce,gi_lonpm,gi_lonpe,gi_latpm,gi_latpe,gi_lonam,gi_lonae,gi_latam,gi_latae] = fun_read_axes_hadcm3x(str);
         disp(['       - Axis info re-read.']);
         % re-read (atmopshere) mask
         [gi_mask] = fun_read_amask_hadcm3x(str);
         disp(['       - Mask info re-read.']);
-    otherwise
-        % DO NOTHING
-        disp(['         (Nothing to re-read.)']);
 end
 %
 % *** RE-GRID WIND SPEED/STRESS DATA ************************************ %
 %
-% n_step = n_step+1;
+n_step = n_step+1;
 %
 if (opt_makezonalwind)
     %
