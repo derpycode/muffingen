@@ -195,10 +195,12 @@ function [] = muffingen(POPT)
 %   19/10/23: change to how missing and empty parameter options are handled
 %             for GCM netCDF file names
 %             *** VERSION 0.81 ********************************************
-%   19/11/17: cosmetic changes ...
+%   19/11/08: added mask editing modifications
+%             added new default of not forcing tripple junctions to be
+%             corrected manually ... (may ... not always be safe?)
 %             *** VERSION 0.82 ********************************************
-%
-%   ***********************************************************************
+%   19/11/17: cosmetic changes ...
+%             *** VERSION 0.83 ********************************************%   ***********************************************************************
 %%
 
 % *********************************************************************** %
@@ -212,7 +214,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.82;
+par_muffingen_ver = 0.83;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -811,6 +813,14 @@ end
 n_step = n_step+1;
 %
 if (opt_maketopo && opt_user)
+    % filter for ocean but not depth info (k > kmax)
+    % search for ocean in the mask that has a 'land' value ...
+    % set to the shallowest k1 level and a nominal middepth of that level
+    loc_dry = intersect(find(go_mask == 1),find(go_k1 > par_max_k));
+    if ~isempty(loc_dry)
+        go_k1(loc_dry) = par_max_k;
+        go_topo(loc_dry) = -go_dm(par_max_k);
+    end
     %
     disp(['>  ' num2str(n_step) '. USER EDITING OF TOPO ...']);
     % user-editing! what can go wrong?
