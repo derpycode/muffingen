@@ -200,7 +200,10 @@ function [] = muffingen(POPT)
 %             corrected manually ... (may ... not always be safe?)
 %             *** VERSION 0.82 ********************************************
 %   19/11/17: cosmetic changes ...
-%             *** VERSION 0.83 ********************************************%   ***********************************************************************
+%             *** VERSION 0.83 ********************************************
+%   19/11/19: adjusted sed depth saving and SEDGEM mask generation
+%             *** VERSION 0.84 ********************************************
+%   ***********************************************************************
 %%
 
 % *********************************************************************** %
@@ -214,7 +217,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.83;
+par_muffingen_ver = 0.84;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -978,12 +981,14 @@ if opt_makeseds
     disp(['>  ' num2str(n_step) '. GENERATING SEDIMENT TOPO ...']);
     %
     % check sed topo re-gridding options
+    % NOTE: assume gos_topo is POSITIVE (depth below surface)
     switch par_sedsopt
         case 1
             % option %1 -- re-grid sediment topography
             switch str(1).gcm
                 case {'hadcm3','hadcm3l','foam','cesm','rockee'}
-                    % if 'high res' sed grid is requested => assume twice ocean resolution
+                    % if 'high res' sed grid is requested 
+                    % => assume twice ocean resolution
                     % + generate new vectors of grid properties
                     if opt_highresseds
                         [gos_lonm,gos_lone,gos_latm,gos_late,gos_dm,gos_de] = make_genie_grid(2*imax,2*jmax,kmax,par_max_D,par_lon_off,opt_equalarea);
@@ -995,50 +1000,71 @@ if opt_makeseds
                     [gos_topo,gos_ftopo] = make_regrid_2d(gi_lonce,gi_latce,gi_topo',gos_lone,gos_late,opt_debug);
                     gos_topo  = gos_topo';
                     gos_ftopo = gos_ftopo';
+                    % invert to depth (rather than height)
+                    gos_topo = -gos_topo;
                     disp(['       - Re-gridded sediment topo from GCM bathymetry.']);
-                case {'k1','grid'}
-                    % convert k1 to depth
+                case {'k1','k2','grid'}
+                    % convert k1,grid,k2 to depth
                     [gos_topo] = fun_conv_k1(go_de,go_k1);
                     disp(['       - Converted k1 file data (nothing to re-grid).']);
                 otherwise
-                    %
+                    % set uniform sediment depth
                     gos_topo = par_max_D*go_mask;
                     disp(['       - Set uniform ocean depth (nothing to re-grid).']);
             end
         case 2
             % option %2 -- create random sediment bathymetry from mask
-            [gos_topo] = make_grid_topo_sed_rnd(go_mask,opt_highresseds,go_de(kmax-(par_min_Dk-1)),par_max_D);
+            % NOTE: assume a flat-bottom ocean and create a new mask 
+            %       based on the minimum set k1 value
+            %       (assuming higher k values are shelf/slope)
+            % NOTE: attempting to retain any shelf/slopes ...
+            % first convert from k1
+            loc_mask = zeros(jmax,imax);
+            [loc_topo] = fun_conv_k1(go_de,go_k1);
+            % now define a mask
+            loc_mask(find(go_k1==par_min_k)) = 1;
+            % create masked random depth grid
+            [gos_topo] = make_grid_topo_sed_rnd(loc_mask,opt_highresseds,go_de(kmax-(par_min_Dk-1)),par_max_D);
+            %  add to random depth grid to ~masked k1 depth grid
+            % (assuming that non random grid depths are zero)
+            if ~opt_highresseds,
+                gos_topo = gos_topo + loc_topo.*(~loc_mask);
+            end
             disp(['       - Created randomized sediment topography (nothing to re-grid).']);
         otherwise
-            % option %0 -- convert k1 to depth
+            % option %0 -- convert k1,k2 to depth
             [gos_topo] = fun_conv_k1(go_de,go_k1);
             disp(['       - Converted k1 file data (nothing to re-grid).']);
     end
-    %
-    % set mask
+    % set sediment grid mask
     if opt_highresseds
         gos_mask = gos_topo;
         gos_mask(find(gos_mask > 0.0)) = 1.0;
     else
         gos_mask = go_mask;
     end
-    % filter topo
-    gos_topo(isnan(gos_topo))         = 0.0;
-    gos_topo(find(gos_topo < -9.9E9)) = 0.0;
-    % invert to depth (rather than height)
-    gos_topo = -gos_topo;
     % apply mask
     gos_topo = gos_mask.*gos_topo;
+    % set sedcore saving mask
+    gos_sedc = 0.0*gos_mask;
+    % set reefal mask
+    if (par_sedsopt==2 && ~opt_highresseds)
+        gos_reef = gos_mask.*(~loc_mask);
+    else
+        gos_reef = 0.0*gos_mask;
+    end
+    % filter topo for saving
+    gos_topo(isnan(gos_topo))         = 0.0;
+    gos_topo(find(gos_topo < -9.9E9)) = 0.0;
+    gos_topo(find(gos_topo > +9.9E9)) = 0.0;
     % plot sediment topo
     if (opt_plots), plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']); end
     % save sediment topo
     fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%10.2f','%10.2f',true,false);
     fprintf('       - .depth.dat saved\n')
     % save other sediment files
-    gos_sedc = 0.0*gos_mask;
     fprint_2DM(gos_sedc(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.sedcoremask.dat'],'%5.1f','%5i',true,false);
     fprintf('       - template file .sedcoremask.dat saved\n')
-    gos_reef = 0.0*gos_mask;
     fprint_2DM(gos_reef(:,:),gos_mask(:,:),[[str_dirout '/' str_nameout] '.reefmask.dat'],'%5.1f','%5i',true,false);
     fprintf('       - template file .reefmask.dat saved\n')
 end
