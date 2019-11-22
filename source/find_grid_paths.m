@@ -23,7 +23,7 @@ function [n_paths,v_paths,n_islands,grid_paths] = find_grid_paths(grid_borders,n
 [jmax imax] = size(grid_borders);
 % create search array
 % directions: 1==S, 2==E, 3==N, 4==W
-vdsrch = [1 0; 0 1; -1 0; 0 -1]; 
+vdsrch = [1 0; 0 1; -1 0; 0 -1];
 % copy & expand border grid
 gb_ex = grid_borders;
 gb_ex = [gb_ex(:,end) gb_ex gb_ex(:,1)];
@@ -50,7 +50,7 @@ if (~isempty(i_poles)),
 end
 %
 % LOOP >>>
-for islnd = 1:n_islands,
+for islnd = 1:n_islands
     %
     disp(['       * Creating raw path #' num2str(islnd) ' ...']);
     % find top LH border cell of the current island border
@@ -180,9 +180,9 @@ for islnd = 1:n_islands,
     elseif (loc_j-j) == -1, %South
         v_paths = [v_paths; -2 loc_i-1 loc_j-1];
     else
-        disp([' *** Failed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),').']);
         diary off;
-        return;
+        error(['Error. \nFailed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),'): %s'],'Exiting ...');
+        %disp([' *** Failed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),').']);
     end
     n_path = n_path + 1;
     % write out path length
@@ -196,10 +196,10 @@ end
 % *** PATH POST-PROCESSING ********************************************** %
 %
 % Included in the automatically generated paths, are 2 illegal moves that
-% result in the c-grid being transversed twice 
+% result in the c-grid being transversed twice
 % (and hence the path direction ambigeous).
 % There are:
-% The top right corner cell of a (bend in a) path, 
+% The top right corner cell of a (bend in a) path,
 % whether an outer or innter bend, and characterized by:
 % path cells to the E and the S
 % (and ocean and/or land to the W and the N)
@@ -225,8 +225,9 @@ end
 %        1 == East  (+ve u)
 %       -1 == West  (-ve u)
 %
-if n_islands >= 2,
-    for islnd = 2:n_islands,
+if n_islands >= 2
+    %
+    for islnd = 2:n_islands
         %
         disp(['       * Building path #' num2str(islnd) ' ...']);
         %
@@ -237,7 +238,7 @@ if n_islands >= 2,
         % (in terms of following the path loop)
         vp_ex = v_paths(pmin:pmax,:);
         vp_ex = [vp_ex(end,:); vp_ex; vp_ex(1,:)];
-        % 
+        %
         vpp = [];
         %
         p = 2;
@@ -368,7 +369,7 @@ if n_islands >= 2,
                 p = p+1;
             else
                 disp(' *** IMPOSSIBLE!');
-                return;        
+                return;
             end
             %
         end
@@ -377,7 +378,7 @@ if n_islands >= 2,
     end
     %
 end
-% 
+%
 %
 % *** CREATE 2D PATHS MAP *********************************************** %
 %
@@ -397,7 +398,7 @@ grid_paths = flipud(grid_paths);
 
 % *********************************************************************** %
 % *** END *************************************************************** %
-% *********************************************************************** 
+% ***********************************************************************
 %
 %%%
 %

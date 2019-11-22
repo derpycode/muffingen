@@ -16,9 +16,9 @@
 %
 % *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* %
 %
-par_wor_name='worxbowl';       % ['STRING'] 8-char (output) config name
-par_gcm='hadcm3l';             % ['STRING'] input format/GCM name
-par_expid='xbowl';             % ['STRING'] input experiment/data name
+par_wor_name='gcmfoam_';       % ['STRING'] 8-char (output) config name
+par_gcm='foam';             % ['STRING'] input format/GCM name
+par_expid='GCMFOAM';             % ['STRING'] input experiment/data name
 %
 % *** FILE PATHS ******************************************************** %
 %
@@ -28,12 +28,12 @@ opt_outputdir=false;           % [false/true] ask for output directory?
 %
 % *** GCM netCDF FILENAMES ********************************************** %
 %
-par_nc_topo_name  = '';        % ['STRING'] optional .nc name
-par_nc_mask_name  = '';        % ['STRING'] optional .nc name
-par_nc_axes_name  = '';        % ['STRING'] optional .nc name
-par_nc_atmos_name = '';        % ['STRING'] optional .nc name
-par_nc_ocean_name = '';        % ['STRING'] optional .nc name
-par_nc_coupl_name = '';        % ['STRING'] optional .nc name
+par_nc_topo_name  = 'topo';        % ['STRING'] optional .nc name
+par_nc_mask_name  = 'topo';        % ['STRING'] optional .nc name
+par_nc_axes_name  = 'topo';        % ['STRING'] optional .nc name
+par_nc_atmos_name = 'atmos';        % ['STRING'] optional .nc name
+par_nc_ocean_name = 'coupl';        % ['STRING'] optional .nc name
+par_nc_coupl_name = 'coupl';        % ['STRING'] optional .nc name
 %
 % *** GRID RESOLUTION *************************************************** %
 %
@@ -63,8 +63,8 @@ par_age=0.0;                   % [0.0-4570.0] optional age (Myr)
 % *** OPTIONS -- MAIN *************************************************** %
 %
 opt_makeall=false;             % [false/true] apply all common options?
-opt_user=false;                % [false/true] enable user input to grid
-opt_plots=true;                % [false/true] plot all input and output?
+opt_user=false;                 % [false/true] enable user input to grid
+opt_plots=false;                % [false/true] plot all input and output?
 %
 % *** OPTIONS -- DATA GENERATION **************************************** %
 %

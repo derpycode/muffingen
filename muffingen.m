@@ -203,6 +203,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.83 ********************************************
 %   19/11/19: adjusted sed depth saving and SEDGEM mask generation
 %             *** VERSION 0.84 ********************************************
+%   19/11/22: tempoary fixes and addiitons ...
+%             *** VERSION 0.00 ********************************************
 %   ***********************************************************************
 %%
 
@@ -217,7 +219,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.84;
+par_muffingen_ver = 0.00;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -921,7 +923,7 @@ if opt_makeocean
     [go_borders] = find_grid_borders_update(go_borders,go_islands,go_mask,n_islands);
     if (opt_plots), plot_2dgridded(flipud(go_borders),999,'',[[str_dirout '/' str_nameout] '.brds_out.FILTERED'],['borders out -- FILTERED']); end
     % (4) border check
-    [opt_user] = find_grid_borders_check(go_borders,opt_user);
+    [go_borders,opt_user] = find_grid_borders_check(go_borders,go_mask,opt_user);
     % (5) user editing of borders
     if opt_user
         % user-editing! what can go wrong?
