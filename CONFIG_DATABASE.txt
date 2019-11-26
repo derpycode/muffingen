@@ -100,12 +100,12 @@ fm0450cc    AR 190827           0.80        "HSO, ice free, 10 PAL -- REPEAT/REC
 fm0450dc    AR 190827           0.80        "HSO, ice free, 8 PAL  -- REPEAT/RECONSTRUCTION OF fm0450da [opened 2 gateways around islands]"
 fm0450ec    AR 190827           0.80        "HSO, ice free, 3 PAL  -- REPEAT/RECONSTRUCTION OF fm0450ea [opened 2 gateways around islands]"
 % --------------------------------------------------------------
-fm0680aa    AR 180325           0.6         "36x36x16, x3CO2, minimal land-sea mask alteration"
-fm0680ba    AR 180325           0.6         "36x36x16, x6CO2, minimal land-sea mask alteration"
-fm0680ca    AR 180325           0.6         "36x36x16, x12CO2, minimal land-sea mask alteration"
-fm0680da    AR 180325           0.6         "36x36x16, x24CO2, minimal land-sea mask alteration"
-fm0680ea    AR 180325           0.6         "36x36x16, x48CO2, minimal land-sea mask alteration"
-fm0680cb    AR 180325           0.6         "18x18x16, x12CO2, cells removed to open gateways"
+fm0635aa    AR 180325           0.6         "36x36x16, x3CO2, minimal land-sea mask alteration"
+fm0635ba    AR 180325           0.6         "36x36x16, x6CO2, minimal land-sea mask alteration"
+fm0635ca    AR 180325           0.6         "36x36x16, x12CO2, minimal land-sea mask alteration"
+fm0635da    AR 180325           0.6         "36x36x16, x24CO2, minimal land-sea mask alteration"
+fm0635ea    AR 180325           0.6         "36x36x16, x48CO2, minimal land-sea mask alteration"
+fm0635cb    AR 180325           0.6         "18x18x16, x12CO2, cells removed to open gateways"
 % --------------------------------------------------------------
 umtdzoaa    AR 180306           0.6         "Hettangian (Early Jurassic) (201.6-197), minimal topo edits"           
 % --------------------------------------------------------------
