@@ -111,6 +111,8 @@ taux_v_1d = zeros(jmax,1);
 % set minimum tau (N m-2)
 % NOTE: derived from JOSEY et al. [2002]
 par_tau_min = 0.02;
+% set date
+str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 %
 % *********************************************************************** %
 
@@ -219,7 +221,7 @@ axis([-90 90 -0.1 0.2]);
 hold on;
 scatter(go_latm(:),taux_u_1d(:));
 % save figure
-print('-dpsc2', [str_nameout, '.taux_u.ps']);
+print('-dpsc2', [str_nameout, '.taux_u.' str_date '.ps']);
 % plot figure -- v grid
 figure;
 plot(go_late(2:end),taux_v_1d(:));
@@ -227,7 +229,7 @@ axis([-90 90 -0.1 0.2]);
 hold on;
 scatter(go_late(2:end),taux_v_1d(:));
 % save figure
-print('-dpsc2', [str_nameout, '.taux_v.ps']);
+print('-dpsc2', [str_nameout, '.taux_v.' str_date '.ps']);
 %
 % *** SAVE FILES ******************************************************** %
 %

@@ -205,6 +205,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.84 ********************************************
 %   19/11/22: tempoary fixes and addiitons ...
 %             *** VERSION 0.00 ********************************************
+%   19/12/03: enabled minimal plotting for 'no plotting' option ... :o)
+%             *** VERSION 0.85 ********************************************
 %   ***********************************************************************
 %%
 
@@ -219,7 +221,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.00;
+par_muffingen_ver = 0.85;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -726,12 +728,15 @@ if ~isempty(str(1).mask)
     go_mask(find(loc_mask == -1)) = 0;
 end
 %
-% create GENIE NaN mask
+% create GENIE NaN masks
 go_masknan = go_mask;
-go_masknan(find(go_masknan == 0)) = NaN;
+go_masknan(find(go_mask == 0)) = NaN;
+go_masknotnan = go_mask;
+go_masknotnan(find(go_mask ~= 0)) = NaN;
+go_masknotnan(find(go_masknotnan == 0)) = 1;
 %
 % plot final mask
-if (opt_plots), plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']); end
+plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']);
 %
 % save mask
 fprint_2DM(go_mask(:,:),[],[[str_dirout '/' str_nameout] '.mask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
@@ -839,11 +844,11 @@ if (opt_maketopo && opt_user)
     %
 end
 %
-if opt_maketopo
-    % plot final k1
-    if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.FINAL'],['k1 out -- FINAL version']); end
+if (opt_maketopo)
     % plot final topo
-    if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']); end
+    plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
+    % plot final k1
+    plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.ocean.FINAL'],['k1 out -- FINAL ocean version']);
 end
 %
 % *** CALCULATE RUNOFF & COMPLETE k1 FILE ******************************* %
@@ -885,6 +890,11 @@ if opt_makeocean
     fprint_2DM(goex_k1(:,:),[],[[str_dirout '/' str_nameout] '.k1'],'%3i','%3i',true,false);
     fprintf('       - .k1 file saved\n')
     %
+end
+%
+if (opt_maketopo)
+    % plot final land k1
+    plot_2dgridded(flipud(go_masknotnan.*go_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.land.FINAL'],['k1 out -- FINAL land version']);
 end
 %
 % *** IDENTIFY ISLANDS ************************************************** %
@@ -1059,8 +1069,8 @@ if opt_makeseds
     gos_topo(isnan(gos_topo))         = 0.0;
     gos_topo(find(gos_topo < -9.9E9)) = 0.0;
     gos_topo(find(gos_topo > +9.9E9)) = 0.0;
-    % plot sediment topo
-    if (opt_plots), plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']); end
+    % plot final sediment topo
+    plot_2dgridded(flipud(gos_topo),9999,'',[[str_dirout '/' str_nameout] '.sedtopo_out.FINAL'],['Sediment topo -- FINAL']);
     % save sediment topo
     fprint_2DM(gos_topo(:,:),[],[[str_dirout '/' str_nameout] '.depth.dat'],'%10.2f','%10.2f',true,false);
     fprintf('       - .depth.dat saved\n')
