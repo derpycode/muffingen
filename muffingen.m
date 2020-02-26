@@ -207,6 +207,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.00 ********************************************
 %   19/12/03: enabled minimal plotting for 'no plotting' option ... :o)
 %             *** VERSION 0.85 ********************************************
+%   20/02/25: enabled high res topo input
+%   20/02/26: rationalized how standard-compatable deeper oceans are made
 %   ***********************************************************************
 %%
 
@@ -254,6 +256,8 @@ if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 %if ~exist('par_nc_mask_name','var'), par_nc_mask_name = ''; end
 % mask mask!
 if ~exist('par_mask_mask_name','var'), par_mask_mask_name = ''; end
+% number of additional ocean levels to assign
+if ~exist('par_add_Dk','var'), par_add_Dk = 0; end
 %
 % *** check / filter options ******************************************** %
 %
@@ -268,29 +272,31 @@ end
 if strcmp(par_gcm,'hadcm3l'), par_gcm = 'hadcm3l'; end
 if strcmp(par_gcm,'HadCM3L'), par_gcm = 'hadcm3l'; end
 if strcmp(par_gcm,'HADCM3L'), par_gcm = 'hadcm3l'; end
-if strcmp(par_gcm,'hadcm3'),  par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'HadCM3'),  par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'HADCM3'),  par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'um'),      par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'UM'),      par_gcm = 'hadcm3'; end
-if strcmp(par_gcm,'FOAM'),    par_gcm = 'foam';   end
-if strcmp(par_gcm,'CESM'),    par_gcm = 'cesm';   end
-if strcmp(par_gcm,'ROCKEE'),  par_gcm = 'rockee'; end
-if strcmp(par_gcm,'K1'),      par_gcm = 'k1';     end
-if strcmp(par_gcm,'.k1'),     par_gcm = 'k1';     end
-if strcmp(par_gcm,'.K1'),     par_gcm = 'k1';     end
-if strcmp(par_gcm,'K2'),      par_gcm = 'k2';   end
-if strcmp(par_gcm,'MASK'),    par_gcm = 'mask';   end
-if strcmp(par_gcm,'dat'),     par_gcm = 'mask';   end
-if strcmp(par_gcm,'.dat'),    par_gcm = 'mask';   end
-if strcmp(par_gcm,''),        par_gcm = 'blank';  end
-if strcmp(par_gcm,'BLANK'),   par_gcm = 'blank';  end
-if strcmp(par_gcm,'none'),    par_gcm = 'blank';  end
-if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';  end
+if strcmp(par_gcm,'hadcm3'),  par_gcm = 'hadcm3';  end
+if strcmp(par_gcm,'HadCM3'),  par_gcm = 'hadcm3';  end
+if strcmp(par_gcm,'HADCM3'),  par_gcm = 'hadcm3';  end
+if strcmp(par_gcm,'um'),      par_gcm = 'hadcm3';  end
+if strcmp(par_gcm,'UM'),      par_gcm = 'hadcm3';  end
+if strcmp(par_gcm,'FOAM'),    par_gcm = 'foam';    end
+if strcmp(par_gcm,'CESM'),    par_gcm = 'cesm';    end
+if strcmp(par_gcm,'ROCKEE'),  par_gcm = 'rockee';  end
+if strcmp(par_gcm,'K1'),      par_gcm = 'k1';      end
+if strcmp(par_gcm,'.k1'),     par_gcm = 'k1';      end
+if strcmp(par_gcm,'.K1'),     par_gcm = 'k1';      end
+if strcmp(par_gcm,'K2'),      par_gcm = 'k2';      end
+if strcmp(par_gcm,'MASK'),    par_gcm = 'mask';    end
+if strcmp(par_gcm,'dat'),     par_gcm = 'mask';    end
+if strcmp(par_gcm,'.dat'),    par_gcm = 'mask';    end
+if strcmp(par_gcm,'.mat'),    par_gcm = 'mat';     end
+if strcmp(par_gcm,'.MAT'),    par_gcm = 'mat';     end
+if strcmp(par_gcm,''),        par_gcm = 'blank';   end
+if strcmp(par_gcm,'BLANK'),   par_gcm = 'blank';   end
+if strcmp(par_gcm,'none'),    par_gcm = 'blank';   end
+if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';   end
 % adjust options accroding to input (GCM) type
 switch par_gcm
     case {'hadcm3','hadcm3l','foam','cesm','rockee'}
-    case {'k1','mask','k2'}
+    case {'k1','mask','k2','mat'}
     otherwise
         opt_makeall=false;
         opt_user=true;
@@ -485,6 +491,8 @@ end
 switch str(1).gcm
     case {'hadcm3','hadcm3l','foam','cesm','rockee'}
         disp(['       * GCM == ' str(1).gcm ' (OK)']);
+    case {'mat'}
+        disp(['       * A high resolution topography (only) file: ' str(1).exp]);
     case {'k1','mask','k2'}
         disp(['       * GENIE grid will be loaded directly from k1, mask, or k2 text file: ' str(1).exp]);
     case {'blank'}
@@ -502,7 +510,7 @@ end
 n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. CREATING GENIE GRID ...']);
 % create GENIE grid
-[go_lonm,go_lone,go_latm,go_late,go_dm,go_de,par_max_D] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_sur_D);
+[go_lonm,go_lone,go_latm,go_late,go_dm,go_de,par_max_D] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_add_Dk);
 disp(['       - GENIE grid generated.']);
 %
 % *** LOAD GRID (AXES) DATA ********************************************* %
@@ -531,6 +539,13 @@ switch str(1).gcm
             return;
         end
         disp(['       - Axis info read.']);
+    case {'mat'}
+        % NOTE: assume equal Dlon, Dlat grid (non equal area) and 1 degree
+        %       also that the input grid starts at -180E
+        % >>> EDIT ME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        gi_lonce = [-180.0:1.0:180.0];
+        gi_latce = [-90.0:1.0:90.0];
+        % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     otherwise
         % DO NOTHING
         disp(['         (Nothing to load.)']);
@@ -560,6 +575,23 @@ switch str(1).gcm
         % plot input mask & topo
         if (opt_plots), plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']); end
         if (opt_plots), plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']); end
+    case {'mat'}
+        % read topo
+        % NOTE: assume specific (rows==lat, col==lon) orientation 
+        %       => flip up/down when loaded
+        % NOTE: assume topography is positive height (above sealevel)
+        % >>> EDIT ME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+        data = load('-mat',[par_expid '.' par_gcm]);
+        vars = fieldnames(data);
+        gi_topo = data.(vars{1});
+        gi_topo = flipud(gi_topo);
+        gi_mask = zeros(size(gi_topo));
+        gi_mask(find(gi_topo < 0.0)) = 1.0;
+        % <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        disp(['       - Mask & topo info read.']);
+        % plot input mask & topo
+        if (opt_plots), plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']); end
+        if (opt_plots), plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']); end
     case {'k1','mask','k2'}
         % load topo directly
         [go_k1,go_mask,imax,jmax] = fun_read_k1(str);
@@ -580,7 +612,7 @@ n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. RE-GRIDING MASK ...']);
 %
 switch str(1).gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+    case {'hadcm3','hadcm3l','foam','cesm','rockee','mat'}
         % initial re-gridding of mask
         % NOTE: need to transpose around [gi_mask] to have correct input format
         %       to make_regrid_2d
@@ -619,7 +651,7 @@ n_step = n_step+1;
 grid_ver = 0;
 str_ver = num2str(grid_ver);
 %
-if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
+if opt_makemask && (opt_filtermask || (par_min_oceann > 0))
     %
     disp(['>   ' num2str(n_step) '. FILTERING MASK ...']);
     %
@@ -669,7 +701,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0)),
         %
     end
     %
-    if (par_min_oceann > 0),
+    if (par_min_oceann > 0)
         %
         % SMALL WATER BODY FILTERING MASK FILTERING
         %
@@ -736,7 +768,7 @@ go_masknotnan(find(go_mask ~= 0)) = NaN;
 go_masknotnan(find(go_masknotnan == 0)) = 1;
 %
 % plot final mask
-plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']);
+if (opt_plots), plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']); end
 %
 % save mask
 fprint_2DM(go_mask(:,:),[],[[str_dirout '/' str_nameout] '.mask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
@@ -755,7 +787,7 @@ if opt_maketopo
     disp(['>   ' num2str(n_step) '. RE-GRIDING TOPOGRAPHY ...']);
     %
     switch str(1).gcm
-        case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+        case {'hadcm3','hadcm3l','foam','cesm','rockee','mat'}
             % initial re-gridding of topo
             % NOTE: need to transpose around [gi_topo] to have correct input format
             %       to make_regrid_2d
@@ -846,9 +878,9 @@ end
 %
 if (opt_maketopo)
     % plot final topo
-    plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']);
+    if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_topo),99999.0,'',[[str_dirout '/' str_nameout] '.topo_out.FINAL'],['topo out -- FINAL version']); end
     % plot final k1
-    plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.ocean.FINAL'],['k1 out -- FINAL ocean version']);
+    if (opt_plots), plot_2dgridded(flipud(go_masknan.*go_k1),89.0,'',[str_dirout '/' str_nameout '.k1_out.ocean.FINAL'],['k1 out -- FINAL ocean version']); end
 end
 %
 % *** CALCULATE RUNOFF & COMPLETE k1 FILE ******************************* %
@@ -894,7 +926,7 @@ end
 %
 if (opt_maketopo)
     % plot final land k1
-    plot_2dgridded(flipud(go_masknotnan.*go_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.land.FINAL'],['k1 out -- FINAL land version']);
+    if (opt_plots), plot_2dgridded(flipud(go_masknotnan.*go_k1),95.0,'',[str_dirout '/' str_nameout '.k1_out.land.FINAL'],['k1 out -- FINAL land version']); end
 end
 %
 % *** IDENTIFY ISLANDS ************************************************** %
@@ -998,7 +1030,7 @@ if opt_makeseds
         case 1
             % option %1 -- re-grid sediment topography
             switch str(1).gcm
-                case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+                case {'hadcm3','hadcm3l','foam','cesm','rockee','mat'}
                     % if 'high res' sed grid is requested 
                     % => assume twice ocean resolution
                     % + generate new vectors of grid properties

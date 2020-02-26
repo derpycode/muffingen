@@ -14,7 +14,7 @@
 %
 % PARAM NAME & DEFAULT VALUE   % [FORMAT] BRIEF DESCRIPTION
 %
-% *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* %
+% *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* % 
 %
 par_wor_name='wppcont1';       % ['STRING'] 8-char (output) config name
 par_gcm='k2';                % ['STRING'] input format/GCM name
@@ -45,9 +45,9 @@ opt_equalarea=true;            % [false/true] equal area grid?
 % *** REGRIDDING SETTINGS *********************************************** %
 %
 par_max_D=5000.0;              % [0.0-99999.9] max grid depth (m)
-par_sur_D=0.0;                 % [0.0-99999.9] reference surface depth
+par_add_Dk=0;                  % [0-99] # of ocean levels that are 'extra' 
 par_min_Dk=2;                  % [1-99] minimum ocean depth (as # levels)
-par_min_k=3;                   % [1-99] maximum ocean depth (k value)
+par_min_k=1;                   % [1-99] maximum ocean depth (k value)
 par_lon_off=-180.0;            % [-360-0] longitude offset of grid start
 par_A_frac_threshold=0.50;     % [0.0-1.0] land fractional area threshold  
 par_mask_mask_name = '';       % ['STRING'] mask of land/ocean features
@@ -57,7 +57,7 @@ opt_highresseds=false;         % [false/true] create 2x res sediment grid
 % *** BOUNDARY CONDITION SETTINGS *************************************** %
 %
 par_runoffopt=0;               % [0/1] run-off generation option
-par_tauopt=1;                  % [0/1/2] zonal windstress generation option
+par_tauopt=1;                  % [0/1/2/3] zonal windstress option
 par_age=0.0;                   % [0.0-4570.0] optional age (Myr)
 %
 % *** OPTIONS -- MAIN *************************************************** %

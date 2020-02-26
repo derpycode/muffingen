@@ -36,6 +36,9 @@ function [] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout,par_tauo
 %             removed un-used input parameters
 %   17/10/22: added new input parameter
 %   18/09/11: added minimum wind stress
+%   20/02/26: added 'grey world' intermediate stress option (3)
+%             re-ordered land vs. ocean array index to be consistent 
+%             with the actual choice options (e.g. 1 == land)
 %
 %   ***********************************************************************
 
@@ -55,6 +58,10 @@ switch par_tauopt
         % water world
         loc_nswl(1:2) = 'nw';
         loc_nswl(3:4) = 'sw';
+    case {3}
+        % grey world
+        loc_nswl(1:2) = 'ng';
+        loc_nswl(3:4) = 'sg';
     otherwise
         % automatically determine water/land options
         % NOTE: any zeros present in mask == non-ocean => land present
@@ -66,7 +73,7 @@ switch par_tauopt
         lat_thrsh = 40.0;
         vo_mask  = mean(go_mask');
         % N
-        if max(vo_mask(find(vo_latm > lat_thrsh))) < 1.0,
+        if max(vo_mask(find(vo_latm > lat_thrsh))) < 1.0
             loc_nswl(1:2) = 'nl';
             fprintf('       * No Northern gateway found.\n')
         else
@@ -74,7 +81,7 @@ switch par_tauopt
             fprintf('       * Northern gateway (> 40N) found.\n')
         end
         % S
-        if max(vo_mask(find(vo_latm < -lat_thrsh))) < 1.0,
+        if max(vo_mask(find(vo_latm < -lat_thrsh))) < 1.0
             loc_nswl(3:4) = 'sl';
             fprintf('       * No Southern gateway found.\n')
         else
@@ -86,23 +93,29 @@ end
 go_cd = 0.0013;
 % set GOLDSTEIn parameters :: air density
 go_rhoair = 1.25;
-% set zonal profile parameters -- water world
-% NOTE: derived vaguely from 
-%       Marshall et al. [2007] and Enderton and Marshall [2014]
-%       also some consistency with SH observations
-par_ws_amp(1)         = -0.140;
+% set zonal profile parameters -- with land
+% NOTE: derived from NH observations
+%       (and to be vaguely consistent with HadeCM3 Eocene simulations)
+par_ws_amp(1)         = -0.090;
 par_ws_offset(1)      = -0.020;
 par_ws_cyclefactor(1) = 6.0;
 par_ws_modfactor(1)   = 2.0;
 par_ws_modpower(1)    = 2.0;
-% set zonal profile parameters -- with land
-% NOTE: derived from NH observations
-%       (and to be vaguely consistent with HadeCM3 Eocene simulations)
-par_ws_amp(2)         = -0.090;
+% set zonal profile parameters -- water world
+% NOTE: derived vaguely from 
+%       Marshall et al. [2007] and Enderton and Marshall [2014]
+%       also some consistency with SH observations
+par_ws_amp(2)         = -0.140;
 par_ws_offset(2)      = -0.020;
 par_ws_cyclefactor(2) = 6.0;
 par_ws_modfactor(2)   = 2.0;
 par_ws_modpower(2)    = 2.0;
+% set zonal profile parameters -- grey (intermediate)
+par_ws_amp(3)         = -0.115;
+par_ws_offset(3)      = -0.020;
+par_ws_cyclefactor(3) = 6.0;
+par_ws_modfactor(3)   = 2.0;
+par_ws_modpower(3)    = 2.0;
 % create zonal output arrays
 taux_u = zeros(jmax,imax);
 taux_u_1d = zeros(jmax,1);
@@ -129,20 +142,26 @@ str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 %   ---------
 %
 % Southern hemisphere
-for j=1:jmax/2,
-    switch loc_nswl,
-        case {'nwsw', 'nlsw'}
+for j=1:jmax/2
+    switch loc_nswl
+        case {'nwsl', 'nlsl'}
             loc_amp         = par_ws_amp(1);
             loc_offset      = par_ws_offset(1);
             loc_cyclefactor = par_ws_cyclefactor(1);
             loc_modfactor   = par_ws_modfactor(1);
             loc_modpower    = par_ws_modpower(1);
-        case {'nwsl', 'nlsl'}
+        case {'nwsw', 'nlsw'}
             loc_amp         = par_ws_amp(2);
             loc_offset      = par_ws_offset(2);
             loc_cyclefactor = par_ws_cyclefactor(2);
             loc_modfactor   = par_ws_modfactor(2);
             loc_modpower    = par_ws_modpower(2);
+        otherwise
+            loc_amp         = par_ws_amp(3);
+            loc_offset      = par_ws_offset(3);
+            loc_cyclefactor = par_ws_cyclefactor(3);
+            loc_modfactor   = par_ws_modfactor(3);
+            loc_modpower    = par_ws_modpower(3);
     end
     % SIN((3.1416/180)*$L$5*ABS(C10))
     loc_tmp1  = sin( loc_cyclefactor*(pi/180.0)*abs(go_latm(j)) );
@@ -155,20 +174,26 @@ for j=1:jmax/2,
     taux_v(j,:) = loc_amp*loc_tmp1e*loc_tmp2e^loc_modpower + loc_offset*(90.0-abs(go_late(j+1)))/90.0;
 end
 % Northern hemisphere
-for j=(jmax/2+1):jmax,
-    switch loc_nswl,
-        case {'nwsw', 'nwsl'}
+for j=(jmax/2+1):jmax
+    switch loc_nswl
+        case {'nlsw', 'nlsl'}
             loc_amp         = par_ws_amp(1);
             loc_offset      = par_ws_offset(1);
             loc_cyclefactor = par_ws_cyclefactor(1);
             loc_modfactor   = par_ws_modfactor(1);
             loc_modpower    = par_ws_modpower(1);
-        case {'nlsw', 'nlsl'}
+        case {'nwsw', 'nwsl'}
             loc_amp         = par_ws_amp(2);
             loc_offset      = par_ws_offset(2);
             loc_cyclefactor = par_ws_cyclefactor(2);
             loc_modfactor   = par_ws_modfactor(2);
             loc_modpower    = par_ws_modpower(2);
+        otherwise
+            loc_amp         = par_ws_amp(3);
+            loc_offset      = par_ws_offset(3);
+            loc_cyclefactor = par_ws_cyclefactor(3);
+            loc_modfactor   = par_ws_modfactor(3);
+            loc_modpower    = par_ws_modpower(3);
     end
     % SIN((3.1416/180)*$L$5*ABS(C10))
     loc_tmp1  = sin( loc_cyclefactor*(pi/180.0)*abs(go_latm(j)) );
@@ -181,7 +206,7 @@ for j=(jmax/2+1):jmax,
     taux_v(j,:) = loc_amp*loc_tmp1e*loc_tmp2e^loc_modpower + loc_offset*(90.0-abs(go_late(j+1)))/90.0;
 end
 % impose minimum magnitude of wind stress
-% NOTE: default value from JOSEY et al. [2002]
+% NOTE: default value of par_tau_min from JOSEY et al. [2002]
 loc_ans = intersect(find(abs(taux_u(:,:)) < par_tau_min),find(taux_u(:,:) > 0.0));
 taux_u(loc_ans) = par_tau_min;
 loc_ans = intersect(find(abs(taux_u(:,:)) < par_tau_min),find(taux_u(:,:) < 0.0));
@@ -210,7 +235,7 @@ wind_u = sign(taux_u(:,:)).*((taux_u(:,:).^2).^0.5/(go_rhoair*go_cd)).^0.5;
 % *** PLOT PROFILES ***************************************************** %
 %
 % calculate zonal mean (should be equal to any particular longitude!)
-for j=1:jmax,
+for j=1:jmax
     taux_u_1d(j) = mean(taux_u(j,:));
     taux_v_1d(j) = mean(taux_v(j,:));
 end
@@ -236,8 +261,8 @@ print('-dpsc2', [str_nameout, '.taux_v.' str_date '.ps']);
 % open file
 fid = fopen([str_nameout, '.taux_u.dat'],'w');
 % write data
-for j=1:jmax,
-    for i=1:imax,
+for j=1:jmax
+    for i=1:imax
         fprintf(fid,'  %d',taux_u(j,i));
         fprintf(fid,'\n');
     end
@@ -247,8 +272,8 @@ fclose(fid);
 % open file
 fid = fopen([str_nameout, '.tauy_u.dat'],'w');
 % write data
-for j=1:jmax,
-    for i=1:imax,
+for j=1:jmax
+    for i=1:imax
         fprintf(fid,'  %d',0.0);
         fprintf(fid,'\n');
     end
@@ -259,8 +284,8 @@ fclose(fid);
 % open file
 fid = fopen([str_nameout, '.taux_v.dat'],'w');
 % write data
-for j=1:jmax,
-    for i=1:imax,
+for j=1:jmax
+    for i=1:imax
         fprintf(fid,'  %d',taux_v(j,i));
         fprintf(fid,'\n');
     end
@@ -270,8 +295,8 @@ fclose(fid);
 % open file
 fid = fopen([str_nameout, '.tauy_v.dat'],'w');
 % write data
-for j=1:jmax,
-    for i=1:imax,
+for j=1:jmax
+    for i=1:imax
         fprintf(fid,'  %d',0.0);
         fprintf(fid,'\n');
     end
@@ -282,8 +307,8 @@ fclose(fid);
 % open file
 fid = fopen([str_nameout, '.wvelx.dat'],'w');
 % write data
-for j=1:jmax,
-    for i=1:imax,
+for j=1:jmax
+    for i=1:imax
         fprintf(fid,'  %d',wind_u(j,i));
         fprintf(fid,'\n');
     end
@@ -293,8 +318,8 @@ fclose(fid);
 % open file
 fid = fopen([str_nameout, '.wvely.dat'],'w');
 % write data
-for j=1:jmax,
-    for i=1:imax,
+for j=1:jmax
+    for i=1:imax
         fprintf(fid,'  %d',0.0);
         fprintf(fid,'\n');
     end
