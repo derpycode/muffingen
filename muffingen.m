@@ -209,6 +209,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.85 ********************************************
 %   20/02/25: enabled high res topo input
 %   20/02/26: rationalized how standard-compatable deeper oceans are made
+%             *** VERSION 0.86 ********************************************
+%
 %   ***********************************************************************
 %%
 
@@ -223,7 +225,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.85;
+par_muffingen_ver = 0.86;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
