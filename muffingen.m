@@ -210,6 +210,9 @@ function [] = muffingen(POPT)
 %   20/02/25: enabled high res topo input
 %   20/02/26: rationalized how standard-compatable deeper oceans are made
 %             *** VERSION 0.86 ********************************************
+%   20/03/09: removed return of an updated maxim depth in calls to 
+%             make_genie_grid
+%             *** VERSION 0.87 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -225,7 +228,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.86;
+par_muffingen_ver = 0.87;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -512,7 +515,7 @@ end
 n_step = n_step+1;
 disp(['>   ' num2str(n_step) '. CREATING GENIE GRID ...']);
 % create GENIE grid
-[go_lonm,go_lone,go_latm,go_late,go_dm,go_de,par_max_D] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_add_Dk);
+[go_lonm,go_lone,go_latm,go_late,go_dm,go_de] = make_genie_grid(imax,jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_add_Dk);
 disp(['       - GENIE grid generated.']);
 %
 % *** LOAD GRID (AXES) DATA ********************************************* %
@@ -804,7 +807,13 @@ if opt_maketopo
             [go_topo] = fun_conv_k1(go_de,go_k1);
             disp(['         (Nothing to re-grid -- convert k1 file data.)']);
         otherwise
-            go_topo = par_max_D*go_mask;
+            % create a k1 first and convert to depth
+            % (even though later this is converted back again ...)
+            % NOTE: scale depth cannot be used because it is not necessary
+            %       the final maximum ocean depth
+            %%%go_topo = par_max_D*go_mask;
+            go_k1 = par_min_k*go_mask;
+            [go_topo] = fun_conv_k1(go_de,go_k1);
             disp(['         (Nothing to re-grid -- set uniform ocean depth.)']);
     end
     % plot & save initial topo re-grid
@@ -1282,6 +1291,9 @@ end
 % Ocean depth scalar (dsc)
 fprintf(fid,'%s\n','# Ocean depth scalar (m) [internally, parameter: dsc]');
 fprintf(fid,'%s\n',['go_par_dsc=',num2str(par_max_D)]);
+% Ocean additional layers
+fprintf(fid,'%s\n','# Additional ocean layers (deeper than go_par_dsc)');
+fprintf(fid,'%s\n',['go_par_dk=',num2str(par_add_Dk)]);
 % Boundary conditions: EMBM
 fprintf(fid,'%s\n','# Boundary conditions: EMBM');
 fprintf(fid,'%s\n',['ea_topo=''',par_wor_name,'''']);

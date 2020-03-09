@@ -1,4 +1,4 @@
-function [axis_imid,axis_iedge,axis_jmid,axis_jedge,axis_kmid,axis_kedge,par_max_D] = make_genie_grid(DUM_NI,DUM_NJ,DUM_NK,DUM_MAXD,DUM_OFF,DUM_EA,DUM_DK);
+function [axis_imid,axis_iedge,axis_jmid,axis_jedge,axis_kmid,axis_kedge] = make_genie_grid(DUM_NI,DUM_NJ,DUM_NK,DUM_MAXD,DUM_OFF,DUM_EA,DUM_DK)
 % MAKE_GENIE_GRID
 %
 %   ***********************************************************************
@@ -21,6 +21,7 @@ function [axis_imid,axis_iedge,axis_jmid,axis_jedge,axis_kmid,axis_kedge,par_max
 %   20/02/25: improved the deeper ocean generation capability
 %             -> now additional deeper layers can be added to
 %                a known (e.g. 16-level) initial ocean layer structure
+%   20/03/09: removed return of an updated maximum ocean depth
 %
 %   ***********************************************************************
 %%
@@ -124,8 +125,6 @@ axis_kbnds(1:n_k,2) = -par_max_D*zw(1:n_k);
 axis_kedge(1:n_k+1) = -par_max_D*zw(1:n_k+1);
 axis_kth(1:n_k)     = -par_max_D*dz(1:n_k);
 axis_kbnds = axis_kbnds';
-% update maximum ocean depth
-par_max_D = axis_kbnds(2,1);
 %
 % END
 %%%disp(['       <<< END [make_genie_grid]'])
