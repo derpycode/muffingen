@@ -1,5 +1,5 @@
 # *******************************************************************
-# *** USERCONFIG.MODERN.ECOGEM.PO4Fe.SPIN ***************************
+# *** USERCONFIG.PALEO.BIOGEM.PO4Fe.SPIN ****************************
 # *******************************************************************
 #
 # *** CLIMATE *******************************************************
@@ -10,8 +10,13 @@ ea_36=y
 # *** BIOLOGICAL NEW PRODUCTION *************************************
 #
 # biological scheme ID string
-# NOTE: with ECOGEM, no BIOGEM biological scheme must be selected
-bg_par_bio_prodopt="NONE"
+bg_par_bio_prodopt="bio_PFe"
+# [PO4] M-M half-sat value (mol kg-1)
+bg_par_bio_c0_PO4=0.10E-06
+# [Fe] M-M half-sat value (mol kg-1)
+bg_par_bio_c0_Fe=0.10E-09
+# biological uptake time-scale
+bg_par_bio_tau=63.3827
 #
 # *** ORGANIC MATTER EXPORT RATIOS **********************************
 #
@@ -20,18 +25,22 @@ bg_par_bio_red_DOMfrac=0.66
 #
 # *** INORGANIC MATTER EXPORT RATIOS ********************************
 #
+# fixed CaCO3:POC
+bg_opt_bio_CaCO3toPOCrainratio='FIXED'
 # underlying export CaCO3 as a proportion of particulate organic matter (i.e., CaCO3/POC)
-# NOTE: change (reduction) required by ECOGEM compared to e.g. BIOGEM/worjh2 config
-bg_par_bio_red_POC_CaCO3=0.0285
-# exponent for modifier of CaCO3:POC export ratio
-bg_par_bio_red_POC_CaCO3_pP=0.7440
+bg_par_bio_red_POC_CaCO3=0.200
 #
 # *** REMINERALIZATION **********************************************
 #
+# *** recommended ***************************************************
+# set 'instantaneous' water column remineralziation
+bg_par_bio_remin_sinkingrate_physical=9.9E9
+bg_par_bio_remin_sinkingrate_reaction=125.0
+# *** common settings ***********************************************
 # DOC lifetime (yrs)
-bg_par_bio_remin_DOMlifetime=1.0
+bg_par_bio_remin_DOMlifetime=0.5
 # initial fractional abundance of POC component #2
-bg_par_bio_remin_POC_frac2=0.055
+bg_par_bio_remin_POC_frac2=0.0557
 # depth of remineralization or particulate organic matter
 bg_par_bio_remin_POC_eL1=589.9451
 # remineralization length #2 for POC
@@ -42,13 +51,21 @@ bg_par_bio_remin_CaCO3_frac2=0.45
 bg_par_bio_remin_CaCO3_eL1=1.8905e+003
 # remineralization length #2 for CaCO3
 bg_par_bio_remin_CaCO3_eL2=1000000.0
+# *** Crichton et al. [2020] temeprature-dependent remin ************
+###bg_ctrl_bio_remin_POC_fixed=.false.
+###bg_par_bio_remin_POC_K1=9.0E11
+###bg_par_bio_remin_POC_Ea1=54000.0
+###bg_par_bio_remin_POC_K2=1.0E14
+###bg_par_bio_remin_POC_Ea2=80000.0
+###bg_par_bio_remin_POC_frac2=0.002
 #
-# *** IRON CYCLING *************************************************
+# *** IRON CYCLING **************************************************
 #
 # iron tracer scheme
+# NOTE: the base-config requires TFe and TL tracers
 bg_opt_geochem_Fe='hybrid'
 # aeolian Fe solubility
-bg_par_det_Fe_sol=0.002014275
+bg_par_det_Fe_sol=0.00291468
 # exponent for aeolian Fe solubility [use 1.0 for uniform solubility]
 bg_par_det_Fe_sol_exp=0.500
 # modifier of the scavenging rate of dissolved Fe
@@ -73,61 +90,25 @@ bg_par_bio_FetoC_K=103684.0
 #[FeT] dependent Fe:C ratio [Ridgwell, 2001] -- constant
 bg_par_bio_FetoC_C=0.0
 #
-# *** ECOGEM ********************************************************
-#
-# ecosystem configuration
-eg_par_ecogem_plankton_file='8P8Z.eco'
-#################### Nitrogen ############################
-eg_useNO3                   =.false.
-eg_nquota                   =.false.
-################## Phosphorus ############################
-eg_usePO4                   =.true.
-eg_pquota                   =.true.
-######################## Iron ############################
-eg_useFe                    =.true.
-eg_fquota                   =.true.
-################# Chlorophyll ############################
-eg_chlquota                 =.true.
-################# d13C ###################################
-eg_useDIC_13C               =.true.
-# Tuned parameters
-eg_qminP_a     =   3.33e-3
-eg_qminFe_a    =   1.00e-6
-eg_qmaxFe_a    =   4.00e-6
-# ???
-eg_ns=2
-# ???
-eg_respir_a=0
-# DOM parameters
-eg_beta_mort_a =   0.8 # Maximum fraction to DOM as ESD --> zero
-eg_beta_mort_b =   0.4 # Minimum fraction to DOM as ESD --> infinity 
-eg_beta_mort_c = 100.0 # Size at 50:50 partition (default = 100 µm^3)
-eg_beta_graz_a =   0.8 # Maximum fraction to DOM as ESD --> zero
-eg_beta_graz_b =   0.4 # Minimum fraction to DOM as ESD --> infinity
-eg_beta_graz_c = 100.0 # Size at 50:50 partition (default = 100 µm^3)
-# ???
-eg_nsubtime=25
-eg_n_keco=1
-# disable ECOGEM restarts (as not currently coded up / used)
-eg_ctrl_ncrst      = .false.
-eg_ctrl_continuing = .false.
-#
 # *** DATA SAVING ***************************************************
 #
-# Basic + biology diagnostics save option
-bg_par_data_save_level=3
+# BASIC + biology + tracer + proxy diagnostics
+bg_par_data_save_level=7
 #
 # *** FORCINGS ******************************************************
 #
-# specify forcings -- dust field and restoring of atmopsheric pCO2 and d13C
-bg_par_forcing_name="worlg4.RpCO2_Rp13CO2.FeMahowald2006"
+# specify forcings -- restoring of atmopsheric pCO2 and d13C + uniform dust
+# NOTE: uniform dust field scaled to equal total present-day flux to the ocean (mol yr-1) [Ward et al., 2018]
+bg_par_forcing_name="pyyyyz.RpCO2_Rp13CO2.DUST"
 bg_par_atm_force_scale_val_3=278.0E-06
 bg_par_atm_force_scale_val_4=-6.5
+bg_par_sed_force_scale_val_22=0.1660401E+14
 #
 # *** MISC **********************************************************
 #
-# kraus-turner mixed layer scheme on (1) or off (0)
-go_imld = 1
+# *** recommended ***************************************************
+# maximum time-scale to geochemical reaction completion (days)
+bg_par_bio_geochem_tau=90.0
 #
 # *******************************************************************
 # *** END ***********************************************************

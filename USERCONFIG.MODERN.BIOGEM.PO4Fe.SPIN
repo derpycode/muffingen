@@ -50,7 +50,7 @@ bg_par_bio_remin_CaCO3_eL1=1.8905e+003
 # remineralization length #2 for CaCO3
 bg_par_bio_remin_CaCO3_eL2=1000000.0
 #
-# *** IRON CYCLING *************************************************
+# *** IRON CYCLING **************************************************
 #
 # *** worjh2 world tuning *******************************************
 # iron tracer scheme
