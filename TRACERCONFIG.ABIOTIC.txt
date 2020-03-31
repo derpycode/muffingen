@@ -1,0 +1,13 @@
+# *******************************************************************
+# TRACER CONFIGURATION
+# *******************************************************************
+# the total number of tracers includes T and S
+# T and S do not need to be explicited selected and initialzied
+# *******************************************************************
+# Set number of tracers
+GOLDSTEINNTRACSOPTS='$(DEFINE)GOLDSTEINNTRACS=2'
+# list selected biogeochemical tracers
+# <<<                                                             >>>
+# list biogeochemical tracer initial values
+# <<<                                                             >>>
+# *******************************************************************
