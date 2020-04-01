@@ -98,11 +98,9 @@ bg_par_data_save_level=7
 # *** FORCINGS ******************************************************
 #
 # specify forcings -- restoring of atmopsheric pCO2 and d13C + uniform dust
-# NOTE: uniform dust field scaled to equal total present-day flux to the ocean (mol yr-1) [Ward et al., 2018]
 bg_par_forcing_name="pyyyyz.RpCO2_Rp13CO2.DUST"
 bg_par_atm_force_scale_val_3=278.0E-06
 bg_par_atm_force_scale_val_4=-6.5
-bg_par_sed_force_scale_val_22=0.1660401E+14
 #
 # *** MISC **********************************************************
 #
