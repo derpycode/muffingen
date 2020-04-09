@@ -19,6 +19,10 @@ bg_par_bio_c0_PO4=8.9369e-007
 # *** 8-level ocean as per Ridgwell et al. [2007] *******************
 ###bg_par_bio_k0_PO4=1.9582242E-06
 ###bg_par_bio_c0_PO4=2.1989611E-07
+# *** optional changes to align with PALEO recommendations **********
+###bg_par_bio_prodopt="bio_P"
+###bg_par_bio_tau=63.3827
+###bg_par_bio_c0_PO4=0.10E-06
 #
 # *** ORGANIC MATTER EXPORT RATIOS **********************************
 #
