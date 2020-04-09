@@ -37,6 +37,8 @@ bg_par_bio_red_DOMfrac=0.66
 bg_opt_bio_CaCO3toPOCrainratio='FIXED'
 # underlying export CaCO3 as a proportion of particulate organic matter (i.e., CaCO3/POC)
 bg_par_bio_red_POC_CaCO3=0.200
+# *** alternative for > 200 Ma **************************************
+###bg_par_bio_red_POC_CaCO3=0.0
 #
 # *** REMINERALIZATION **********************************************
 #
@@ -65,7 +67,7 @@ bg_par_bio_remin_CaCO3_eL2=1000000.0
 ###bg_par_bio_remin_POC_Ea1=54000.0
 ###bg_par_bio_remin_POC_K2=1.0E14
 ###bg_par_bio_remin_POC_Ea2=80000.0
-###bg_par_bio_remin_POC_frac2=0.002
+###bg_par_bio_remin_POC_frac2=0.008
 #
 # *** DATA SAVING ***************************************************
 #
@@ -84,6 +86,11 @@ bg_par_atm_force_scale_val_4=-6.5
 # *** recommended ***************************************************
 # maximum time-scale to geochemical reaction completion (days)
 bg_par_bio_geochem_tau=90.0
+# extend solubility and geochem constant T range (leave S range as default)
+gm_par_geochem_Tmin  = -2.0
+gm_par_geochem_Tmax  = 45.0
+gm_par_carbchem_Tmin = -2.0
+gm_par_carbchem_Tmax = 45.0
 #
 # *******************************************************************
 # *** END ***********************************************************

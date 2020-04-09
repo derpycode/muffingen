@@ -10,6 +10,8 @@ ea_36=y
 # *** BIOLOGICAL NEW PRODUCTION *************************************
 #
 # *** 16-level ocean as per Cao et al. [2009] ***********************
+# biological scheme ID string
+bg_par_bio_prodopt='1N1T_PO4MM_Tdep'
 # maximum rate of conversion of dissolved PO4 into organic matter by phytoplankton (mol kg-1 yr-1)
 bg_par_bio_k0_PO4=8.9876e-006
 # [PO4] M-M half-sat value (mol kg-1)
@@ -59,6 +61,10 @@ bg_par_bio_remin_CaCO3_eL2=1000000.0
 ###bg_par_bio_remin_CaCO3_frac2=0.4325
 ###bg_par_bio_remin_CaCO3_eL1=1083.486
 ###bg_par_bio_remin_CaCO3_eL2=1000000.0
+# *** optional changes to align with PALEO recommendations **********
+#### set 'instantaneous' water column remineralziation
+###bg_par_bio_remin_sinkingrate_physical=9.9E9
+###bg_par_bio_remin_sinkingrate_reaction=125.0
 #
 # *** DATA SAVING ***************************************************
 #
@@ -78,6 +84,17 @@ bg_par_forcing_name="worjh2.preindustrial"
 ###bg_par_forcing_name="pyyyyz.RpCO2_Rp13CO2"
 ###bg_par_atm_force_scale_val_3=278.0E-06
 ###bg_par_atm_force_scale_val_4=-6.5
+#
+# *** MISC **********************************************************
+#
+# *** optional changes to align with PALEO recommendations **********
+#### maximum time-scale to geochemical reaction completion (days)
+###bg_par_bio_geochem_tau=90.0
+#### extend solubility and geochem constant T range (leave S range as default)
+###gm_par_geochem_Tmin  = -2.0
+###gm_par_geochem_Tmax  = 45.0
+###gm_par_carbchem_Tmin = -2.0
+###gm_par_carbchem_Tmax = 45.0
 #
 # *******************************************************************
 # *** END ***********************************************************

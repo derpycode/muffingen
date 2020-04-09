@@ -49,6 +49,12 @@ bg_par_bio_remin_CaCO3_frac2=0.45
 bg_par_bio_remin_CaCO3_eL1=1.8905e+003
 # remineralization length #2 for CaCO3
 bg_par_bio_remin_CaCO3_eL2=1000000.0
+# *** optional changes to align with PALEO recommendations **********
+#### DOC lifetime (yrs) -- following Doney et al. [2006]
+###bg_par_bio_remin_DOMlifetime=0.5
+#### set 'instantaneous' water column remineralziation
+###bg_par_bio_remin_sinkingrate_physical=9.9E9
+###bg_par_bio_remin_sinkingrate_reaction=125.0
 #
 # *** IRON CYCLING **************************************************
 #
@@ -58,17 +64,19 @@ bg_par_bio_remin_CaCO3_eL2=1000000.0
 bg_opt_geochem_Fe='OLD'
 # aeolian Fe solubility
 bg_par_det_Fe_sol=0.00291468
+# modifier of the scavenging rate of dissolved Fe
+bg_par_scav_Fe_sf_POC=1.338130
 # *** worlg4 world tuning *******************************************
 ###bg_opt_geochem_Fe='hybrid'
 ###bg_par_det_Fe_sol=0.002014275
+###bg_par_scav_Fe_sf_POC=0.344104
+# *** optional changes to align with PALEO recommendations **********
+###bg_opt_geochem_Fe='hybrid'
+###bg_par_det_Fe_sol=0.00291468
+###bg_par_scav_Fe_sf_POC=1.338130
 # *** common settings ***********************************************
 # exponent for aeolian Fe solubility [use 1.0 for uniform solubility]
 bg_par_det_Fe_sol_exp=0.500
-# modifier of the scavenging rate of dissolved Fe
-bg_par_scav_Fe_sf_POC=1.338130
-bg_par_scav_Fe_sf_CaCO3=0.000
-bg_par_scav_Fe_sf_opal=0.000
-bg_par_scav_Fe_sf_det=0.000
 # no scavenged regeneration
 bg_par_scav_fremin=0.0
 # return POFe
@@ -101,6 +109,17 @@ bg_par_forcing_name="worjh2.RpCO2_Rp13CO2.FeMahowald2006"
 # *** common settings ***********************************************
 bg_par_atm_force_scale_val_3=278.0E-06
 bg_par_atm_force_scale_val_4=-6.5
+#
+# *** MISC **********************************************************
+#
+# *** optional changes to align with PALEO recommendations **********
+#### maximum time-scale to geochemical reaction completion (days)
+###bg_par_bio_geochem_tau=90.0
+#### extend solubility and geochem constant T range (leave S range as default)
+###gm_par_geochem_Tmin  = -2.0
+###gm_par_geochem_Tmax  = 45.0
+###gm_par_carbchem_Tmin = -2.0
+###gm_par_carbchem_Tmax = 45.0
 #
 # *******************************************************************
 # *** END ***********************************************************

@@ -15,16 +15,11 @@ bg_par_bio_prodopt="NONE"
 #
 # *** ORGANIC MATTER EXPORT RATIOS **********************************
 #
-# production fraction of dissolved organic matter
-bg_par_bio_red_DOMfrac=0.66
+# [dealt with by ECOGEM]
 #
 # *** INORGANIC MATTER EXPORT RATIOS ********************************
 #
-# underlying export CaCO3 as a proportion of particulate organic matter (i.e., CaCO3/POC)
-# NOTE: change (reduction) required by ECOGEM compared to e.g. BIOGEM/worjh2 config
-bg_par_bio_red_POC_CaCO3=0.0285
-# exponent for modifier of CaCO3:POC export ratio
-bg_par_bio_red_POC_CaCO3_pP=0.7440
+# [dealt with by ECOGEM]
 #
 # *** REMINERALIZATION **********************************************
 #
@@ -42,20 +37,23 @@ bg_par_bio_remin_CaCO3_frac2=0.45
 bg_par_bio_remin_CaCO3_eL1=1.8905e+003
 # remineralization length #2 for CaCO3
 bg_par_bio_remin_CaCO3_eL2=1000000.0
+# *** optional changes to align with PALEO recommendations **********
+#### DOC lifetime (yrs) -- following Doney et al. [2006]
+###bg_par_bio_remin_DOMlifetime=0.5
+#### set 'instantaneous' water column remineralziation
+###bg_par_bio_remin_sinkingrate_physical=9.9E9
+###bg_par_bio_remin_sinkingrate_reaction=125.0
 #
-# *** IRON CYCLING *************************************************
+# *** IRON CYCLING **************************************************
 #
 # iron tracer scheme
 bg_opt_geochem_Fe='hybrid'
 # aeolian Fe solubility
 bg_par_det_Fe_sol=0.002014275
+# modifier of the scavenging rate of dissolved Fe
+bg_par_scav_Fe_sf_POC=0.344104
 # exponent for aeolian Fe solubility [use 1.0 for uniform solubility]
 bg_par_det_Fe_sol_exp=0.500
-# modifier of the scavenging rate of dissolved Fe
-bg_par_scav_Fe_sf_POC=1.338130
-bg_par_scav_Fe_sf_CaCO3=0.000
-bg_par_scav_Fe_sf_opal=0.000
-bg_par_scav_Fe_sf_det=0.000
 # no scavenged regeneration
 bg_par_scav_fremin=0.0
 # return POFe
@@ -108,14 +106,18 @@ eg_beta_graz_c = 100.0 # Size at 50:50 partition (default = 100 µm^3)
 # ???
 eg_nsubtime=25
 eg_n_keco=1
-# disable ECOGEM restarts (as not currently coded up / used)
-eg_ctrl_ncrst      = .false.
-eg_ctrl_continuing = .false.
+# exponent for modifier of CaCO3:POC export ratio
+eg_par_bio_red_POC_CaCO3_pP  = 0.7440 # exponent for modifier of CaCO3:POC export ratio
+# underlying export CaCO3 as a proportion of particulate organic matter (i.e., CaCO3/POC)
+eg_par_bio_red_POC_CaCO3     = 0.0285 # underlying export CaCO3 as a proportion of particulate organic matter (i.e., CaCO3/POC)
 #
 # *** DATA SAVING ***************************************************
 #
 # Basic + biology diagnostics save option
 bg_par_data_save_level=3
+# disable ECOGEM restarts (as not currently coded up / used)
+eg_ctrl_ncrst      = .false.
+eg_ctrl_continuing = .false.
 #
 # *** FORCINGS ******************************************************
 #
@@ -123,11 +125,31 @@ bg_par_data_save_level=3
 bg_par_forcing_name="worlg4.RpCO2_Rp13CO2.FeMahowald2006"
 bg_par_atm_force_scale_val_3=278.0E-06
 bg_par_atm_force_scale_val_4=-6.5
+# *** alternative NO Fe-limitation forcing **************************
+#### specify forcings -- restoring of atmopsheric pCO2 and d13C
+###bg_par_forcing_name="pyyyyz.RpCO2_Rp13CO2"
 #
 # *** MISC **********************************************************
 #
 # kraus-turner mixed layer scheme on (1) or off (0)
 go_imld = 1
+# *** optional changes to align with PALEO recommendations **********
+#### set mixed layer to be only diagnosed (for ECOGEM)
+###go_ctrl_diagmld=.true.
+#### add seaice attenuation of PAR
+###eg_ctrl_PARseaicelimit=.true.
+#### relative partitioning of C into DOM
+###eg_par_beta_POCtoDOC=0.75
+#### maximum time-scale to geochemical reaction completion (days)
+###bg_par_bio_geochem_tau=90.0
+#### extend solubility and geochem constant T range (leave S range as default)
+###gm_par_geochem_Tmin  = -2.0
+###gm_par_geochem_Tmax  = 45.0
+###gm_par_carbchem_Tmin = -2.0
+###gm_par_carbchem_Tmax = 45.0
+# *** alternative NO Fe-limitation calibrated value *****************
+#### relative partitioning of C into DOM
+###eg_par_beta_POCtoDOC=0.70
 #
 # *******************************************************************
 # *** END ***********************************************************

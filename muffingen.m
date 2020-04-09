@@ -213,6 +213,9 @@ function [] = muffingen(POPT)
 %   20/03/09: removed return of an updated maxim depth in calls to 
 %             make_genie_grid
 %             *** VERSION 0.87 ********************************************
+%   20/04/08: bug-fix of .mat input path
+%             bug-fix of conversion of MASK option mask to k1
+%             *** VERSION 0.88 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -228,7 +231,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.87;
+par_muffingen_ver = 0.88;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -586,7 +589,12 @@ switch str(1).gcm
         %       => flip up/down when loaded
         % NOTE: assume topography is positive height (above sealevel)
         % >>> EDIT ME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-        data = load('-mat',[par_expid '.' par_gcm]);
+        if isempty(str(1).path)
+            loc_str_file = [par_expid '.' par_gcm];
+        else
+            loc_str_file = [str(1).path '/' par_expid '.' par_gcm];
+        end
+        data = load('-mat',loc_str_file);
         vars = fieldnames(data);
         gi_topo = data.(vars{1});
         gi_topo = flipud(gi_topo);
@@ -597,7 +605,7 @@ switch str(1).gcm
         % plot input mask & topo
         if (opt_plots), plot_2dgridded(flipud(gi_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_in'],['mask in']); end
         if (opt_plots), plot_2dgridded(flipud(gi_topo),6000.0,'',[[str_dirout '/' str_nameout] '.topo_in'],['topo in']); end
-    case {'k1','mask','k2'}
+    case {'k1','k2','mask'}
         % load topo directly
         [go_k1,go_mask,imax,jmax] = fun_read_k1(str);
         disp(['       - k1 read.']);
@@ -636,8 +644,8 @@ switch str(1).gcm
         [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
         disp(['       * Original land area fraction    = ', num2str(1.0-si_farea)]);
         disp(['       * Re-gridded land area fraction  = ', num2str(1.0-so_farea)]);
-    case {'k1','mask','k2'}
-        disp(['         (Nothing to do ... k1/mask/k2 file already loaded.)']);
+    case {'k1','k2','mask'}
+        disp(['         (Nothing to do ... k1/k2/mask file already loaded.)']);
         go_fmask = zeros(jmax,imax) + 1;
     otherwise
         go_mask = zeros(jmax,imax) + 1;
@@ -811,8 +819,10 @@ if opt_maketopo
             % (even though later this is converted back again ...)
             % NOTE: scale depth cannot be used because it is not necessary
             %       the final maximum ocean depth
+            % filter mask value 0 (land) to a k1 value 'land' (90)
             %%%go_topo = par_max_D*go_mask;
             go_k1 = par_min_k*go_mask;
+            go_k1(find(go_k1==0))=90;
             [go_topo] = fun_conv_k1(go_de,go_k1);
             disp(['         (Nothing to re-grid -- set uniform ocean depth.)']);
     end
