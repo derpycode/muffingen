@@ -24,10 +24,9 @@ bg_par_data_save_level=12
 #
 # *** optional changes to add ventillation age as a tracer ************
 #### activate single-tracer ventillation age tracer
-#### NOTE: you *must* have the 'red' color tracer incuded in the base-config and hence gm_ocn_select_4=.true.
+#### NOTE: you *must* have the 'red' color tracer colr included in the base-config and hence gm_ocn_select_48=.true.
 ###bg_ctrl_force_ocn_age1=.true.
 #
 # *******************************************************************
 # *** END ***********************************************************
 # *******************************************************************
-#
