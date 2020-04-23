@@ -170,6 +170,16 @@ umQ10p0a    AR 191024           0.81        "REPEAT/RECONSTRUCTION -- Tortonian 
 umQ12p5a    AR 191024           0.81        "REPEAT/RECONSTRUCTION -- Serravillian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic as before (but now land fraction too small); (default) roof runoff"
 umQ15p0a    AR 191024           0.81        "REPEAT/RECONSTRUCTION -- Langhian (Miocene); 0.45 re-gridding area fraction -- re-opened Arctic (to approx preserve land fraction); (default) roof runoff"
 % --------------------------------------------------------------
+% --- UM scotese_02 --------------------------------------------
+% --------------------------------------------------------------
+% --------------------------------------------------------------
+umtexpaa    AR 200422           0.89        "texpa1 (0Ma/late Holocene; 276.01 pCO2)    -- -180E grid boundary; mask edits to approximate GIteiiaa"  
+umtexpab    AR 200422           0.89        "texpa1 (0Ma/late Holocene; 276.01 pCO2)    -- -260E grid boundary; mask edits to approximate GIteiiaa"
+umtexPka    AR 200422           0.89        "texPk1 (178Ma/Toarcian; 986.22 pCO2)       -- [no edits]"
+umtexPla    AR 200422           0.89        "texPl1 (187Ma; 948.81 pCO2)                -- [no edits]"  
+umtexPoa    AR 200422           0.89        "texPo1 (201Ma/T-J; 1728.90 pCO2)           -- [no edits]"
+umtexPya    AR 200422           0.89        "texPy (252Ma/end Permian; 878.74 pCO2)     -- [no edits]"  
+% --------------------------------------------------------------
 % --------------------------------------------------------------
 % 
 % ==============================================================
