@@ -49,144 +49,159 @@ if (~isempty(i_poles)),
     end
 end
 %
-% LOOP >>>
-for islnd = 1:n_islands
+if (n_islands >= 2)
     %
-    disp(['       * Creating raw path #' num2str(islnd) ' ...']);
-    % find top LH border cell of the current island border
-    % raster left-to-right, top-to-bottom
-    corner = false;
-    for j = 2:jmax+1
-        for i = 2:imax+1
-            if (gb_ex(j,i) == islnd), corner = true; end
+    disp(['       * Ignoring border #1']);
+    % set dummy first path data
+    v_paths = [v_paths; 0 0 0];
+    n_paths = [n_paths 1];
+    % LOOP >>>
+    for islnd = 2:n_islands
+        %
+        disp(['       * Creating raw path #' num2str(islnd) ' ...']);
+        % find top LH border cell of the current island border
+        % raster left-to-right, top-to-bottom
+        corner = false;
+        for j = 2:jmax+1
+            for i = 2:imax+1
+                if (gb_ex(j,i) == islnd), corner = true; end
+                if corner, break; end
+            end
             if corner, break; end
         end
-        if corner, break; end
-    end
-    %
-    loc_j = j;
-    loc_i = i;
-    % mark initial cell as searched
-    gs_ex(loc_j,loc_i) = 1;
-    % test for E-W wall and also mark wrap-around cell as searched
-    if (loc_i == 2), gs_ex(loc_j,imax+2) = 1; end
-    if (loc_i == imax+1), gs_ex(loc_j,1) = 1; end
-    % check assumption of East being A-OK ...
-    if (gb_ex(loc_j,loc_i+1) == islnd),
-        % initial direction to the next cell *must* be East [1] [assumption!]
-        % => take first step in that direction
-        % record direction and current location (in core grid indices)
-        v_paths = [v_paths; 1 loc_i-1 loc_j-1];
-        % now move 1 East
-        loc_i = loc_i + 1;
-        % test for E-W wall ...
-        % mark i==1 cell as implicitly, already searched
-        if (loc_i == imax+2),
-            loc_i = 2;
-            gs_ex(loc_j,loc_i)  = 1;
-            gs_ex(loc_j,imax+2) = 1;
+        %
+        loc_j = j;
+        loc_i = i;
+        % mark initial cell as searched
+        gs_ex(loc_j,loc_i) = 1;
+        % test for E-W wall and also mark wrap-around cell as searched
+        if (loc_i == 2), gs_ex(loc_j,imax+2) = 1; end
+        if (loc_i == imax+1), gs_ex(loc_j,1) = 1; end
+        % check assumption of East being A-OK ...
+        if (gb_ex(loc_j,loc_i+1) == islnd),
+            % initial direction to the next cell *must* be East [1] [assumption!]
+            % => take first step in that direction
+            % record direction and current location (in core grid indices)
+            v_paths = [v_paths; 1 loc_i-1 loc_j-1];
+            % now move 1 East
+            loc_i = loc_i + 1;
+            % test for E-W wall ...
+            % mark i==1 cell as implicitly, already searched
+            if (loc_i == imax+2),
+                loc_i = 2;
+                gs_ex(loc_j,loc_i)  = 1;
+                gs_ex(loc_j,imax+2) = 1;
+            end
+        elseif (gb_ex(loc_j+1,loc_i) == islnd),
+            disp('       ! Initial E direction path follow step failed ...');
+            disp('         ... trying the S direction ...');
+            % try South ...
+            % record direction and current location (in core grid indices)
+            v_paths = [v_paths; -2 loc_i-1 loc_j-1];
+            % now move 1 South
+            loc_j = loc_j + 1;
+        else
+            disp(' *** Path follow failed (both E and S directions) :(');
+            diary off;
+            return;
         end
-    elseif (gb_ex(loc_j+1,loc_i) == islnd),
-        disp('       ! Initial E direction path follow step failed ...');
-        disp('         ... trying the S direction ...');
-        % try South ...
-        % record direction and current location (in core grid indices)
-        v_paths = [v_paths; -2 loc_i-1 loc_j-1];
-        % now move 1 South
-        loc_j = loc_j + 1;
-    else
-        disp(' *** Path follow failed (both E and S directions) :(');
-        diary off;
-        return;
-    end
-    % mark as searched
-    gs_ex(loc_j,loc_i) = 1;
-    % initialize vector length at 1
-    % (as the vector has already been populaed with its first line)
-    n_path = 1;
-    % now follow path around island -- clockwise
-    follow = true;
-    while follow
-        % find adajacent, unmarked border cell
-        % NOTE: if none exist, finish!
-        % search surrounding cells
-        follow = false;
-        for s = 1:4
-            loc_jj = loc_j + vdsrch(s,1);
-            loc_ii = loc_i + vdsrch(s,2);
-            % test for adjacent border cell
-            if (gb_ex(loc_jj,loc_ii) == islnd) && ~gs_ex(loc_jj,loc_ii),
-                % record current location and direction to next cell
-                % directions: 1==S, 2==E, 3==N, 4==W
-                % reminder:
-                %        2 == North
-                %       -2 == South
-                %        1 == East
-                %       -1 == West
-                % NOTE: take into account expanded i,j indices and
-                %       record location in core grid coordinates
-                switch s
-                    case (1)
-                        v_paths = [v_paths; -2 loc_i-1 loc_j-1];
-                    case (2)
-                        v_paths = [v_paths;  1 loc_i-1 loc_j-1];
-                    case (3)
-                        v_paths = [v_paths;  2 loc_i-1 loc_j-1];
-                    case (4)
-                        v_paths = [v_paths; -1 loc_i-1 loc_j-1];
+        % mark as searched
+        gs_ex(loc_j,loc_i) = 1;
+        % initialize vector length at 1
+        % (as the vector has already been populaed with its first line)
+        n_path = 1;
+        % now follow path around island -- clockwise
+        follow = true;
+        while follow
+            % find adajacent, unmarked border cell
+            % NOTE: if none exist, finish!
+            % search surrounding cells
+            follow = false;
+            for s = 1:4
+                loc_jj = loc_j + vdsrch(s,1);
+                loc_ii = loc_i + vdsrch(s,2);
+                % test for adjacent border cell
+                if (gb_ex(loc_jj,loc_ii) == islnd) && ~gs_ex(loc_jj,loc_ii),
+                    % record current location and direction to next cell
+                    % directions: 1==S, 2==E, 3==N, 4==W
+                    % reminder:
+                    %        2 == North
+                    %       -2 == South
+                    %        1 == East
+                    %       -1 == West
+                    % NOTE: take into account expanded i,j indices and
+                    %       record location in core grid coordinates
+                    switch s
+                        case (1)
+                            v_paths = [v_paths; -2 loc_i-1 loc_j-1];
+                        case (2)
+                            v_paths = [v_paths;  1 loc_i-1 loc_j-1];
+                        case (3)
+                            v_paths = [v_paths;  2 loc_i-1 loc_j-1];
+                        case (4)
+                            v_paths = [v_paths; -1 loc_i-1 loc_j-1];
+                    end
+                    % update path length count
+                    n_path = n_path + 1;
+                    % mark tested cell as searched
+                    loc_j = loc_jj;
+                    loc_i = loc_ii;
+                    gs_ex(loc_j,loc_i) = 1;
+                    % test for E-W wall:
+                    % adjust (j,i) location if necessary and also
+                    % mark as searched
+                    if (loc_ii == 1)
+                        gs_ex(loc_j,imax+1) = 1; % wrap-around location
+                        loc_i = imax+1;
+                        gs_ex(loc_j,imax+2) = 1; % implicitly, already searched
+                    elseif (loc_ii == 2)
+                        gs_ex(loc_j,imax+2) = 1; % wrap-around location
+                    elseif (loc_ii == imax+2)
+                        gs_ex(loc_j,2) = 1;      % wrap-around location
+                        loc_i = 2;
+                        gs_ex(loc_j,1) = 1;      % implicitly, already searched
+                    elseif (loc_ii == imax+1)
+                        gs_ex(loc_jj,1) = 1;     % wrap-around location
+                    end
+                    % continue ...
+                    follow = true;
+                    % exit (s) loop
+                    break;
                 end
-                % update path length count
-                n_path = n_path + 1;
-                % mark tested cell as searched
-                loc_j = loc_jj;
-                loc_i = loc_ii;
-                gs_ex(loc_j,loc_i) = 1;
-                % test for E-W wall:
-                % adjust (j,i) location if necessary and also
-                % mark as searched
-                if (loc_ii == 1)
-                    gs_ex(loc_j,imax+1) = 1; % wrap-around location
-                    loc_i = imax+1;
-                    gs_ex(loc_j,imax+2) = 1; % implicitly, already searched
-                elseif (loc_ii == 2)
-                    gs_ex(loc_j,imax+2) = 1; % wrap-around location
-                elseif (loc_ii == imax+2)
-                    gs_ex(loc_j,2) = 1;      % wrap-around location
-                    loc_i = 2;
-                    gs_ex(loc_j,1) = 1;      % implicitly, already searched
-                elseif (loc_ii == imax+1)
-                    gs_ex(loc_jj,1) = 1;     % wrap-around location
-                end
-                % continue ...
-                follow = true;
-                % exit (s) loop
-                break;
             end
         end
+        % add final location, calculate direction to start, update count
+        % NOTE: take into account upside-down GENIE array indexing in MATLAB
+        % reminder:
+        %        2 == North
+        %       -2 == South
+        %        1 == East
+        %       -1 == West
+        if ((loc_i-i+1) == imax) || ((loc_i-i) == -1), %East
+            v_paths = [v_paths;  1 loc_i-1 loc_j-1];
+        elseif ((loc_i-i-1) == -imax) || ((loc_i-i) == 1), %West
+            v_paths = [v_paths; -1 loc_i-1 loc_j-1];
+        elseif (loc_j-j) == 1, %North
+            v_paths = [v_paths;  2 loc_i-1 loc_j-1];
+        elseif (loc_j-j) == -1, %South
+            v_paths = [v_paths; -2 loc_i-1 loc_j-1];
+        else
+            % NOTE: The requirement for 2-cell seperation could be fixed
+            %       (removed) in a future release.
+            disp([' *** You may have insufficient seperation between the South Pole and a land mass:']);
+            disp(['     => create a 2 cell seperation of ocean, or join landmass to S. Pole.']);
+            disp(['       (but there could be other issues ...)']);
+            disp([' ']);
+            diary off;
+            error(['Error. \nFailed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),'): %s'],'Exiting ...');
+            return;
+        end
+        n_path = n_path + 1;
+        % write out path length
+        n_paths = [n_paths n_path];
+        %
     end
-    % add final location, calculate direction to start, update count
-    % NOTE: take into account upside-down GENIE array indexing in MATLAB
-    % reminder:
-    %        2 == North
-    %       -2 == South
-    %        1 == East
-    %       -1 == West
-    if ((loc_i-i+1) == imax) || ((loc_i-i) == -1), %East
-        v_paths = [v_paths;  1 loc_i-1 loc_j-1];
-    elseif ((loc_i-i-1) == -imax) || ((loc_i-i) == 1), %West
-        v_paths = [v_paths; -1 loc_i-1 loc_j-1];
-    elseif (loc_j-j) == 1, %North
-        v_paths = [v_paths;  2 loc_i-1 loc_j-1];
-    elseif (loc_j-j) == -1, %South
-        v_paths = [v_paths; -2 loc_i-1 loc_j-1];
-    else
-        diary off;
-        error(['Error. \nFailed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),'): %s'],'Exiting ...');
-        %disp([' *** Failed to complete path loop @ (',num2str(loc_i),',',num2str(loc_j),').']);
-    end
-    n_path = n_path + 1;
-    % write out path length
-    n_paths = [n_paths n_path];
+    % <<< LOOP
 end
 % now fix the up-side-down World
 for p = 1:sum(n_paths),

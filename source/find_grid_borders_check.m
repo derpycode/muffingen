@@ -55,16 +55,17 @@ for i = 2:imax+1
                         loc_i = i + vdsrch_diag(s,2);
                         % test adjacent cells for unassigned border and ocean
                         if (gb_ex(loc_j,loc_i)==0 && gm_ex(loc_j,loc_i)==1 )
-                            loc_gb = gb_ex;
-                            loc_gb(loc_j,loc_i) = loc_gb(j,i);
-                            loc_gb(j,i) = 0;
-                            [loc_user] = find_grid_borders_recheck(loc_gb,false);
+                            loc_gb_ex = gb_ex;
+                            loc_gb_ex(loc_j,loc_i) = loc_gb_ex(j,i);
+                            loc_gb_ex(j,i) = 0;
+                            [loc_user] = find_grid_borders_recheck(loc_gb_ex,false);
                             if ~loc_user
                                 gb_ex(loc_j,loc_i) = gb_ex(j,i);
                                 gb_ex(j,i) = 0;
                                 grid_borders(loc_j-1,loc_i-1) = grid_borders(j-1,i-1);
                                 grid_borders(j-1,i-1) = 0;
                                 disp(['     ... junction was only a tripple junction and has now been fixed ... hopefully!']);
+                                opt_user = false;
                                 break
                             else
                                 isrch = isrch + 1;

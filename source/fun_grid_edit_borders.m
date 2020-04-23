@@ -37,7 +37,7 @@ while flag == 0
     if ix < 1 | ix > imax | iy < 1 | iy > jmax
         fprintf('       - Out of grid range\n');
         flag = 1;
-        fprintf('       * Mask alteration complete\n');
+        fprintf('       * Borders alteration complete\n');
     elseif button == 2
         flag = 1;
         fprintf('       * Borders alteration complete\n');

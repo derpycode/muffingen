@@ -216,6 +216,12 @@ function [] = muffingen(POPT)
 %   20/04/08: bug-fix of .mat input path
 %             bug-fix of conversion of MASK option mask to k1
 %             *** VERSION 0.88 ********************************************
+%   20/04/22: bux-fix to find_grid_borders_check
+%             fix for 5 vs. 6-character UM code length
+%             removed creation of raw path for the 1st border 
+%             in find_grid_paths
+%             (it is never made into a complete path anyway)
+%             *** VERSION 0.89 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -231,7 +237,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.88;
+par_muffingen_ver = 0.89;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -342,10 +348,10 @@ switch par_gcm
     case {'hadcm3','hadcm3l'}
         if isempty(par_nc_topo_name),  par_nc_topo_name  = [par_expid '.qrparm.omask']; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = [par_expid '.qrparm.mask']; end
-        if isempty(par_nc_axes_name),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = [par_expid(1:5) 'a.pdclann']; end
         if isempty(par_nc_atmos_name), par_nc_atmos_name = [par_expid '_sed']; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = [par_expid '.qrparm.mask']; end
-        if isempty(par_nc_coupl_name), par_nc_coupl_name = [par_expid 'a.pdclann']; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = [par_expid(1:5) 'a.pdclann']; end
     case ('foam')
         if isempty(par_nc_topo_name),  par_nc_topo_name  = 'topo'; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
@@ -879,9 +885,10 @@ if (opt_maketopo && opt_user)
     % filter for ocean but not depth info (k > kmax)
     % search for ocean in the mask that has a 'land' value ...
     % set to the shallowest k1 level and a nominal middepth of that level
+    % NOTE: shallowest *allowed* k1 level (by par_min_Dk)
     loc_dry = intersect(find(go_mask == 1),find(go_k1 > par_max_k));
     if ~isempty(loc_dry)
-        go_k1(loc_dry) = par_max_k;
+        go_k1(loc_dry) = (par_max_k-(par_min_Dk-1));
         go_topo(loc_dry) = -go_dm(par_max_k);
     end
     %

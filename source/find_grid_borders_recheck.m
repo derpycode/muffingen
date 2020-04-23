@@ -1,4 +1,4 @@
-function [opt_user]  = find_grid_borders_recheck(grid_borders,opt_user)
+function [opt_user]  = find_grid_borders_recheck(grid_borders_ex,opt_user)
 %
 %%
 
@@ -7,21 +7,19 @@ function [opt_user]  = find_grid_borders_recheck(grid_borders,opt_user)
 % *********************************************************************** %
 %
 % determine mask size (remember: [rows columns])
-[jmax, imax] = size(grid_borders);
+[jmax, imax] = size(grid_borders_ex);
 % create search array
 vdsrch_nsew = [1 0; 0 1; -1 0; 0 -1];
-% copy & expand grid
-gb_ex = grid_borders;
-gb_ex = [gb_ex(:,end) gb_ex gb_ex(:,1)];
-gb_ex = [gb_ex(1,:); gb_ex; gb_ex(end,:)];
-gb_ex(1,:)   = 0;
-gb_ex(end,:) = 0;
+% copy grid
+% NOTE: already expanded!
+gb_ex = grid_borders_ex;
 %
 % *** SEARCH FOR TRIPPLE POINTS! **************************************** %
 %
 % search across grid -- find any tripple points
-for i = 2:imax+1
-    for j = 2:jmax+1
+% NOTE: remember that imax and jmax are now both +2
+for i = 2:imax-1
+    for j = 2:jmax-1
         % test for cell being a border
         if gb_ex(j,i) > 0
             isrch  = 0;
