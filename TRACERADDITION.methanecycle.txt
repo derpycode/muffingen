@@ -1,0 +1,15 @@
+# *******************************************************************
+# Set number of tracers
+### remember that the total must be increase by 2 when adding CH4 and CH4_13C as additional ocean tracers
+# list selected biogeochemical tracers
+gm_atm_select_10=.true.     #   pCH4
+gm_atm_select_11=.true.     #   pCH4_13C
+###gm_atm_select_12=.true.     #   pCH4_14C
+gm_ocn_select_25=.true.     #   CH4
+gm_ocn_select_26=.true.     #   CH4_13C
+gm_ocn_select_27=.true.     #   CH4_14C
+# list biogeochemical tracer initial values
+bg_ocn_init_25=0.0
+bg_ocn_init_26=0.0
+###bg_ocn_init_27=0.0
+# *******************************************************************

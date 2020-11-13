@@ -1,0 +1,32 @@
+#
+# *** REMINERALIZATION **********************************************
+#
+# half-saturation constant for oxic remin
+bg_par_bio_remin_c0_O2=1.0E-07
+# inhibition constant for oxic remin
+bg_par_bio_remin_ci_O2=1.0E-06
+# half-saturation constant for sulphate reduction
+bg_par_bio_remin_c0_SO4=5.0E-04
+# inhibition constant for sulphate reduction
+bg_par_bio_remin_ci_SO4=5.0E-04
+# sulfide oxidation rate form
+bg_opt_bio_remin_oxidize_H2StoSO4="OLD"
+# sulfide oxidation rate constant [only used if rate law is linear]
+#bg_par_bio_remin_kH2StoSO4=1.0E07
+# rate constant for aerobic methanotrophy
+bg_par_bio_remin_AER_kAER=0.10
+# O2 half-saturation constant for aerobic methanotrophy
+bg_par_bio_remin_AER_Km_O2=20.E-06
+# rate constant for AOM
+bg_par_bio_remin_AOM_kAOM=0.01
+# SO4 half-saturation constant for AOM
+bg_par_bio_remin_AOM_Km_SO4=500.0E-06
+# enable/disable thermodynamic terms
+bg_par_bio_remin_AER_thermo="on"
+bg_par_bio_remin_AOM_thermo="on"
+# biological energy quanta (BEQ) for CH4 oxidation
+bg_par_bio_remin_AER_BEQ=15.0
+bg_par_bio_remin_AOM_BEQ=15.0
+# methanogenesis 13C fractionation
+bg_par_d13C_Corg_CH4_epsilon=-35.0
+# *******************************************************************
