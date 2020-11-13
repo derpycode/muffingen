@@ -1,4 +1,9 @@
 #
+# *** ATMOSPHERIC PHOTOCHEMISTRY ************************************
+#
+# atmospheric photochemical scheme ID string
+ac_par_atm_CH4_photochem="claire06"
+*
 # *** REMINERALIZATION **********************************************
 #
 # half-saturation constant for oxic remin
