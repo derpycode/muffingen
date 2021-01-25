@@ -222,6 +222,9 @@ function [] = muffingen(POPT)
 %             in find_grid_paths
 %             (it is never made into a complete path anyway)
 %             *** VERSION 0.89 ********************************************
+%   21/01/22: added explicit limits for SEDGEM take topography
+%             also updated the hypsographic curve used (little difference)
+%             *** VERSION 0.90 ********************************************
 %
 %   ***********************************************************************
 %%
@@ -237,7 +240,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-par_muffingen_ver = 0.89;
+par_muffingen_ver = 0.90;
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -272,6 +275,12 @@ if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 if ~exist('par_mask_mask_name','var'), par_mask_mask_name = ''; end
 % number of additional ocean levels to assign
 if ~exist('par_add_Dk','var'), par_add_Dk = 0; end
+% sediment depth bounds
+% NOTE: these implict defaults do not quite preserve the orignal ones
+%       (the minimum, surface depth differs from go_de(kmax-(par_min_Dk-1))
+%        whose value is not know at this point)
+if ~exist('par_sed_Dmin','var'), par_sed_Dmin = 0.0; end
+if ~exist('par_sed_Dmax','var'), par_sed_Dmax = par_max_D; end
 %
 % *** check / filter options ******************************************** %
 %
@@ -1096,7 +1105,7 @@ if opt_makeseds
             % now define a mask
             loc_mask(find(go_k1==par_min_k)) = 1;
             % create masked random depth grid
-            [gos_topo] = make_grid_topo_sed_rnd(loc_mask,opt_highresseds,go_de(kmax-(par_min_Dk-1)),par_max_D);
+            [gos_topo] = make_grid_topo_sed_rnd(loc_mask,opt_highresseds,par_sed_Dmin,par_sed_Dmax);
             %  add to random depth grid to ~masked k1 depth grid
             % (assuming that non random grid depths are zero)
             if ~opt_highresseds,
@@ -1333,26 +1342,27 @@ if opt_makealbedo
 end
 % Boundary conditions: BIOGEM
 if (opt_makezonalwind)
-    fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false']);
+    fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
+    fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false.']);
     fprintf(fid,'%s\n','# gas transfer coeff');
     fprintf(fid,'%s\n',['bg_par_gastransfer_a=',num2str(0.722)]);
 elseif (opt_makewind)
+    fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
     % windspeed
     % NOTE: bg_ctrl_force_windspeed is .true. by default
     % NOTE: par_wspeed_avstr is the averaging product code
     switch str(1).gcm
         case {'hadcm3','hadcm3l','foam','cesm'}
-            fprintf(fid,'%s\n','# Boundary conditions: BIOGEM');
+            fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.true.']);
             fprintf(fid,'%s\n',['bg_par_pindir_name=''../../cgenie.muffin/genie-paleo/',par_wor_name,'/''']);
             fprintf(fid,'%s\n',['bg_par_windspeed_file=''',par_wor_name,'.windspeed_' str(1).wspd '.dat''']);
         otherwise
-            fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false']);
+            fprintf(fid,'%s\n',['bg_ctrl_force_windspeed=.false.']);
     end
     % air-sea gas exchange
     % NOTE: re-scale to give a modern global mean air-sea coefficient of
     %       ~0.058 mol m-2 yr-1 uatm-1
     %       (default is bg_par_gastransfer_a=0.310)
-    fprintf(fid,'%s\n','# BIOGEM MISC');
     switch str(1).gcm
         case {'hadcm3','hadcm3l'}
             fprintf(fid,'%s\n','# gas transfer coeff');

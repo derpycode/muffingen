@@ -14,6 +14,7 @@ function [grid_topos] = make_grid_topo_sed_rnd(grid_mask,opt_highresseds,bath_mi
 %
 %   14/11/22: CREATED [derived from Goldschmidt 2013 era process_hyps.m]
 %   17/03/13: re-write for muffingen
+%   21/01/21: updated with re-calculated ETOPO5 data (almost identical)
 %
 %   ***********************************************************************
 
@@ -40,7 +41,7 @@ grid_topos = zeros(jmaxs,imaxs);
 % *********************************************************************** %
 %
 % load data (processed with 10 m intervals bins)
-hyps=load('elev0010_area_int_norm.dat','-ascii');
+hyps=load('ETOPO5.data.210121.dat','-ascii');
 % invert depth
 hyps(:,1)=-hyps(:,1);
 % filter out too shallow/deep data
