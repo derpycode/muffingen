@@ -93,6 +93,9 @@ bg_par_bio_FetoC_C=0.0
 #
 # BASIC + biology + tracer + proxy diagnostics
 bg_par_data_save_level=7
+# *** recommended ***************************************************
+# force time-slice save at run end only
+bg_par_infile_slice_name='save_timeslice_NONE.dat'
 #
 # *** FORCINGS ******************************************************
 #

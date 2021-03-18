@@ -11,18 +11,24 @@ ea_36=y
 #
 # *** 16-level ocean as per Cao et al. [2009] ***********************
 # biological scheme ID string
-bg_par_bio_prodopt='1N1T_PO4MM_Tdep'
+bg_par_bio_prodopt='1N1T_PO4MM'
 # maximum rate of conversion of dissolved PO4 into organic matter by phytoplankton (mol kg-1 yr-1)
 bg_par_bio_k0_PO4=8.9876e-006
 # [PO4] M-M half-sat value (mol kg-1)
 bg_par_bio_c0_PO4=8.9369e-007
 # *** 8-level ocean as per Ridgwell et al. [2007] *******************
+###bg_par_bio_prodopt='1N1T_PO4MM'
 ###bg_par_bio_k0_PO4=1.9582242E-06
 ###bg_par_bio_c0_PO4=2.1989611E-07
 # *** optional changes to align with PALEO recommendations **********
 ###bg_par_bio_prodopt="bio_P"
 ###bg_par_bio_tau=63.3827
 ###bg_par_bio_c0_PO4=0.10E-06
+# *** Crichton et al. [2020] calibration ****************************
+# NOTE: light limitation term is different in biological scheme 1N1T_PO4MM_Tdep compared to bio_P
+###bg_par_bio_prodopt='1N1T_PO4MM_Tdep'
+###bg_par_bio_mu1=10
+###bg_par_bio_c0_PO4=8.9369e-007
 #
 # *** ORGANIC MATTER EXPORT RATIOS **********************************
 #
@@ -69,13 +75,21 @@ bg_par_bio_remin_CaCO3_eL2=1000000.0
 #### set 'instantaneous' water column remineralziation
 ###bg_par_bio_remin_sinkingrate_physical=9.9E9
 ###bg_par_bio_remin_sinkingrate_reaction=125.0
+# *** Crichton et al. [2020] temeprature-dependent remin ************
+###bg_ctrl_bio_remin_POC_fixed=.false.
+###bg_par_bio_remin_POC_K1=9.0E11
+###bg_par_bio_remin_POC_Ea1=54000.0
+###bg_par_bio_remin_POC_K2=1.0E14
+###bg_par_bio_remin_POC_Ea2=80000.0
+###bg_par_bio_remin_POC_frac2=0.008
 #
 # *** DATA SAVING ***************************************************
 #
 # Ocean acidification save option == biology and geochemical output fields plus all carbonate chemistry
 bg_par_data_save_level=10
-# Basic + biology diagnostics save option
-###bg_par_data_save_level=3
+# *** optional changes to align with PALEO recommendations **********
+#### force time-slice save at run end only
+###bg_par_infile_slice_name='save_timeslice_NONE.dat'
 #
 # *** FORCINGS ******************************************************
 #

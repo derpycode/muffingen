@@ -19,6 +19,9 @@ bg_par_bio_prodopt='NONE'
 # Set BASIC + tracer + full physics save level (12)
 # (assume default time-series and time-slice save intervals)
 bg_par_data_save_level=12
+# *** optional changes to align with PALEO recommendations **********
+#### force time-slice save at run end only
+###bg_par_infile_slice_name='save_timeslice_NONE.dat'
 #
 # *** MISC **********************************************************
 #

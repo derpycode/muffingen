@@ -98,6 +98,9 @@ bg_par_bio_FetoC_C=0.0
 #
 # Ocean acidification save option == biology and geochemical output fields plus all carbonate chemistry
 bg_par_data_save_level=10
+# *** optional changes to align with PALEO recommendations **********
+#### force time-slice save at run end only
+###bg_par_infile_slice_name='save_timeslice_NONE.dat'
 #
 # *** FORCINGS ******************************************************
 #

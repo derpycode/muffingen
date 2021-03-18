@@ -1,0 +1,16 @@
+#
+# *** IODINE CYCLE **************************************************
+#
+# Iodine cycle parameter values as per Lu et al. [2018]
+# set biological IO3 uptake (as a Redfield ration with carbon)
+bg_par_bio_red_POC_POI=1.4E-4
+# select basic oxidation option
+bg_opt_bio_remin_oxidize_ItoIO3='lifetime'
+# set I lifetime (yrs)
+bg_par_bio_remin_Ilifetime=40.0
+# select option for no watercolumn reduction
+bg_opt_bio_remin_reduce_IO3toI='threshold'
+# set [O2] threshold (mol kg-1) for (complete) IO3 reduction to I
+bg_par_bio_remin_cO2_IO3toI=30.00E-06
+#
+# *******************************************************************

@@ -1,0 +1,16 @@
+# *******************************************************************
+# Set number of tracers
+### remember that the total must be increase by 4 when adding Fe, FeL, L, and DOM_Fe as additional ocean tracers
+# list selected biogeochemical tracers
+gm_ocn_select_9=.true.      #   Fe -- 'dissolved iron III (Fe)'
+gm_ocn_select_23=.true.     #   FeL -- 'ligand-bound Fe'
+gm_ocn_select_24=.true.     #   L -- 'free ligand (iron binding)'    
+gm_ocn_select_22=.true.     #   DOM_Fe -- 'dissolved organic matter; iron'
+gm_sed_select_10=.true.     #   POFe -- 'particulate organic iron (POFe)' 
+gm_sed_select_13=.true.     #   POM_Fe -- 'POM scavenged Fe' 
+gm_sed_select_21=.true.     #   CaCO3_Fe -- 'CaCO3 scavenged Fe'
+gm_sed_select_25=.true.     #   det_Fe -- 'detrital scavenged Fe'
+# list biogeochemical tracer initial values
+bg_ocn_init_9=0.650E-09
+bg_ocn_init_24=1.000E-09
+# *******************************************************************

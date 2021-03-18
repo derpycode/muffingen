@@ -1,11 +1,13 @@
 # *******************************************************************
 # Set number of tracers
-### remember that the total must be increase by 2 when adding I and IO3 as additional ocean tracers
+### remember that the total must be increase by 3 when adding I, IO3, and DOM_I as additional ocean tracers
 # list selected biogeochemical tracers
 gm_ocn_select_92=.true.     #   I   -- 'iodide' 
 gm_ocn_select_93=.true.     #   IO3 -- 'iodate' 
+gm_ocn_select_94=.true.     #   DOM_I -- 'dissolved organic matter; iodine' 
 gm_sed_select_79=.true.     #   POI -- 'particulate organic iodine (POI)'
 # list biogeochemical tracer initial values
+bg_ocn_init_92=0.0E-09
 bg_ocn_init_93=500.0E-09
 bg_ocn_init_94=0.0E-09
 # *******************************************************************

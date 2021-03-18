@@ -1,0 +1,19 @@
+# *******************************************************************
+# Set number of tracers
+### remember that the total must be increase by 5 when adding Fe, Fe2, TL, FeOOH, and DOM_Fe as additional ocean tracers
+# list selected biogeochemical tracers
+# NOTE: no need to have the 3 traditional scavenged tracers of iron, if iron is scavenged as FeOOH now
+#       (io_FeOOH is only used if associated with is_POM_FeOOH)
+gm_ocn_select_9=.true.      #   Fe -- 'total dissolved Fe (3+)'
+gm_ocn_select_83=.true.     #   Fe2 -- 'dissolved Fe (2+)'
+gm_ocn_select_42=.true.     #   TL -- 'total dissolved ligand'
+gm_sed_select_95=.true.     #   FeOOH -- 'FeOOH'
+gm_ocn_select_22=.true.     #   DOM_Fe -- 'dissolved organic matter; iron'
+gm_sed_select_10=.true.     #   POFe -- 'particulate organic iron (POFe)' 
+gm_sed_select_103=.true.    #   POM_FeOOH -- 'POM scavenged FeOOH'
+# list biogeochemical tracer initial values
+bg_ocn_init_9=0.650E-09
+bg_ocn_init_83=0.0
+bg_ocn_init_42=1.000E-09
+bg_ocn_init_95=0.0
+# *******************************************************************

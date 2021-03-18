@@ -118,6 +118,9 @@ bg_par_data_save_level=3
 # disable ECOGEM restarts (as not currently coded up / used)
 eg_ctrl_ncrst      = .false.
 eg_ctrl_continuing = .false.
+# *** optional changes to align with PALEO recommendations **********
+#### force time-slice save at run end only
+###bg_par_infile_slice_name='save_timeslice_NONE.dat'
 #
 # *** FORCINGS ******************************************************
 #
