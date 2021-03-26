@@ -131,7 +131,7 @@ eg_ctrl_PARseaicelimit=.true.
 # relative partitioning of C into DOM
 eg_par_beta_POCtoDOC=0.70
 # maximum time-scale to geochemical reaction completion (days)
-bg_par_bio_geochem_tau=90.0
+bg_par_bio_geochem_tau=45.0
 # extend solubility and geochem constant T range (leave S range as default)
 gm_par_geochem_Tmin  = -2.0
 gm_par_geochem_Tmax  = 45.0
