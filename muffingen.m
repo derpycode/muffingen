@@ -227,6 +227,8 @@ function [] = muffingen(POPT)
 %             *** VERSION 0.90 ********************************************
 %   21/03/17: version numbering now aligned with cgenie.muffin
 %             *** v0.9.20 *************************************************
+%   21/06/28: edit to HadCM3/l 'a.pdclann' string .nc filename
+%             *** v0.9.21 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -242,7 +244,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.20';
+str_muffingen_ver = 'v0.9.21';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -355,14 +357,17 @@ if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = ''; end
 if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
 if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
 % -> set default variable names
+% NOTE: it is not obvious where originally why 'hadcm3','hadcm3l' 
+%       options required: par_expid(1:5)
+%       (but I have removed it now to enable 6-character UM codes)
 switch par_gcm
     case {'hadcm3','hadcm3l'}
         if isempty(par_nc_topo_name),  par_nc_topo_name  = [par_expid '.qrparm.omask']; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = [par_expid '.qrparm.mask']; end
-        if isempty(par_nc_axes_name),  par_nc_axes_name  = [par_expid(1:5) 'a.pdclann']; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = [par_expid 'a.pdclann']; end
         if isempty(par_nc_atmos_name), par_nc_atmos_name = [par_expid '_sed']; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = [par_expid '.qrparm.mask']; end
-        if isempty(par_nc_coupl_name), par_nc_coupl_name = [par_expid(1:5) 'a.pdclann']; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = [par_expid 'a.pdclann']; end
     case ('foam')
         if isempty(par_nc_topo_name),  par_nc_topo_name  = 'topo'; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
