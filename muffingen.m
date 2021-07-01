@@ -289,7 +289,7 @@ if ~exist('par_sed_Dmax','var'), par_sed_Dmax = par_max_D; end
 % *** check / filter options ******************************************** %
 %
 % age parameter
-if ~exist('par_age','var'),
+if ~exist('par_age','var')
     par_age = 0.0;
     par_age_emty = true;
 else
