@@ -137,6 +137,25 @@ csmPEx6a    AR 190319           0.74        "b.e12.B1850C5CN.f19_g16.iPETM06x.02
 csmPEx9a    AR 190319           0.74        "b.e12.B1850C5CN.f19_g16.iPETM09x.02.cam.h0.1901-2000 -- added New Zealand (single cell)"
 csmPEx6b    AR 190324           0.74        "b.e12.B1850C5CN.f19_g16.iPETM06x.02.cam.h0.1901-2000 -- added New Zealand (single cell) + closed Drake Passage to net flow"
 % --------------------------------------------------------------
+% scotese_02 series [Valdes et al., 2021]
+utexpa1a    AR 210630           v0.9.21     "0 Ma -- added Panama isthmus (otherwise all defaults)"
+utexpa1b    AR 210709           v0.9.21     "0 Ma -- added Panama isthmus; added New Zealand (otherwise all defaults)"
+utexPk1a    AR 210712           v0.9.21     "178 Ma -- Early Jurassic (Toarcian, 178.4 Ma) -- default regridding"
+% --------------------------------------------------------------
+% DeepMIP series
+umxooewa    AR 210630           v0.9.21     "PI -- added Panama isthmus (otherwise all defaults)"
+umxooeta    AR 210630           v0.9.21     "Eocene -- x1 CO2; default regridding"
+umxooeua    AR 210630           v0.9.21     "Eocene -- x2 CO2; default regridding"
+umxooeva    AR 210630           v0.9.21     "Eocene -- x3 CO2; default regridding"
+umxooewb    AR 210709           v0.9.21     "PI -- added Panama isthmus; added New Zealand (otherwise all defaults)"
+umxooetb    AR 210712           v0.9.21     "Eocene -- x1 CO2; opened Tasmanian Gateway (otherwise all defaults)"
+umxooeub    AR 210712           v0.9.21     "Eocene -- x2 CO2; opened Tasmanian Gateway (otherwise all defaults)"
+umxooevb    AR 210712           v0.9.21     "Eocene -- x3 CO2; opened Tasmanian Gateway (otherwise all defaults)"
+umxooewc    AR 210709           v0.9.21     "as umxooewb but @ 18x18"
+umxooetc    AR 210709           v0.9.21     "as umxooetb but @ 18x18"
+umxooeuc    AR 210709           v0.9.21     "as umxooeub but @ 18x18"
+umxooevc    AR 210709           v0.9.21     "as umxooevb but @ 18x18"
+% --------------------------------------------------------------
 % --- CONCEPTUAL -----------------------------------------------
 % --------------------------------------------------------------
 eg_dd_hi    AR 180919           0.63        "double-Drake @ 36x36x16"       
