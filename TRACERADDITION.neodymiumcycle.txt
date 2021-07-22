@@ -1,0 +1,21 @@
+# *******************************************************************
+# Set number of tracers
+# NOTE: increase number of tracers of tracers by 2
+# NOTE: if 'red' color tracer colr is also included, increase the total number of tracers by 3
+# NOTE: if you have Nd scavenging, you need some or all of the sed tracers (depending on what is doing the scavenging)
+# list selected biogeochemical tracers
+gm_ocn_select_55=.true.     #   Nd              -- 'dissolved Neodymium (Nd)' 
+gm_ocn_select_56=.true.     #   Nd_144Nd        -- '144Nd of Nd' 
+###gm_ocn_select_48=.true.     #   colr            -- 'RED numerical (color) tracer' 
+###gm_sed_select_47=.true.     #   POM_Nd          -- 'POM scavenged Nd'
+###gm_sed_select_48=.true.     #   POM_Nd_144Nd    -- 'POM scavenged 144Nd' 
+###gm_sed_select_49=.true.     #   CaCO3_Nd        -- 'CaCO3 scavenged Nd'  
+###gm_sed_select_50=.true.     #   CaCO3_Nd_144Nd  -- 'CaCO3 scavenged 144Nd' 
+###gm_sed_select_51=.true.     #   det_Nd          -- 'detrital scavenged Nd' 
+###gm_sed_select_52=.true.     #   det_Nd_144Nd    -- 'detrital scavenged 144Nd'   
+###gm_sed_select_53=.true.     #   opal_Nd         -- 'opal scavenged Nd' 
+###gm_sed_select_54=.true.     #   opal_Nd_144Nd   -- 'opal scavenged 144Nd' 
+# list biogeochemical tracer initial values
+bg_ocn_init_55=20.0E-12
+bg_ocn_init_56=0.0
+# *******************************************************************
