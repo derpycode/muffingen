@@ -1,6 +1,7 @@
 # *******************************************************************
 # Set number of tracers
-### remember that the total must be increase by 2 when adding CH4 and CH4_13C as additional ocean tracers
+# NOTE: remember that the total must be increase by 2 when adding CH4 and CH4_13C as additional ocean tracers
+#       (increase by 3 if you also add the dissolved 14C CH4 tracer)
 # list selected biogeochemical tracers
 gm_atm_select_10=.true.     #   pCH4
 gm_atm_select_11=.true.     #   pCH4_13C
