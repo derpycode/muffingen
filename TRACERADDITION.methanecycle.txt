@@ -7,7 +7,7 @@ gm_atm_select_11=.true.     #   pCH4_13C
 ###gm_atm_select_12=.true.     #   pCH4_14C
 gm_ocn_select_25=.true.     #   CH4
 gm_ocn_select_26=.true.     #   CH4_13C
-gm_ocn_select_27=.true.     #   CH4_14C
+###gm_ocn_select_27=.true.     #   CH4_14C
 # list biogeochemical tracer initial values
 bg_ocn_init_25=0.0
 bg_ocn_init_26=0.0
