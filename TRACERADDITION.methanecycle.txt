@@ -10,6 +10,8 @@ gm_ocn_select_25=.true.     #   CH4
 gm_ocn_select_26=.true.     #   CH4_13C
 ###gm_ocn_select_27=.true.     #   CH4_14C
 # list biogeochemical tracer initial values
+ac_atm_init_10=0.0
+ac_atm_init_11=0.0
 bg_ocn_init_25=0.0
 bg_ocn_init_26=0.0
 ###bg_ocn_init_27=0.0
