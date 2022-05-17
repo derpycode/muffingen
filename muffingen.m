@@ -229,6 +229,9 @@ function [] = muffingen(POPT)
 %             *** v0.9.20 *************************************************
 %   21/06/28: edit to HadCM3/l 'a.pdclann' string .nc filename
 %             *** v0.9.21 *************************************************
+%   22/04/25: changed paleo [Ca], [Mg] to: Zeebe and Tyrrell [2019]
+%             (and added [SO4])
+%             *** v0.9.22 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -244,7 +247,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.21';
+str_muffingen_ver = 'v0.9.22';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -1438,7 +1441,8 @@ if opt_makeseds
 end
 % GEOLOGIC AGE DEPENDENT PARAMETERS
 fprintf(fid,'%s\n','# GEOLOGIC AGE DEPENDENT PARAMETERS');
-if (par_age == 0.0),
+% solar constant and orbits
+if (par_age == 0.0)
     fprintf(fid,'%s\n','# Solar constant (W m-2) ... don''t forget to adjust it if not modern!!');
     fprintf(fid,'%s\n',['###ma_genie_solar_constant=','1368.0']);
     fprintf(fid,'%s\n','# ... also, salinity should be set 1 PSU lower if it an ice-free World');
@@ -1459,16 +1463,34 @@ else
     fprintf(fid,'%s\n',['ea_par_orbit_oscsob=','0.397789',' # sine of obliquity']);
     fprintf(fid,'%s\n',['ea_par_orbit_oscgam=','102.92',' # longitude of perihelion']);
 end
-if (par_age > 0.0) && (par_age <= 100.0),
-    loc_Ca = 1E-3*(1.028E-02*1000 - 0.1966*(-par_age) - 0.001116*(-par_age)^2 - 0.000003374*(-par_age)^3 - 0.000000006584*(-par_age)^4);
-    loc_Mg = 1E-3*(5.282E-02*1000 + 0.915*(-par_age) + 0.01308*(-par_age)^2 + 0.00008419*(-par_age)^3 + 0.000000201*(-par_age)^4);
-    fprintf(fid,'%s\n','# Ocean Mg/Ca concentrations');
-    fprintf(fid,'%s\n',['bg_ocn_init_35=',num2str(loc_Ca)]);
-    fprintf(fid,'%s\n',['bg_ocn_init_50=',num2str(loc_Mg)]);
+% ocean Ca/Mg (and SO4)
+% From: Zeebe and Tyrrell [2019]
+% Equation form: x(t) = (x1 - x2) * e((t - t1)/tau) + x2 (mmol kg-1)
+if (par_age > 0.0) && (par_age <= 37.0)
+%     loc_Ca = 1E-3*(1.028E-02*1000 - 0.1966*(-par_age) - 0.001116*(-par_age)^2 - 0.000003374*(-par_age)^3 - 0.000000006584*(-par_age)^4);
+%     loc_Mg = 1E-3*(5.282E-02*1000 + 0.915*(-par_age) + 0.01308*(-par_age)^2 + 0.00008419*(-par_age)^3 + 0.000000201*(-par_age)^4);
+    loc_Ca  = (10.280 - 19.000) * exp(-(par_age - 0)/40.000) + 19.000;
+    loc_Mg  = (52.820 - 35.000) * exp(-(par_age - 0)/12.000) + 35.000;
+    loc_SO4 = (28.240 - 11.000) * exp(-(par_age - 0)/32.000) + 11.000;
+    fprintf(fid,'%s\n','# Ocean Ca, Mg, SO4 concentrations');
+    fprintf(fid,'%s\n',['bg_ocn_init_35=',1.0E-3*num2str(loc_Ca)]);
+    fprintf(fid,'%s\n',['bg_ocn_init_50=',1.0E-3*num2str(loc_Mg)]);
+    fprintf(fid,'%s\n',['bg_ocn_init_38=',1.0E-3*num2str(loc_SO4)]);
+elseif (par_age > 37.0) && (par_age <= 100.0)
+%     loc_Ca = 1E-3*(1.028E-02*1000 - 0.1966*(-par_age) - 0.001116*(-par_age)^2 - 0.000003374*(-par_age)^3 - 0.000000006584*(-par_age)^4);
+%     loc_Mg = 1E-3*(5.282E-02*1000 + 0.915*(-par_age) + 0.01308*(-par_age)^2 + 0.00008419*(-par_age)^3 + 0.000000201*(-par_age)^4);
+    loc_Ca  = (15.542 - 11.478) * exp(-(par_age - 37.0)/(-47.011)) + 11.478;
+    loc_Mg  = (52.820 - 35.000) * exp(-(par_age - 0)/12.0) + 35.000;
+    loc_SO4 = (28.240 - 11.000) * exp(-(par_age - 0)/32.000) + 11.000;
+    fprintf(fid,'%s\n','# Ocean Ca, Mg, SO4 concentrations');
+    fprintf(fid,'%s\n',['bg_ocn_init_35=',1.0E-3*num2str(loc_Ca)]);
+    fprintf(fid,'%s\n',['bg_ocn_init_50=',1.0E-3*num2str(loc_Mg)]);
+    fprintf(fid,'%s\n',['bg_ocn_init_38=',1.0E-3*num2str(loc_SO4)]);
 else
-    fprintf(fid,'%s\n','# Ocean Mg/Ca concentrations (modern defaults, mol kg-1)');
-    fprintf(fid,'%s\n',['bg_ocn_init_35=','1.028E-02']);
-    fprintf(fid,'%s\n',['bg_ocn_init_50=','5.282E-02']);
+    fprintf(fid,'%s\n','# Ocean Ca, Mg, SO4 concentrations (modern defaults, mol kg-1)');
+    fprintf(fid,'%s\n',['bg_ocn_init_35=','10.280E-03']);
+    fprintf(fid,'%s\n',['bg_ocn_init_50=','52.820E-03']);
+    fprintf(fid,'%s\n',['bg_ocn_init_38=','28.240E-03']);
 end
 % END
 fprintf(fid,'%s\n','##################################################################################');
