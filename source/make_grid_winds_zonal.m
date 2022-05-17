@@ -51,7 +51,7 @@ function [] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout,par_tauo
 [jmax imax] = size(go_mask);
 switch par_tauopt
     case {1}
-        % modern NH / paleo Eocene (both hemispheres)
+        % land world (modern NH / paleo Eocene (both hemispheres))
         loc_nswl(1:2) = 'nl';
         loc_nswl(3:4) = 'sl';
     case {2}
