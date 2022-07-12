@@ -108,8 +108,17 @@ else
 end
 % catch identical limits ...
 if (data_min == data_max)
-    data_max = 1.001*data_max;
-    data_min = 0.999*data_min;
+    if (data_min == 0.0)
+        data_max = 0.001;
+        data_min = -0.001;
+    else
+        data_max = 1.001*data_max;
+        data_min = 0.999*data_min;
+    end
+end
+if (isnan(data_min) || isnan(data_max))
+    data_max = 0.001;
+    data_min = -0.001;
 end
 %
 % *** SCALING *********************************************************** %
