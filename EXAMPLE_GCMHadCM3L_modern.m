@@ -45,13 +45,15 @@ opt_equalarea=true;            % [false/true] equal area grid?
 % *** REGRIDDING SETTINGS *********************************************** %
 %
 par_max_D=5000.0;              % [0.0-99999.9] max grid depth (m)
-par_sur_D=0.0;                 % [0.0-99999.9] reference surface depth
+par_add_Dk=0;                  % [0-99] # of ocean levels that are 'extra' 
 par_min_Dk=2;                  % [1-99] minimum ocean depth (as # levels)
 par_min_k=1;                   % [1-99] maximum ocean depth (k value)
 par_lon_off=-260.0;            % [-360-0] longitude offset of grid start
 par_A_frac_threshold=0.45;     % [0.0-1.0] land fractional area threshold  
 par_mask_mask_name = '';       % ['STRING'] mask of land/ocean features
 par_sedsopt=0;                 % [0/1/2] sediment re-gridding option
+par_sed_Dmin=1000.0;           % minimm (random, option 2) sediment depth
+par_sed_Dmax=6000.0;           % maximum (random, option 2) sediment depth
 opt_highresseds=false;         % [false/true] create 2x res sediment grid
 %
 % *** BOUNDARY CONDITION SETTINGS *************************************** %

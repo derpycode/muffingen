@@ -52,6 +52,8 @@ par_lon_off=-180.0;            % [-360-0] longitude offset of grid start
 par_A_frac_threshold=0.50;     % [0.0-1.0] land fractional area threshold  
 par_mask_mask_name = '';       % ['STRING'] mask of land/ocean features
 par_sedsopt=0;                 % [0/1/2] sediment re-gridding option
+par_sed_Dmin=1000.0;           % minimm (random, option 2) sediment depth
+par_sed_Dmax=6000.0;           % maximum (random, option 2) sediment depth
 opt_highresseds=false;         % [false/true] create 2x res sediment grid
 %
 % *** BOUNDARY CONDITION SETTINGS *************************************** %
@@ -64,7 +66,7 @@ par_age=0.0;                   % [0.0-4570.0] optional age (Myr)
 %
 opt_makeall=false;             % [false/true] apply all common options?
 opt_user=false;                % [false/true] enable user input to grid
-opt_plots=false;                % [false/true] plot all input and output?
+opt_plots=false;               % [false/true] plot all input and output?
 %
 % *** OPTIONS -- DATA GENERATION **************************************** %
 %

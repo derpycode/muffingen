@@ -17,8 +17,8 @@
 % *** CONFIG NAME AND MAIN INPUT SETTINGS ******************************* %
 %
 par_wor_name='sed_grid';       % ['STRING'] 8-char (output) config name
-par_gcm='k1';                 % ['STRING'] input format/GCM name
-par_expid='p0251b';           % ['STRING'] input experiment/data name
+par_gcm='k1';                  % ['STRING'] input format/GCM name
+par_expid='p0251b';            % ['STRING'] input experiment/data name
 %
 % *** FILE PATHS ******************************************************** %
 %
@@ -52,6 +52,8 @@ par_lon_off=-180.0;            % [-360-0] longitude offset of grid start
 par_A_frac_threshold=0.50;     % [0.0-1.0] land fractional area threshold  
 par_mask_mask_name = '';       % ['STRING'] mask of land/ocean features
 par_sedsopt=2;                 % [0/1/2] sediment re-gridding option
+par_sed_Dmin=1000.0;           % minimm (random, option 2) sediment depth
+par_sed_Dmax=6000.0;           % maximum (random, option 2) sediment depth
 opt_highresseds=false;         % [false/true] create 2x res sediment grid
 %
 % *** BOUNDARY CONDITION SETTINGS *************************************** %
@@ -75,7 +77,7 @@ opt_makerunoff=false;           % [false/true] create runoff pattern?
 opt_makewind=false;             % [false/true] re-grid wind products?
 opt_makezonalwind=false;        % [false/true] force zonal wind generation
 opt_makealbedo=false;           % [false/true] make albedo file
-opt_makeseds=true;             % [false/true] make sediment files
+opt_makeseds=true;              % [false/true] make sediment files
 %
 % *** OPTIONS -- GRID FILTERING ***************************************** %
 %
