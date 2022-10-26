@@ -234,6 +234,14 @@ function [] = muffingen(POPT)
 %             *** v0.9.22 *************************************************
 %   22/05/19: fix bug in output for paleo [Ca], [Mg], [SO4]
 %             *** v0.9.23 *************************************************
+%   22/10/26: altered the roofing runoff scheme to retain existing 
+%             directions (e.g. when using a k1 file as input)
+%             also, to improve the user experience, if there are no
+%             path problems, user input is now automatically disabled
+%             also also ... hopefully fixed topo editing color scale issues
+%             (and corrected an accidental k=3 depth truncation in the 
+%             EXAMPLE_K1_permian example)
+%             *** v0.9.24 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -249,7 +257,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.23';
+str_muffingen_ver = 'v0.9.24';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -838,6 +846,11 @@ if opt_maketopo
             go_topo = go_topo';
             go_ftopo = go_ftopo';
         case {'k1','k2'}
+            % ensure that any new 'land' is assigned '90' in the k1
+            loc_dry = intersect(find(go_mask == 0),find(go_k1 <= par_max_k));
+            if ~isempty(loc_dry)
+                go_k1(loc_dry) = 90;
+            end
             % convert k1 to depth
             [go_topo] = fun_conv_k1(go_de,go_k1);
             disp(['         (Nothing to re-grid -- convert k1 file data.)']);
@@ -864,7 +877,7 @@ end
 %
 n_step = n_step+1;
 %
-if opt_maketopo,
+if opt_maketopo
     %
     disp(['>   ' num2str(n_step) '. RE-GRIDING OCEAN BATHYMETRY ...']);
     %
@@ -888,7 +901,7 @@ end
 n_step = n_step+1;
 %
 % carry out basic automatic topo filtering
-if opt_maketopo && opt_filtertopo,
+if opt_maketopo && opt_filtertopo
     %
     disp(['>  ' num2str(n_step) '. FILTERING BATHYMETRY ...']);
     %
@@ -945,7 +958,7 @@ if opt_makeocean
     % (i) first, check for all ocean
     if (max(max(go_k1)) < 90), opt_makerunoff = false; end
     % (ii) create roof scheme (if selected)
-    if (opt_makerunoff && par_runoffopt == 0),
+    if (opt_makerunoff && par_runoffopt == 0)
         [go_k1] = make_grid_runoff_roof(go_mask,go_k1,str);
         loc_k1 = go_k1;
         loc_k1(find(loc_k1 < 91)) = 95;
@@ -961,7 +974,7 @@ if opt_makeocean
     % add buffer columns for E-W wall
     goex_k1 = [goex_k1(:,end) goex_k1 goex_k1(:,1)];
     % (iv) create random runoff grid (if selected)
-    if (opt_makerunoff && par_runoffopt == 1),
+    if (opt_makerunoff && par_runoffopt == 1)
         [goex_k1] = make_grid_runoff_rnd(goex_k1,str,opt_debug);
         loc_k1 = goex_k1(2:end-1,2:end-1);
         loc_k1(find(loc_k1 < 91)) = 95;

@@ -23,6 +23,9 @@ gm_ex = [gm_ex(:,end) gm_ex gm_ex(:,1)];
 gm_ex = [gm_ex(1,:); gm_ex; gm_ex(end,:)];
 gm_ex(1,:)   = 0;
 gm_ex(end,:) = 0;
+% set default border check to false (unless intervention is required)
+% (simply to reduce user confusion ...)
+opt_user = false;
 %
 % *** SEARCH FOR TRIPPLE POINTS! **************************************** %
 %

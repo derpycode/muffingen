@@ -46,8 +46,8 @@ opt_equalarea=true;            % [false/true] equal area grid?
 %
 par_max_D=5000.0;              % [0.0-99999.9] max grid depth (m)
 par_add_Dk=0;                  % [0-99] # of ocean levels that are 'extra' 
-par_min_Dk=2;                  % [1-99] minimum ocean depth (as # levels)
-par_min_k=3;                   % [1-99] maximum ocean depth (k value)
+par_min_Dk=1;                  % [1-99] minimum ocean depth (as # levels)
+par_min_k=1;                   % [1-99] maximum ocean depth (k value)
 par_lon_off=-0.0;              % [-360-0] longitude offset of grid start
 par_A_frac_threshold=0.50;     % [0.0-1.0] land fractional area threshold  
 par_mask_mask_name = '';       % ['STRING'] mask of land/ocean features

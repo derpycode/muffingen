@@ -25,13 +25,21 @@ fprintf('         (2) right button to shallow grid cell\n');
 fprintf('         (3) middle button, or clickoutside the grid, to finish\n');
 %cmap = [0.5 1 0.5; 0.5 0.5 1]; colormap (cmap);
 %
+colormap default; 
+%
 flag = 0;
 while flag == 0
+%     figure(1); clf
+%     pcolor(flipud(gk_ex)); % axis image;
+%     caxis([0.5 (kmax+1.5)]); h = colorbar ('horiz');
+%     set(h,'XTick',1:kmax+1);
+%     title ('Ocean land/sea mask and bathymetry');
     figure(1); clf
-    pcolor (flipud(gk_ex)); % axis image;
-    caxis ([0.5 (kmax+1.5)]); h = colorbar ('horiz');
-    set(h,'XTick',1:kmax+1);
-    title ('Ocean land/sea mask and bathymetry');
+    loc_gk_ex = flipud(gk_ex); loc_gk_ex(find(loc_gk_ex>kmax)) = NaN; % create array for plotting only
+    pcolor(loc_gk_ex); % axis image;
+    h = colorbar ('horiz');
+    set(h,'XTick',1:kmax);
+    title ('Ocean bathymetry');
     [x,y,button] = ginput(1);
     ix = floor(x); iy = floor(y);
     if ix < 1 | ix > imax | iy < 1 | iy > jmax
@@ -43,10 +51,10 @@ while flag == 0
         fprintf('       * Topography alteration complete\n');
     else
         loc_j = jmax-iy+2;
-        if ((gk_ex(loc_j,ix) > 1) && (gk_ex(loc_j,ix) <= kmax) && (button == 1)),
+        if ((gk_ex(loc_j,ix) > 1) && (gk_ex(loc_j,ix) <= kmax) && (button == 1))
             fprintf('         -> Deepening cell at (%d, %d) to k=%d\n',ix,iy,gk_ex(loc_j,ix)-1);
             gk_ex(loc_j,ix) = gk_ex(loc_j,ix)-1; 
-        elseif ((gk_ex(loc_j,ix) < kmax) && (button == 3)),
+        elseif ((gk_ex(loc_j,ix) < kmax) && (button == 3))
             fprintf('         -> Shallowing cell at (%d, %d) to k=%d\n',ix,iy,gk_ex(loc_j,ix)+1);
             gk_ex(loc_j,ix) = gk_ex(loc_j,ix)+1; 
         else

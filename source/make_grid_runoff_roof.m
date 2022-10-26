@@ -21,12 +21,15 @@ function [grid_k1]  = make_grid_runoff_roof(grid_mask,grid_k1,str)
 % NOTE: input grid may have:
 %       ocean > 0, land 0
 %       ocean > 0, land >90
+% NOTE: retain existing runoff information
 gr = grid_k1;
-gr(find(gr > 90)) = 90;
+gr(find(gr > 94)) = 90; % gr(find(gr > 90)) = 90;
 gr(find(gr == 0)) = 90;
 gr(find(gr < 90)) = 0;
 % create search mask
 gm = grid_mask;
+% update mask to remove existing run-off cells from search
+gm(find(gr > 90)) = 1;
 %
 % *** ITERATIVELY POPULATE GRID ***************************************** %
 %
@@ -37,7 +40,7 @@ while search
     for i = 1:imax
         for j = 1:jmax
             % test for unassigned (land) cell
-            if ~gm(j,i),
+            if ~gm(j,i)
                 % search for cell adjacent to watershed: assign runoff dir
                 [gr] = fun_grid_cell_runoff_search(j,i,gm,gr);
             end
