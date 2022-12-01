@@ -56,39 +56,36 @@ bg_par_bio_remin_CaCO3_eL2=1000000.0
 #
 # *** ECOGEM ********************************************************
 #
-# ecosystem configuration
+# specify ecosystem structure definition file
 eg_par_ecogem_plankton_file='8P8Z.eco'
-#################### Nitrogen ############################
+# include cellular quota: N
 eg_useNO3                   =.false.
 eg_nquota                   =.false.
-################## Phosphorus ############################
+# include cellular quota: PO4
 eg_usePO4                   =.true.
 eg_pquota                   =.true.
-######################## Iron ############################
+# include cellular quota: Fe
 eg_useFe                    =.false.
 eg_fquota                   =.false.
-################# Chlorophyll ############################
+# include cellular quota: Chlorophyll
 eg_chlquota                 =.true.
-################# d13C ###################################
+# d13C fractionaton based on d13C of DIC?
 eg_useDIC_13C               =.true.
-# Tuned parameters
+# P and Fe quota parameters (tuned values)
 eg_qminP_a     =   3.33e-3
 eg_qminFe_a    =   1.00e-6
 eg_qmaxFe_a    =   4.00e-6
-# ???
+# Prey switching exponent (Holling 2 or 3 [= ns+1])
 eg_ns=2
-# ???
-eg_respir_a=0
-# DOM parameters
+# Carbon respiration rate - intercept
+eg_respir_a=0.0
+# DOM (ca. POM) partitioning parameters
 eg_beta_mort_a =   0.8 # Maximum fraction to DOM as ESD --> zero
 eg_beta_mort_b =   0.4 # Minimum fraction to DOM as ESD --> infinity 
 eg_beta_mort_c = 100.0 # Size at 50:50 partition (default = 100 µm^3)
 eg_beta_graz_a =   0.8 # Maximum fraction to DOM as ESD --> zero
 eg_beta_graz_b =   0.4 # Minimum fraction to DOM as ESD --> infinity
 eg_beta_graz_c = 100.0 # Size at 50:50 partition (default = 100 µm^3)
-# ???
-eg_nsubtime=25
-eg_n_keco=1
 # exponent for modifier of CaCO3:POC export ratio
 # NOTE: set power to zero for invarient ratio
 eg_par_bio_red_POC_CaCO3_pP=0.0
@@ -100,11 +97,8 @@ eg_par_bio_red_POC_CaCO3     = 0.0100 # underlying export CaCO3 as a proportion 
 #
 # *** DATA SAVING ***************************************************
 #
-# Basic + biology diagnostics save option
-bg_par_data_save_level=3
-# disable ECOGEM restarts (as not currently coded up / used)
-eg_ctrl_ncrst      = .false.
-eg_ctrl_continuing = .false.
+# BASIC + biology + tracer + proxy diagnostics
+bg_par_data_save_level=7
 # *** recommended ***************************************************
 # force time-slice save at run end only
 bg_par_infile_slice_name='save_timeslice_NONE.dat'
