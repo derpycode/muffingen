@@ -1,9 +1,9 @@
-function [mask] = fun_read_omask_hadcm3x(str)
+function [grid_orog] = fun_read_orog_hadcm3x(str)
 %
 %%
 
 % *********************************************************************** %
-% *** READ AND RETURN OCEAN MASK **************************************** %
+% *** READ AND RETURN OROGRAPHY ***************************************** %
 % *********************************************************************** %
 %
 % open netCDF file and load variables
@@ -17,18 +17,21 @@ function [mask] = fun_read_omask_hadcm3x(str)
 % str(5).nc == par_nc_coupl_name
 % str(6).nc == par_nc_ocean_name
 % str(7).nc == par_nc_biome_name
+% str(8).nc == par_nc_orog_name
 %
 % open netCDF file
-ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(2).nc '.nc'],'nowrite');
-% load OCEAN MASK
-varid  = netcdf.inqVarID(ncid,'lsm');
-mask(:,:) = netcdf.getVar(ncid,varid);
-mask = double(mask);
+ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(8).nc '.nc'],'nowrite');
+% load TOPOGRAPHY
+varid  = netcdf.inqVarID(ncid,'ht');
+grid_orog(:,:) = netcdf.getVar(ncid,varid);
+grid_orog = double(grid_orog);
 % NOTE: format needed is: [LAT,LON] (rows x columns) orientation
 %       => flip up-down & transpose to give a readable ASCII array
-mask = flipud(mask');
-% convert land to ocean mask
-mask = 1.0 - mask;
+% NOTE: for some reason this field does not need flipud-ing ... ??
+grid_orog = grid_orog';
+% filter out land (mark as invalid)
+% NOTE: assume that zero is ocean
+grid_orog(find(grid_orog==0.0))=NaN;
 % close netCDF file
 netcdf.close(ncid);
 %

@@ -242,6 +242,9 @@ function [] = muffingen(POPT)
 %             (and corrected an accidental k=3 depth truncation in the 
 %             EXAMPLE_K1_permian example)
 %             *** v0.9.24 *************************************************
+%   23/04/05: interim extension for generating ENTS config files
+%             (from HadCM3(L))
+%             *** v0.9.25 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -257,7 +260,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.24';
+str_muffingen_ver = 'v0.9.25';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -273,15 +276,17 @@ eval(POPT);
 % *** backwards compatability ******************************************* %
 % 
 % zonal wind-stress generaton parameter
-if ~exist('par_tauopt','var'), par_tauopt = 0; end
+if ~exist('par_tauopt','var'),   par_tauopt   = 0; end
+% ENTS-enabled output??
+if ~exist('opt_makeents','var'), opt_makeents = false; end
 % surface layer reference thickness (m)
-if ~exist('par_sur_D','var'),  par_sur_D  = 0.0; end
+if ~exist('par_sur_D','var'),    par_sur_D    = 0.0; end
 % minimum k level
-if ~exist('par_min_k','var'),  par_min_k  = 1; end
+if ~exist('par_min_k','var'),    par_min_k    = 1; end
 % create plots?
-if ~exist('opt_plots','var'),  opt_plots  = true; end
+if ~exist('opt_plots','var'),    opt_plots    = true; end
 % debug?
-if ~exist('opt_debug','var'),  opt_debug  = false; end
+if ~exist('opt_debug','var'),    opt_debug    = false; end
 % make zonal winds (rather than re-grid GCM)?
 if ~exist('opt_makezonalwind','var'), opt_makezonalwind = false; end
 % set dummy mask nc name
@@ -369,6 +374,8 @@ if ~exist('par_nc_axes_name','var'),  par_nc_axes_name  = ''; end
 if ~exist('par_nc_atmos_name','var'), par_nc_atmos_name = ''; end
 if ~exist('par_nc_ocean_name','var'), par_nc_ocean_name = ''; end
 if ~exist('par_nc_coupl_name','var'), par_nc_coupl_name = ''; end
+if ~exist('par_nc_biome_name','var'), par_nc_biome_name = ''; end
+if ~exist('par_nc_orog_name','var'),  par_nc_orog_name = '';  end
 % -> set default variable names
 % NOTE: it is not obvious where originally why 'hadcm3','hadcm3l' 
 %       options required: par_expid(1:5)
@@ -381,6 +388,8 @@ switch par_gcm
         if isempty(par_nc_atmos_name), par_nc_atmos_name = [par_expid '_sed']; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = [par_expid '.qrparm.mask']; end
         if isempty(par_nc_coupl_name), par_nc_coupl_name = [par_expid 'a.pdclann']; end
+        if isempty(par_nc_biome_name), par_nc_biome_name = [par_expid '_inputdata']; end
+        if isempty(par_nc_orog_name),  par_nc_orog_name  = [par_expid '.qrparm.orog']; end
     case ('foam')
         if isempty(par_nc_topo_name),  par_nc_topo_name  = 'topo'; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
@@ -430,13 +439,13 @@ tmp_path = tmp_path(1:end-length(str_function)-3);
 addpath([tmp_path '/' par_dpath_source]);
 addpath([tmp_path '/' 'DATA']);
 % set full file name string
-if ~isempty(par_gcm),
+if ~isempty(par_gcm)
     str_file = [str_function '.' par_gcm '.' str_nameout];
 else
     str_file = [str_function '.' str_nameout];
 end
 % set/create output directory
-if opt_outputdir,
+if opt_outputdir
     str_dirout = uigetdir(par_pathout);
 else
     if isempty(par_pathout)
@@ -458,12 +467,14 @@ str = setfield(str, {1}, 'path', par_pathin);
 str = setfield(str, {2}, 'path', par_pathout);
 str = setfield(str, {1}, 'dir', '');
 str = setfield(str, {2}, 'dir', str_dirout);
-str = setfield(str, {2}, 'nc', par_nc_topo_name);
-str = setfield(str, {4}, 'nc', par_nc_mask_name);
 str = setfield(str, {1}, 'nc', par_nc_axes_name);
+str = setfield(str, {2}, 'nc', par_nc_topo_name);
 str = setfield(str, {3}, 'nc', par_nc_atmos_name);
-str = setfield(str, {6}, 'nc', par_nc_ocean_name);
+str = setfield(str, {4}, 'nc', par_nc_mask_name);
 str = setfield(str, {5}, 'nc', par_nc_coupl_name);
+str = setfield(str, {6}, 'nc', par_nc_ocean_name);
+str = setfield(str, {7}, 'nc', par_nc_biome_name);
+str = setfield(str, {8}, 'nc', par_nc_orog_name);
 str = setfield(str, {1}, 'wspd', par_wspeed_avstr);
 str = setfield(str, {1}, 'mask', par_mask_mask_name);
 %
@@ -688,7 +699,7 @@ switch str(1).gcm
         go_fmask = go_mask;
 end
 % plot & save initial mask re-grid
-if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.RAW'],['mask out -- RAW re-gridded']); end
+if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.omask_out.RAW'],['ocean mask out -- RAW re-gridded']); end
 %
 % *** FILTER MASK ******************************************************* %
 %
@@ -727,7 +738,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0))
         % <<< LOOP
         fprintf('       - Single cell embayments filtered out.\n')
         % plot mask
-        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
+        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.omask_out.v' str_ver],['ocean mask out -- version ' str_ver]); end
         %
     end
     %
@@ -745,7 +756,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0))
         %
         fprintf('       - Polar connections cleaned up.\n')
         % plot mask
-        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
+        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.omask_out.v' str_ver],['ocean mask out -- version ' str_ver]); end
         %
     end
     %
@@ -763,7 +774,7 @@ if opt_makemask && (opt_filtermask || (par_min_oceann > 0))
         [go_mask,go_oceans,n_oceans] = find_grid_oceans_update(go_mask,go_oceans,n_oceans,par_min_oceann);
         fprintf('       - Small water bodies cleaned up.\n')
         % plot mask
-        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
+        if (opt_plots), plot_2dgridded(flipud(go_mask),2.0,'',[[str_dirout '/' str_nameout] '.omask_out.v' str_ver],['ocean mask out -- version ' str_ver]); end
         %
     end
     %
@@ -786,7 +797,7 @@ if opt_user
     grid_ver = grid_ver + 1;
     str_ver = num2str(grid_ver);
     % plot mask
-    if (opt_plots), plot_2dgridded(flipud(go_mask),2,'',[[str_dirout '/' str_nameout] '.mask_out.v' str_ver],['mask out -- version ' str_ver]); end
+    if (opt_plots), plot_2dgridded(flipud(go_mask),2,'',[[str_dirout '/' str_nameout] '.omask_out.v' str_ver],['ocean mask out -- version ' str_ver]); end
     % calculate new fractional area
     [so_farea,so_farearef] = fun_grid_calc_ftotarea(go_mask,go_lone,go_late);
     disp(['       * Revised land area fraction = ', num2str(1.0-so_farea)]);
@@ -816,10 +827,10 @@ go_masknotnan(find(go_mask ~= 0)) = NaN;
 go_masknotnan(find(go_masknotnan == 0)) = 1;
 %
 % plot final mask
-if (opt_plots), plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.mask_out.FINAL'],['mask out -- FINAL version']); end
+if (opt_plots), plot_2dgridded(flipud(go_mask),99999.0,'',[[str_dirout '/' str_nameout] '.omask_out.FINAL'],['ocean mask out -- FINAL version']); end
 %
 % save mask
-fprint_2DM(go_mask(:,:),[],[[str_dirout '/' str_nameout] '.mask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
+fprint_2DM(go_mask(:,:),[],[[str_dirout '/' str_nameout] '.omask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
 fprintf('       - .mask_out.FINAL.dat saved\n')
 %
 % calculate new fractional area
@@ -1303,6 +1314,79 @@ if opt_makealbedo
     fprint_1Dn(vo_albd(:),[[str_dirout '/' str_nameout] '.albd.dat'],'%8.4f','%8.4f',true,false);
     fprintf('       - .albd.dat file saved\n')
     %
+end
+%
+% *** LOAD ICE MASK & OROGRAPHY DATA ************************************ %
+%
+n_step = n_step+1;
+%
+% for ENTS-enabled configs
+if opt_makeents
+    %
+    disp(['>  ' num2str(n_step) '. LOADING ICE MASK & OROGRAPHY DATA ...']);
+    %
+    [gi_imask] = fun_read_imask_hadcm3x(str);
+    [gi_orog]  = fun_read_orog_hadcm3x(str);
+    % plot input mask & topo
+    if (opt_plots), plot_2dgridded(flipud(gi_imask),2.0,'',[[str_dirout '/' str_nameout] '.imask_in'],['mask in']); end
+    if (opt_plots), plot_2dgridded(flipud(gi_orog),6000.0,'',[[str_dirout '/' str_nameout] '.orog_in'],['topo in']); end
+end
+%
+% *** RE-GRID ICE MASK & OROGRAPHY DATA ********************************* %
+%
+n_step = n_step+1;
+%
+% for ENTS-enabled configs
+% NOTE: the ice mask is not changed after this point
+% NOTE: ice mask and orography on atmospheric grid
+if opt_makeents
+    %
+    disp(['>  ' num2str(n_step) '. CREATING ICE MASK & OROGRAPHY DATA ...']);
+    % ice mask
+    [go_imask,go_tmp] = make_regrid_2d(gi_lonae,gi_latae,gi_imask',go_lone,go_late,opt_debug);
+    go_imask  = go_imask';
+    go_tmp    = go_tmp';
+    disp(['       - Ice mask re-gridded.']);
+    disp(['         NOTE: The ice mask is not adjusted after this point and so may need to be hand-edited if the land-sea mask changes.']);
+    if (opt_plots), plot_2dgridded(flipud(go_imask),99999.0,'',[[str_dirout '/' str_nameout] '.imask_out.RAW'],['Ice mask out -- RAW']); end
+    fprint_2DM(go_imask(:,:),[],[[str_dirout '/' str_nameout] '.imask_out.RAW.dat'],'%4.1f','%4.1f',true,false);
+    % apply FINAL land-sea mask (no icesheet (==0) over ocean)
+    go_imask = go_imask.*(1-go_mask);
+    if (opt_plots), plot_2dgridded(flipud(go_imask),99999.0,'',[[str_dirout '/' str_nameout] '.imask_out.FINAL'],['Ice mask out -- FINAL version']); end
+    fprint_2DM(go_imask(:,:),[],[[str_dirout '/' str_nameout] '.imask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
+    % orography
+    [go_orog,go_tmp] = make_regrid_2d(gi_lonae,gi_latae,gi_orog',go_lone,go_late,opt_debug);
+    go_orog  = go_orog';
+    go_tmp   = go_tmp';
+    disp(['       - Orography re-gridded.']);
+    if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.RAW'],['Orography out -- RAW']); end
+    fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orog_out.RAW.dat'],'%10.2f','%10i',true,true); 
+    % apply FINAL land-sea mask
+    % NOTE: ocean mask has 1 == ocean
+    % NOTE: at this point, re-gridded cells with no orographic information == NaN
+    %       while land cells in the mask are zero
+    %       becasue the mask might have changed compared to the orographic grid, we need:
+    %       (1) ocean cells to be NaN in the orographic grid irrespective of the original orographic re-gridding
+    %       (2) land cells which are NaN in the orographic grid, to be zero
+    %           (i.e. in the absence of GCM info, we are going to place 'new' land at sealevel
+    % (1)
+    go_orog(find(go_mask==1)) = NaN;
+    % (2) 
+    go_orog(intersect(find(go_mask==0),find(go_orog==NaN))) = 0.0;
+    %
+    if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.FINAL'],['Orography out -- FINAL version']); end
+    fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orog_out.FINAL.dat'],'%10.2f','%10i',true,true);
+    % create and save combined ENTS mask
+    % NOTE: Ocean = 0; Land = 1; Ice sheet = 2
+    %       (=> invert ocean mask, then add ice mask)
+    % NOTE: first convert fractional ice mask to (1,0): assume a thresold of 0.5
+    i_imask = find(go_imask(:,:) > 0.5);
+    go_imask(:,:) = 0.0;
+    go_imask(i_imask) = 1.0;
+    go_olimask(:,:) = 1 - go_mask(:,:);
+    go_olimask(:,:) = go_olimask(:,:) + go_imask(:,:);
+    if (opt_plots), plot_2dgridded(flipud(go_olimask),99999.0,'',[[str_dirout '/' str_nameout] '.olimask_out.FINAL'],['ocean-land-ice mask out -- FINAL version']); end
+    fprint_2DM(go_olimask(:,:),[],[[str_dirout '/' str_nameout] '.olimask_out.FINAL.dat'],'%3i','%3i',true,false);
 end
 %
 % *** GENERATE CONFIG FILE PARAMETER LINES ****************************** %
