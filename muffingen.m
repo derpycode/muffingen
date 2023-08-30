@@ -1238,13 +1238,13 @@ elseif (opt_makewind)
     end
 end
 %
-% *** LOAD ALBEDO DATA ************************************************** %
+% *** LOAD PLANETARY ALBEDO DATA **************************************** %
 %
 n_step = n_step+1;
 %
 if opt_makealbedo
     %
-    disp(['>  ' num2str(n_step) '. LOADING ALBEDO DATA ...']);
+    disp(['>  ' num2str(n_step) '. LOADING PLANETARY ALBEDO DATA ...']);
     %
     switch str(1).gcm
         case {'hadcm3','hadcm3l','foam','cesm','rockee'}
@@ -1267,13 +1267,13 @@ if opt_makealbedo
     %
 end
 %
-% *** RE-GRID & PROCESS ALBEDO ****************************************** %
+% *** RE-GRID & PROCESS PLANETARY ALBEDO ******************************** %
 %
 n_step = n_step+1;
 %
 if opt_makealbedo
     %
-    disp(['>  ' num2str(n_step) '. CREATING ALBEDO DATA ...']);
+    disp(['>  ' num2str(n_step) '. CREATING PLANETARY ALBEDO DATA ...']);
     %
     switch str(1).gcm
         case {'hadcm3','hadcm3l','foam','cesm','rockee'}
@@ -1316,11 +1316,36 @@ if opt_makealbedo
     %
 end
 %
+% *** LOAD & PROCESS FULL ALBEDO PRODUCTS ******************************* %
+%
+n_step = n_step+1;
+%
+% for ENTS-enabled configs
+% NOTE: for now, assuming HadCM3(L)
+if opt_makeents
+    %
+    disp(['>  ' num2str(n_step) '. LOADING & PROCESSING FULL ALBEDO PRODUCTS  ...']);
+    %
+    % NOTE: gi_albd_cloud == cloud albedo diagnosed from planetary and surface albedo products
+    [gi_albd_planet gi_albd_surface gi_albd_cloud] = fun_read_albd_all_hadcm3x(str);
+    disp(['       - Read full GCM albedo products.']);
+    % plot full set of albedo products
+    if (opt_plots), plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_in'],['albedo in']); end
+    
+    % NOTE: gi_albd_cloud_sw == cloud albedo diagnosed from SW fluxes
+    [gi_albd_cloud_sw] = fun_read_albd_sw_hadcm3x(str);
+    disp(['       - Read GCM albedo derived from SW fluxes.']);
+    
+    
+    
+end
+%
 % *** LOAD ICE MASK & OROGRAPHY DATA ************************************ %
 %
 n_step = n_step+1;
 %
 % for ENTS-enabled configs
+% NOTE: for now, assuming HadCM3(L)
 if opt_makeents
     %
     disp(['>  ' num2str(n_step) '. LOADING ICE MASK & OROGRAPHY DATA ...']);
@@ -1337,6 +1362,7 @@ end
 n_step = n_step+1;
 %
 % for ENTS-enabled configs
+% NOTE: for now, assuming HadCM3(L)
 % NOTE: the ice mask is not changed after this point
 % NOTE: ice mask and orography on atmospheric grid
 if opt_makeents
