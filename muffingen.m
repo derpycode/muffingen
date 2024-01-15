@@ -1321,22 +1321,7 @@ end
 n_step = n_step+1;
 %
 % for ENTS-enabled configs
-% NOTE: for now, assuming HadCM3(L)
 if opt_makeents
-    %
-    disp(['>  ' num2str(n_step) '. LOADING & PROCESSING FULL ALBEDO PRODUCTS  ...']);
-    %
-    % NOTE: gi_albd_cloud == cloud albedo diagnosed from planetary and surface albedo products
-    [gi_albd_planet gi_albd_surface gi_albd_cloud] = fun_read_albd_all_hadcm3x(str);
-    disp(['       - Read full GCM albedo products.']);
-    % plot full set of albedo products
-    if (opt_plots), plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_in'],['albedo in']); end
-    
-    % NOTE: gi_albd_cloud_sw == cloud albedo diagnosed from SW fluxes
-    [gi_albd_cloud_sw] = fun_read_albd_sw_hadcm3x(str);
-    disp(['       - Read GCM albedo derived from SW fluxes.']);
-    
-    
     
 end
 %
