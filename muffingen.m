@@ -1248,7 +1248,7 @@ if opt_makealbedo
     %
     switch str(1).gcm
         case {'hadcm3','hadcm3l','foam','cesm','rockee'}
-            % read albedo
+            % read planetary albedo
             if (strcmp(str(1).gcm,'hadcm3') || strcmp(str(1).gcm,'hadcm3l'))
                 [gi_albd] = fun_read_albd_hadcm3x(str);
             elseif (strcmp(str(1).gcm,'foam'))
@@ -1260,7 +1260,7 @@ if opt_makealbedo
             end
             disp(['       - Read GCM albedo data.']);
             % plot input albedo
-            if (opt_plots), plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_in'],['albedo in']); end
+            if (opt_plots), plot_2dgridded(flipud(gi_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_in'],['planetary albedo in']); end
         otherwise
             disp(['         (Nothing to load.)']);
     end
@@ -1281,38 +1281,38 @@ if opt_makealbedo
             [go_albd,go_falbd] = make_regrid_2d(gi_lonae,gi_latae,gi_albd',go_lone,go_late,opt_debug);
             go_albd  = go_albd';
             go_falbd = go_falbd';
-            disp(['       - Re-gridded GCM albedo data.']);
+            disp(['       - Re-gridded GCM planetary albedo data.']);
             % plot output albedo
-            if (opt_plots), plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_out'],['albedo out']); end
+            if (opt_plots), plot_2dgridded(flipud(go_albd),100.0,'',[[str_dirout '/' str_nameout] '.albd_pl_out'],['albedo out']); end
             % save 2D file
-            fprint_2DM(go_albd(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd.dat'],'%8.4f','%8.4f',true,false);
-            fprintf('       - 2D albedo file saved\n')
+            fprint_2DM(go_albd(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd_pl.dat'],'%8.4f','%8.4f',true,false);
+            fprintf('       - 2D planetary albedo file saved\n')
             % create zonal mean
             vo_albd = mean(go_albd');
-            disp(['       - Generated zonal mean albedo profile.']);
+            disp(['       - Generated zonal mean planetary albedo profile.']);
         otherwise
             % NOTE: if age == 0, then default (modern) GENIE,
             %       otherwise for generic ice-free world
             vo_albd = make_grid_albd(go_latm,par_age);
-            disp(['       - Created generic zonal mean albedo profile.'])
+            disp(['       - Created generic zonal mean planetary albedo profile.'])
             % plot output albedo profile
             figure;
             scatter(go_latm,vo_albd);
             axis([-90 90 0.0 1.0]);
             xlabel('Latitude');
             ylabel('Albedo');
-            title('Zonally averaged albedo profile');
-            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd.' str_date '.ps']);
+            title('Zonally averaged planetary albedo profile');
+            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.ps']);
             % reorientate albedo vector for saving
             vo_albd = fliplr(vo_albd);
     end
-    % save albedo vector
-    % NOTE: when the file is read in by GENIE, it counrs down in j value:
+    % save planetary albedo vector
+    % NOTE: when the file is read in by GENIE, it counts down in j value:
     %       such that the N pole is the first element in file;
     %       fprint_1Dn saves the 2st row at the top, hence the vector
     %       must be orientated as in a map orientation (N at top)
-    fprint_1Dn(vo_albd(:),[[str_dirout '/' str_nameout] '.albd.dat'],'%8.4f','%8.4f',true,false);
-    fprintf('       - .albd.dat file saved\n')
+    fprint_1Dn(vo_albd(:),[[str_dirout '/' str_nameout] '.albd_pl.dat'],'%8.4f','%8.4f',true,false);
+    fprintf('       - Zonal mean .albd_pl.dat file saved\n')
     %
 end
 %
@@ -1322,7 +1322,78 @@ n_step = n_step+1;
 %
 % for ENTS-enabled configs
 if opt_makeents
-    
+    %
+    disp(['>  ' num2str(n_step) '. LOADING SURFACE & CLOUD ALBEDO DATA ...']);
+    %
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l'}
+            [~,gi_albd_sur,gi_albd_cl] = fun_read_albd_hadcm3x_all(str);
+            disp(['       - Read GCM albedo data.']);
+            % plot input albedo
+            if (opt_plots)
+                plot_2dgridded(flipud(gi_albd_sur),100.0,'',[[str_dirout '/' str_nameout] '.albd_sur_in'],['surface albedo in']); 
+                plot_2dgridded(flipud(gi_albd_cl),100.0,'',[[str_dirout '/' str_nameout] '.albd_cl_in'],['cloud albedo in']); 
+            end
+        otherwise
+            disp(['         (Nothing to load.)']);
+    end
+    %
+    disp(['>  ' num2str(n_step) '. CREATING SURFACE & CLOUD ALBEDO DATA ...']);
+    %
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l'}
+            % re-grid surface albedo
+            [go_albd_sur,go_falbd_sur] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_sur',go_lone,go_late,opt_debug);
+            go_albd_sur  = go_albd_sur';
+            go_falbd_sur = go_falbd_sur';
+            disp(['       - Re-gridded GCM surface albedo data.']);
+            % re-grid cloud albedo
+            [go_albd_cl,go_falbd_cl] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_cl',go_lone,go_late,opt_debug);
+            go_albd_cl  = go_albd_cl';
+            go_falbd_cl = go_falbd_cl';
+            disp(['       - Re-gridded GCM cloud albedo data.']);
+            % plot surface and cloud albedo output
+            if (opt_plots)
+                plot_2dgridded(flipud(go_albd_sur),100.0,'',[[str_dirout '/' str_nameout] '.albd_sur_out'],['surface albedo out']);
+                plot_2dgridded(flipud(go_albd_cl),100.0,'',[[str_dirout '/' str_nameout] '.albd_cl_out'],['cloud albedo out']);
+            end
+            % save 2D file
+            fprint_2DM(go_albd_sur(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd_sur.dat'],'%8.4f','%8.4f',true,false);
+            fprintf('       - 2D surface albedo file saved\n')
+            fprint_2DM(go_albd_cl(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd_cl.dat'],'%8.4f','%8.4f',true,false);
+            fprintf('       - 2D cloud albedo file saved\n')
+            % create zonal mean
+            vo_albd_sur = mean(go_albd_sur');
+            vo_albd_cl = mean(go_albd_cl');
+            disp(['       - Generated zonal mean surface and cloud albedo profiles.']);
+            % save surface and cloud albedo vectors
+            fprint_1Dn(vo_albd_sur(:),[[str_dirout '/' str_nameout] '.albd_sur.dat'],'%8.4f','%8.4f',true,false);
+            fprintf('       - Zonal mean .albd_sur.dat file saved\n')
+        otherwise
+            % generate idealized cloud albedo
+            % NOTE: if age == 0, then default (modern) GENIE,
+            %       otherwise for generic ice-free world
+            [~,vo_albd_cl]  = make_grid_albd_all(go_latm,par_age);
+            disp(['       - Created generic zonal mean cloud albedo profile.'])
+            % plot output cloud albedo profile
+            figure; scatter(go_latm,vo_albd_cl);
+            axis([-90 90 0.0 1.0]);
+            xlabel('Latitude'); ylabel('Cloud albedo');
+            title('Zonally averaged cloud albedo profile');
+            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.ps']);
+            % reorientate albedo vector for saving
+            vo_albd_cl = fliplr(vo_albd_cl);
+    end
+    fprint_1Dn(vo_albd_cl(:),[[str_dirout '/' str_nameout] '.albd_cl.dat'],'%8.4f','%8.4f',true,false);
+    fprintf('       - Zonal mean .albd_cl.dat file saved\n')
+    % convert cloud albedo to 2D format for usage in ENTS
+    vo_albd_cl_2d = zeros(length(go_latm),length(go_lonm));
+    for i = 1:length(go_lonm)
+        vo_albd_cl_2d(:,i) = vo_albd_cl(:);
+    end
+    % save output
+    fprint_2DM(vo_albd_cl_2d(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd_cl.dat'],'%8.4f','%8.4f',true,false);
+    fprintf('       - Idealized 2D cloud albedo file saved\n')
 end
 %
 % *** LOAD ICE MASK & OROGRAPHY DATA ************************************ %
@@ -1330,16 +1401,24 @@ end
 n_step = n_step+1;
 %
 % for ENTS-enabled configs
-% NOTE: for now, assuming HadCM3(L)
+% NOTE: for now, allow HadCM3(L) input only
+%       make flat orography for other inputs
+%       make snow-free mask for other inputs
 if opt_makeents
     %
     disp(['>  ' num2str(n_step) '. LOADING ICE MASK & OROGRAPHY DATA ...']);
     %
-    [gi_imask] = fun_read_imask_hadcm3x(str);
-    [gi_orog]  = fun_read_orog_hadcm3x(str);
-    % plot input mask & topo
-    if (opt_plots), plot_2dgridded(flipud(gi_imask),2.0,'',[[str_dirout '/' str_nameout] '.imask_in'],['mask in']); end
-    if (opt_plots), plot_2dgridded(flipud(gi_orog),6000.0,'',[[str_dirout '/' str_nameout] '.orog_in'],['topo in']); end
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l'}
+            [gi_imask] = fun_read_imask_hadcm3x(str);
+            [gi_orog]  = fun_read_orog_hadcm3x(str);
+            disp(['       - Read GCM orography and icemask data.']);
+            % plot input mask & topo
+            if (opt_plots), plot_2dgridded(flipud(gi_imask),2.0,'',[[str_dirout '/' str_nameout] '.imask_in'],['mask in']); end
+            if (opt_plots), plot_2dgridded(flipud(gi_orog),6000.0,'',[[str_dirout '/' str_nameout] '.orog_in'],['topo in']); end
+        otherwise
+            disp(['         (Nothing to load.)']);
+    end
 end
 %
 % *** RE-GRID ICE MASK & OROGRAPHY DATA ********************************* %
@@ -1347,57 +1426,71 @@ end
 n_step = n_step+1;
 %
 % for ENTS-enabled configs
-% NOTE: for now, assuming HadCM3(L)
+% NOTE: for now, assuming HadCM3(L) where ice=1 & no ice=0
 % NOTE: the ice mask is not changed after this point
 % NOTE: ice mask and orography on atmospheric grid
 if opt_makeents
     %
     disp(['>  ' num2str(n_step) '. CREATING ICE MASK & OROGRAPHY DATA ...']);
-    % ice mask
-    [go_imask,go_tmp] = make_regrid_2d(gi_lonae,gi_latae,gi_imask',go_lone,go_late,opt_debug);
-    go_imask  = go_imask';
-    go_tmp    = go_tmp';
-    disp(['       - Ice mask re-gridded.']);
-    disp(['         NOTE: The ice mask is not adjusted after this point and so may need to be hand-edited if the land-sea mask changes.']);
-    if (opt_plots), plot_2dgridded(flipud(go_imask),99999.0,'',[[str_dirout '/' str_nameout] '.imask_out.RAW'],['Ice mask out -- RAW']); end
-    fprint_2DM(go_imask(:,:),[],[[str_dirout '/' str_nameout] '.imask_out.RAW.dat'],'%4.1f','%4.1f',true,false);
-    % apply FINAL land-sea mask (no icesheet (==0) over ocean)
-    go_imask = go_imask.*(1-go_mask);
-    if (opt_plots), plot_2dgridded(flipud(go_imask),99999.0,'',[[str_dirout '/' str_nameout] '.imask_out.FINAL'],['Ice mask out -- FINAL version']); end
-    fprint_2DM(go_imask(:,:),[],[[str_dirout '/' str_nameout] '.imask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
-    % orography
-    [go_orog,go_tmp] = make_regrid_2d(gi_lonae,gi_latae,gi_orog',go_lone,go_late,opt_debug);
-    go_orog  = go_orog';
-    go_tmp   = go_tmp';
-    disp(['       - Orography re-gridded.']);
-    if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.RAW'],['Orography out -- RAW']); end
-    fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orog_out.RAW.dat'],'%10.2f','%10i',true,true); 
-    % apply FINAL land-sea mask
-    % NOTE: ocean mask has 1 == ocean
-    % NOTE: at this point, re-gridded cells with no orographic information == NaN
-    %       while land cells in the mask are zero
-    %       becasue the mask might have changed compared to the orographic grid, we need:
-    %       (1) ocean cells to be NaN in the orographic grid irrespective of the original orographic re-gridding
-    %       (2) land cells which are NaN in the orographic grid, to be zero
-    %           (i.e. in the absence of GCM info, we are going to place 'new' land at sealevel
-    % (1)
-    go_orog(find(go_mask==1)) = NaN;
-    % (2) 
-    go_orog(intersect(find(go_mask==0),find(go_orog==NaN))) = 0.0;
     %
-    if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.FINAL'],['Orography out -- FINAL version']); end
-    fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orog_out.FINAL.dat'],'%10.2f','%10i',true,true);
-    % create and save combined ENTS mask
-    % NOTE: Ocean = 0; Land = 1; Ice sheet = 2
-    %       (=> invert ocean mask, then add ice mask)
-    % NOTE: first convert fractional ice mask to (1,0): assume a thresold of 0.5
-    i_imask = find(go_imask(:,:) > 0.5);
-    go_imask(:,:) = 0.0;
-    go_imask(i_imask) = 1.0;
-    go_olimask(:,:) = 1 - go_mask(:,:);
-    go_olimask(:,:) = go_olimask(:,:) + go_imask(:,:);
-    if (opt_plots), plot_2dgridded(flipud(go_olimask),99999.0,'',[[str_dirout '/' str_nameout] '.olimask_out.FINAL'],['ocean-land-ice mask out -- FINAL version']); end
-    fprint_2DM(go_olimask(:,:),[],[[str_dirout '/' str_nameout] '.olimask_out.FINAL.dat'],'%3i','%3i',true,false);
+    switch str(1).gcm
+        case {'hadcm3','hadcm3l'}
+            % regrid ice mask
+            [go_imask,go_tmp] = make_regrid_2d(gi_lonae,gi_latae,gi_imask',go_lone,go_late,opt_debug);
+            go_imask  = go_imask';
+            go_tmp    = go_tmp';
+            % plot raw data (not adjusted for land-sea mask)
+            if (opt_plots), plot_2dgridded(flipud(go_imask),99999.0,'',[[str_dirout '/' str_nameout] '.imask_out.RAW'],['Ice mask out -- RAW']); end
+            fprint_2DM(go_imask(:,:),[],[[str_dirout '/' str_nameout] '.imask_out.RAW.dat'],'%4.1f','%4.1f',true,false);
+            % apply FINAL land-sea mask (no icesheet (==0) over ocean)
+            go_imask = go_imask.*(1-go_mask);
+            disp(['       - Ice mask re-gridded.']);
+            disp(['         NOTE: Ice mask is not adjusted after this point so may need to be hand-edited if the land-sea mask changes.']);
+            if (opt_plots), plot_2dgridded(flipud(go_imask),99999.0,'',[[str_dirout '/' str_nameout] '.imask_out.FINAL'],['Ice mask out -- FINAL version']); end
+            fprint_2DM(go_imask(:,:),[],[[str_dirout '/' str_nameout] '.imask_out.FINAL.dat'],'%4.1f','%4.1f',true,false);
+            % orography
+            [go_orog,go_tmp] = make_regrid_2d(gi_lonae,gi_latae,gi_orog',go_lone,go_late,opt_debug);
+            go_orog  = go_orog';
+            go_tmp   = go_tmp';
+            disp(['       - Orography re-gridded.']);
+            if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.RAW'],['Orography out -- RAW']); end
+            fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orog_out.RAW.dat'],'%10.2f','%10i',true,true);
+            % apply FINAL land-sea mask
+            % NOTE: ocean mask has 1 == ocean
+            % NOTE: at this point, re-gridded cells with no orographic information == NaN
+            %       while land cells in the mask are zero
+            %       because the mask might have changed compared to the orographic grid, we need:
+            %       (1) ocean cells to be NaN in the orographic grid irrespective of the original orographic re-gridding
+            %       (2) land cells which are NaN in the orographic grid, to be zero
+            %           (i.e. in the absence of GCM info, we are going to place 'new' land at sealevel
+            % (1)
+            go_orog(find(go_mask==1)) = NaN;
+            % (2)
+            go_orog(intersect(find(go_mask==0),find(go_orog==NaN))) = 0.0;
+            %
+            if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.FINAL'],['Orography out -- FINAL version']); end
+            % create and save combined ENTS mask
+            % NOTE: Ocean = 0; Land = 1; Ice sheet = 2
+            %       (=> invert ocean mask, then add ice mask)
+            % NOTE: first convert fractional ice mask to (1,0): assume a thresold of 0.5
+            i_imask = find(go_imask(:,:) > 0.5);
+            go_imask(:,:) = 0.0;
+            go_imask(i_imask) = 1.0;
+            go_licemask(:,:) = (1 - go_mask(:,:)) + go_imask(:,:);
+            if (opt_plots), plot_2dgridded(flipud(go_licemask),99999.0,'',[[str_dirout '/' str_nameout] '.licemask_out.FINAL'],['Land-ice mask out -- FINAL version']); end
+        otherwise
+            % generate flat orography at 840 m ==> mean modern land elevation
+            go_orog = abs(go_mask-1)*840;
+            disp(['       - Created flat orography.']);
+            % generate ice-free land-ice mask
+            % NOTE: Ocean = 0; Land = 1; Ice sheet = 2
+            %       (=> invert ocean mask, do not add ice)
+            go_licemask = abs(go_mask-1);
+            disp(['       - Created ice-free icemask.']);
+    end
+    % print to textfile
+    fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orography.dat'],'%10.2f','%10i',true,true);
+    fprint_2DM(go_licemask(:,:),[],[[str_dirout '/' str_nameout] '.licemask.dat'],'%3i','%3i',true,false);
 end
 %
 % *** GENERATE CONFIG FILE PARAMETER LINES ****************************** %
@@ -1449,16 +1542,24 @@ fprintf(fid,'%s\n',['ea_taux_v=''',par_wor_name,'.taux_v.dat''']);
 fprintf(fid,'%s\n',['ea_tauy_v=''',par_wor_name,'.tauy_v.dat''']);
 fprintf(fid,'%s\n',['ea_adv_u=''',par_wor_name,'.wvelx.dat''']);
 fprintf(fid,'%s\n',['ea_adv_v=''',par_wor_name,'.wvely.dat''']);
+% Boundary conditions: PLANETARY ALBEDO
+if opt_makealbedo
+    fprintf(fid,'%s\n','# Boundary conditions: ALBEDO (planetary)');
+    fprintf(fid,'%s\n',['ea_par_albedo1d_name=''',par_wor_name,'.albd_pl.dat''']);
+end
 % Boundary conditions: GOLDSTEIN
 fprintf(fid,'%s\n','# Boundary conditions: GOLDSTEIN');
 fprintf(fid,'%s\n',['go_topo=''',par_wor_name,'''']);
 % Boundary conditions: GOLDSTEIN sea-ice
 fprintf(fid,'%s\n','# Boundary conditions: GOLDSTEIN sea-ice');
 fprintf(fid,'%s\n',['gs_topo=''',par_wor_name,'''']);
-% Boundary conditions: ALBEDO!
-if opt_makealbedo
-    fprintf(fid,'%s\n','# Boundary conditions: ALBEDO!');
-    fprintf(fid,'%s\n',['ea_par_albedo1d_name=''',par_wor_name,'.albd.dat''']);
+% Boundary conditions: ENTS
+if opt_makeents
+    fprintf(fid,'%s\n','# Boundary conditions: ENTS');
+    fprintf(fid,'%s\n',['ea_filename_ents2d=.true.']);
+    fprintf(fid,'%s\n',['ea_filenameorog=''',par_wor_name,'.orography.dat''']);
+    fprintf(fid,'%s\n',['ea_filenamelice=''',par_wor_name,'.licemask.dat''']);
+    fprintf(fid,'%s\n',['ea_filenamealba=''',par_wor_name,'.2Dalbd_cl.dat''']);
 end
 % Boundary conditions: BIOGEM
 if (opt_makezonalwind)
@@ -1558,9 +1659,10 @@ if (par_age == 0.0)
     fprintf(fid,'%s\n','# ... also, salinity should be set 1 PSU lower if it an ice-free World');
     fprintf(fid,'%s\n',['###go_saln0=33.9']);
     fprintf(fid,'%s\n','# Orbital parameters (modern, defaults)');
-    fprintf(fid,'%s\n',['###ea_par_orbit_osce=','0.0167',' # eccentricity']);
-    fprintf(fid,'%s\n',['###ea_par_orbit_oscsob=','0.397789',' # sine of obliquity']);
-    fprintf(fid,'%s\n',['###ea_par_orbit_oscgam=','102.92',' # longitude of perihelion']);
+    fprintf(fid,'%s\n',['ea_opt_orbit_old =','.false.',' # flag NEW orbit code']);
+    fprintf(fid,'%s\n',['ea_par_orbit_osce=','0.0167',' # eccentricity']);
+    fprintf(fid,'%s\n',['ea_par_orbit_oscobl=','0.409093',' # obliquity (rad)']);
+    fprintf(fid,'%s\n',['ea_par_orbit_osclonperi=','1.796257',' # true longitude of perihelion (rad)']);
 else
     loc_per = 100.0*(1-1/(1+(2/5)*(1-(4.570E+03-par_age)/4.570E+03)));
     loc_S0  = 1.368E+03*(100-loc_per)/100;
@@ -1569,9 +1671,10 @@ else
     fprintf(fid,'%s\n','# Ocean salinity -- assuming an ice-free World (1 PSU lower than modern)');
     fprintf(fid,'%s\n',['go_saln0=33.9']);
     fprintf(fid,'%s\n','# Orbital parameters -- modern set => adjust as necessary');
+    fprintf(fid,'%s\n',['ea_opt_orbit_old =','.false.',' # flag NEW orbit code']);
     fprintf(fid,'%s\n',['ea_par_orbit_osce=','0.0167',' # eccentricity']);
-    fprintf(fid,'%s\n',['ea_par_orbit_oscsob=','0.397789',' # sine of obliquity']);
-    fprintf(fid,'%s\n',['ea_par_orbit_oscgam=','102.92',' # longitude of perihelion']);
+    fprintf(fid,'%s\n',['ea_par_orbit_oscobl=','0.409093',' # obliquity (rad)']);
+    fprintf(fid,'%s\n',['ea_par_orbit_osclonperi=','1.796257',' # true longitude of perihelion (rad)']);
 end
 % ocean Ca/Mg (and SO4)
 % From: Zeebe and Tyrrell [2019]

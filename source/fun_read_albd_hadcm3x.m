@@ -32,7 +32,8 @@ ncid = netcdf.open([str_path '/' str(3).nc '.nc'],'nowrite');
 % NOTE: albedop(time=18, lat=73, lon=96)
 varid  = netcdf.inqVarID(ncid,'albedop');
 albd(:,:,:) = netcdf.getVar(ncid,varid);
-grid_albd = double(albd(:,:,13));
+grid_albd = double(albd(:,:));
+%grid_albd = double(albd(:,:,13));
 % NOTE: format needed is: [LAT,LON] (rows x columns) orientation
 %       => flip up-down & transpose to give a readable ASCII array
 % NOTE: for some reason this field does not need flipud-ing ... ??
