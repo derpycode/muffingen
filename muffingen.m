@@ -1384,17 +1384,19 @@ if opt_makeents
             print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.ps']);
             % reorientate albedo vector for saving
             vo_albd_cl = fliplr(vo_albd_cl);
-    end
-    fprint_1Dn(vo_albd_cl(:),[[str_dirout '/' str_nameout] '.albd_cl.dat'],'%8.4f','%8.4f',true,false);
-    fprintf('       - Zonal mean .albd_cl.dat file saved\n')
-    % convert cloud albedo to 2D format for usage in ENTS
-    vo_albd_cl_2d = zeros(length(go_latm),length(go_lonm));
-    for i = 1:length(go_lonm)
-        vo_albd_cl_2d(:,i) = vo_albd_cl(:);
-    end
-    % save output
-    fprint_2DM(vo_albd_cl_2d(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd_cl.dat'],'%8.4f','%8.4f',true,false);
-    fprintf('       - Idealized 2D cloud albedo file saved\n')
+			% convert cloud albedo to 2D format for usage in ENTS
+			go_albd_cl = zeros(length(go_latm),length(go_lonm));
+			for i = 1:length(go_lonm)
+				go_albd_cl(:,i) = vo_albd_cl(:);
+			end    
+			% save output
+			fprint_2DM(go_albd_cl(:,:),[],[[str_dirout '/' str_nameout] '.2Dalbd_cl.dat'],'%8.4f','%8.4f',true,false);
+			fprintf('       - Generic 2D cloud albedo file saved\n')
+			fprint_1Dn(vo_albd_cl(:),[[str_dirout '/' str_nameout] '.albd_cl.dat'],'%8.4f','%8.4f',true,false);
+			fprintf('       - Generic zonal mean .albd_cl.dat file saved\n')
+	end
+    
+
 end
 %
 % *** LOAD ICE MASK & OROGRAPHY DATA ************************************ %
