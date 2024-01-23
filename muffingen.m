@@ -354,6 +354,7 @@ if opt_makeall
     opt_makerunoff=true;  %
     opt_makewind=true;    %
     opt_makealbedo=true;  %
+	opt_makeents=true;    %
     opt_makeseds=true;    %
     opt_filtermask=true;  %
     opt_filtertopo=true;  %
