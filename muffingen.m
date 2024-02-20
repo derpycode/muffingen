@@ -245,6 +245,8 @@ function [] = muffingen(POPT)
 %   23/04/05: interim extension for generating ENTS config files
 %             (from HadCM3(L))
 %             *** v0.9.25 *************************************************
+%   24/02/20: fixes for high res SEDGEM grids by Alexandre Pohl
+%             *** v0.9.26 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -260,7 +262,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.25';
+str_muffingen_ver = 'v0.9.26';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
