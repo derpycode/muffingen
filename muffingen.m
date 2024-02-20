@@ -245,6 +245,8 @@ function [] = muffingen(POPT)
 %   23/04/05: interim extension for generating ENTS config files
 %             (from HadCM3(L))
 %             *** v0.9.25 *************************************************
+%   24/02/20: fixes for high res SEDGEM grids by Alexandre Pohl
+%             *** v0.9.26 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -260,7 +262,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.25';
+str_muffingen_ver = 'v0.9.26';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -1108,7 +1110,7 @@ if opt_makeseds
                     % => assume twice ocean resolution
                     % + generate new vectors of grid properties
                     if opt_highresseds
-                        [gos_lonm,gos_lone,gos_latm,gos_late,gos_dm,gos_de] = make_genie_grid(2*imax,2*jmax,kmax,par_max_D,par_lon_off,opt_equalarea);
+                        [gos_lonm,gos_lone,gos_latm,gos_late,gos_dm,gos_de] = make_genie_grid(2*imax,2*jmax,kmax,par_max_D,par_lon_off,opt_equalarea,par_add_Dk);
                     else
                         gos_lone = go_lone;
                         gos_late = go_late;
@@ -1551,8 +1553,13 @@ end
 if opt_makeseds
     % Grid resolution of solid Earth components
     fprintf(fid,'%s\n','# Grid resolution of solid Earth components');
-    fprintf(fid,'%s\n',['SEDGEMNLONSOPTS=''$(DEFINE)SEDGEMNLONS=',num2str(imax),'''']);
-    fprintf(fid,'%s\n',['SEDGEMNLATSOPTS=''$(DEFINE)SEDGEMNLATS=',num2str(jmax),'''']);
+    if (opt_highresseds)
+        fprintf(fid,'%s\n',['SEDGEMNLONSOPTS=''$(DEFINE)SEDGEMNLONS=',num2str(2.*imax),'''']);
+        fprintf(fid,'%s\n',['SEDGEMNLATSOPTS=''$(DEFINE)SEDGEMNLATS=',num2str(2.*jmax),'''']);
+    else
+        fprintf(fid,'%s\n',['SEDGEMNLONSOPTS=''$(DEFINE)SEDGEMNLONS=',num2str(imax),'''']);
+        fprintf(fid,'%s\n',['SEDGEMNLATSOPTS=''$(DEFINE)SEDGEMNLATS=',num2str(jmax),'''']);        
+    end
     fprintf(fid,'%s\n',['ROKGEMNLONSOPTS=''$(DEFINE)ROKGEMNLONS=',num2str(imax),'''']);
     fprintf(fid,'%s\n',['ROKGEMNLATSOPTS=''$(DEFINE)ROKGEMNLATS=',num2str(jmax),'''']);
     % Topography for solid Earth components
