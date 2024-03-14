@@ -403,7 +403,7 @@ switch par_gcm
     case {'cesm'}
         if isempty(par_nc_topo_name),  par_nc_topo_name  = 'climo'; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
-        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; endpar_wspeed_avstr
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; end
         if isempty(par_nc_atmos_name), par_nc_atmos_name = par_nc_topo_name; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = par_nc_topo_name; end
         if isempty(par_nc_coupl_name), par_nc_coupl_name = par_nc_topo_name; end
