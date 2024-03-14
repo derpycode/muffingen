@@ -38,21 +38,21 @@ ncid = netcdf.open([str_path '/' str(3).nc '.nc'],'nowrite');
 % NOTE: albedop = upSol_mm_s3_TOA./downSol_mm_TOA;
 varid  = netcdf.inqVarID(ncid,'albedop');
 albd(:,:,:) = netcdf.getVar(ncid,varid);
+%gi_albd_planet = double(albd(:,:))';
 gi_albd_planet = double(albd(:,:,13))';
 % ALBEDO -- SURFACE
 % NOTE: albedos = (downSol_Seaice_mm_s3_srf-solar_mm_s3_srf)./downSol_Seaice_mm_s3_srf;
 varid  = netcdf.inqVarID(ncid,'albedos');
 albd(:,:,:) = netcdf.getVar(ncid,varid);
+%gi_albd_surface = double(albd(:,:))';
 gi_albd_surface = double(albd(:,:,13))';
 % close netCDF file
 netcdf.close(ncid);
 %
 % ALBEDO -- CLOUD 
+% NOTE: no hadCM3 output -- needs manual calculation
 % open netCDF files
 ncid = netcdf.open([str_path '/' str(1).nc '.nc'],'nowrite');
-% load and process data
-% NOTE: VAR(lat=73, lon=96) ==> annual means
-% NOTE: no hadCM3 output -- needs manual calculation
 varid  = netcdf.inqVarID(ncid,'downSol_Seaice_mm_s3_srf');
 downSol_srf(:,:) = netcdf.getVar(ncid,varid);
 varid  = netcdf.inqVarID(ncid,'upSol_mm_s3_TOA');
@@ -65,15 +65,24 @@ netcdf.close(ncid);
 downSol_srf = downSol_srf';
 upSol_TOA = upSol_TOA';
 downSol_TOA = downSol_TOA';
-%
+
 % calculate upSol_srf (reflected from surface)
 upSol_srf = gi_albd_surface.*downSol_srf;
 % calculate diff between TOA outgoing solar and surface-reflected 
-% outgoing solar to obtain cloud-reflected fraction of outgoing solar energy
+% outgoing solar to obtain cloud-reflected outgoing solar energy
 upSol_Cloud = upSol_TOA - upSol_srf;
 % calculate cloud albedo and 
 gi_albd_cloud = (upSol_Cloud./downSol_TOA);
-%
+
+
+% % load
+% downSol_mm_TOA=ncread([str_path '/' str(1).nc '.nc'],'downSol_mm_TOA');
+% downSol_Seaice_mm_s3_srf=ncread([str_path '/' str(1).nc '.nc'],'downSol_Seaice_mm_s3_srf');
+% 
+% %transpose
+% downSol_mm_TOA=downSol_mm_TOA';
+% downSol_Seaice_mm_s3_srf=downSol_Seaice_mm_s3_srf';
+
 %
 % *********************************************************************** %
 

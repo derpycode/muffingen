@@ -10,7 +10,7 @@ function [vo_albd,vo_albd_atm]  = make_grid_albd(go_latm,par_age)
 [jmax] = length(go_latm);
 % create otput vectors
 vo_albd = 0.0*go_latm;
-vo_albd_atm = 0.0*go_latm; 
+vo_albd_atm = 0.0*go_latm;
 % convert rad to deg
 loc_latm = (pi/180.0)*go_latm;
 %
@@ -46,7 +46,9 @@ else
 end
 % calculate the albedo profile itself
 for j = 1:jmax
+    % planetary albedo
     vo_albd(j) = climalbedo_offset + climalbedo_amp*0.5*(1.0 - cos(2.0*loc_latm(j)) + climalbedo_mod*cos(6.0*loc_latm(j)));
+    % atmospheric or 'cloud' albedo
     vo_albd_atm(j) = atmalbedo_offset + atmalbedo_amp*0.5*(1.0 - cos(2.0*loc_latm(j)) + atmalbedo_mod*cos(6.0*loc_latm(j)));
 end
 %

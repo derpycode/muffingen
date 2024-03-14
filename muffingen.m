@@ -278,7 +278,7 @@ eval(POPT);
 % zonal wind-stress generaton parameter
 if ~exist('par_tauopt','var'),   par_tauopt   = 0; end
 % ENTS-enabled output??
-if ~exist('opt_makeents','var'), opt_makeents = false; end
+if ~exist('opt_makeents','var'), opt_makeents = true; end
 % surface layer reference thickness (m)
 if ~exist('par_sur_D','var'),    par_sur_D    = 0.0; end
 % minimum k level
@@ -338,14 +338,7 @@ if strcmp(par_gcm,''),        par_gcm = 'blank';   end
 if strcmp(par_gcm,'BLANK'),   par_gcm = 'blank';   end
 if strcmp(par_gcm,'none'),    par_gcm = 'blank';   end
 if strcmp(par_gcm,'NONE'),    par_gcm = 'blank';   end
-% adjust options accroding to input (GCM) type
-switch par_gcm
-    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
-    case {'k1','mask','k2','mat'}
-    otherwise
-        opt_makeall=false;
-        opt_user=true;
-end
+%
 % deal with meta selections
 if opt_makeall
     opt_makemask=true;    %
@@ -362,6 +355,15 @@ end
 if opt_makeseds
     opt_maketopo=true;
 end
+% adjust options according to input (GCM) type
+switch par_gcm
+    case {'hadcm3','hadcm3l','foam','cesm','rockee'}
+    case {'k1','mask','k2','mat'}
+    otherwise
+        opt_makeall=false;
+        opt_user=true;
+end
+
 % rename variables
 % NOTE: for some earlier code consistency ... now redundant ...
 imax = par_max_i;
@@ -397,11 +399,11 @@ switch par_gcm
         if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; end
         if isempty(par_nc_atmos_name), par_nc_atmos_name = 'atmos'; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = ''; end
-        if isempty(par_nc_coupl_name), par_nc_coupl_name = ''; end
+        if isempty(par_nc_coupl_name), par_nc_coupl_name = 'coupl'; end
     case {'cesm'}
         if isempty(par_nc_topo_name),  par_nc_topo_name  = 'climo'; end
         if isempty(par_nc_mask_name),  par_nc_mask_name  = par_nc_topo_name; end
-        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; end
+        if isempty(par_nc_axes_name),  par_nc_axes_name  = par_nc_topo_name; endpar_wspeed_avstr
         if isempty(par_nc_atmos_name), par_nc_atmos_name = par_nc_topo_name; end
         if isempty(par_nc_ocean_name), par_nc_ocean_name = par_nc_topo_name; end
         if isempty(par_nc_coupl_name), par_nc_coupl_name = par_nc_topo_name; end
@@ -527,6 +529,8 @@ disp([' ']);
 % RE-GRID WIND SPEED/STRESS DATA
 % LOAD ALBEDO DATA
 % RE-GRID & PROCESS ALBEDO
+% LOAD OROGRAPHY AND ICEMASK
+% RE-GRID & PROCESS OROGRAPHY AND ICEMASK
 % GENERATE CONFIG FILE PARAMETER LINES
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -558,6 +562,19 @@ switch str(1).gcm
         disp([' ']);
         diary off;
         return;
+end
+% check compatibility of GCM with muffingen settings
+switch str(1).gcm
+    case {'hadcm3','hadcm3l','foam'}
+    case {'cesm','rockee'}
+        opt_makeents=false;
+        disp(['       * ERROR: ' str(1).gcm ' input is not (yet) supported to generate ENTS fields :(']);
+        disp(['         ----> set opt_makeents=.FALSE. and continue muffingen']);
+        disp(['--------------------------------------------------------']);
+    case {'k1','mask','k2','mat'}
+    otherwise
+        opt_makeall=false;
+        opt_user=true;
 end
 %
 % *** SET UP OUTPUT GRID ************************************************ %
@@ -1235,7 +1252,8 @@ elseif (opt_makewind)
             disp(['       - Re-grided GCM wind products.']);
         otherwise
             make_grid_winds_zonal(go_latm,go_late,go_mask,[str_dirout '/' str_nameout],par_tauopt);
-            disp(['       - Generated zonal wind products.']);
+            disp(['       - Generated idealized zonal wind products.']);
+            disp(['       - Generated idealized 2D windspeed on full grid.']);
     end
 end
 %
@@ -1335,6 +1353,14 @@ if opt_makeents
                 plot_2dgridded(flipud(gi_albd_sur),100.0,'',[[str_dirout '/' str_nameout] '.albd_sur_in'],['surface albedo in']); 
                 plot_2dgridded(flipud(gi_albd_cl),100.0,'',[[str_dirout '/' str_nameout] '.albd_cl_in'],['cloud albedo in']); 
             end
+        case {'foam'}
+            [~,gi_albd_sur,gi_albd_cl] = fun_read_albd_foam_all(str);
+            disp(['       - Read GCM albedo data.']);
+            % plot input albedo
+            if (opt_plots)
+                plot_2dgridded(flipud(gi_albd_sur),100.0,'',[[str_dirout '/' str_nameout] '.albd_sur_in'],['surface albedo in']); 
+                plot_2dgridded(flipud(gi_albd_cl),100.0,'',[[str_dirout '/' str_nameout] '.albd_cl_in'],['cloud albedo in']); 
+            end
         otherwise
             disp(['         (Nothing to load.)']);
     end
@@ -1342,7 +1368,7 @@ if opt_makeents
     disp(['>  ' num2str(n_step) '. CREATING SURFACE & CLOUD ALBEDO DATA ...']);
     %
     switch str(1).gcm
-        case {'hadcm3','hadcm3l'}
+        case {'hadcm3','hadcm3l','foam'}
             % re-grid surface albedo
             [go_albd_sur,go_falbd_sur] = make_regrid_2d(gi_lonae,gi_latae,gi_albd_sur',go_lone,go_late,opt_debug);
             go_albd_sur  = go_albd_sur';
@@ -1374,7 +1400,7 @@ if opt_makeents
             % generate idealized cloud albedo
             % NOTE: if age == 0, then default (modern) GENIE,
             %       otherwise for generic ice-free world
-            [~,vo_albd_cl]  = make_grid_albd_all(go_latm,par_age);
+            [~,vo_albd_cl]  = make_grid_albd(go_latm,par_age);
             disp(['       - Created generic zonal mean cloud albedo profile.'])
             % plot output cloud albedo profile
             figure; scatter(go_latm,vo_albd_cl);
@@ -1394,9 +1420,7 @@ if opt_makeents
 			fprintf('       - Generic 2D cloud albedo file saved\n')
 			fprint_1Dn(vo_albd_cl(:),[[str_dirout '/' str_nameout] '.albd_cl.dat'],'%8.4f','%8.4f',true,false);
 			fprintf('       - Generic zonal mean .albd_cl.dat file saved\n')
-	end
-    
-
+    end   
 end
 %
 % *** LOAD ICE MASK & OROGRAPHY DATA ************************************ %
@@ -1407,6 +1431,9 @@ n_step = n_step+1;
 % NOTE: for now, allow HadCM3(L) input only
 %       make flat orography for other inputs
 %       make snow-free mask for other inputs
+% 
+% TO DO: add manual imput option for icesheet mask
+%
 if opt_makeents
     %
     disp(['>  ' num2str(n_step) '. LOADING ICE MASK & OROGRAPHY DATA ...']);
@@ -1418,6 +1445,13 @@ if opt_makeents
             disp(['       - Read GCM orography and icemask data.']);
             % plot input mask & topo
             if (opt_plots), plot_2dgridded(flipud(gi_imask),2.0,'',[[str_dirout '/' str_nameout] '.imask_in'],['mask in']); end
+            if (opt_plots), plot_2dgridded(flipud(gi_orog),6000.0,'',[[str_dirout '/' str_nameout] '.orog_in'],['topo in']); end
+        case {'foam'}
+            % icemask not available as input for FOAM
+            [gi_orog]  = fun_read_orog_foam(str);
+            disp(['       - Read GCM orography data.']);
+            disp(['       - FOAM ice mask input not supported.']);
+            % plot input topo
             if (opt_plots), plot_2dgridded(flipud(gi_orog),6000.0,'',[[str_dirout '/' str_nameout] '.orog_in'],['topo in']); end
         otherwise
             disp(['         (Nothing to load.)']);
@@ -1475,12 +1509,40 @@ if opt_makeents
             % create and save combined ENTS mask
             % NOTE: Ocean = 0; Land = 1; Ice sheet = 2
             %       (=> invert ocean mask, then add ice mask)
-            % NOTE: first convert fractional ice mask to (1,0): assume a thresold of 0.5
+            % NOTE: first convert fractional ice mask to (1,0): assume a threshold of 0.5
             i_imask = find(go_imask(:,:) > 0.5);
             go_imask(:,:) = 0.0;
             go_imask(i_imask) = 1.0;
             go_licemask(:,:) = (1 - go_mask(:,:)) + go_imask(:,:);
             if (opt_plots), plot_2dgridded(flipud(go_licemask),99999.0,'',[[str_dirout '/' str_nameout] '.licemask_out.FINAL'],['Land-ice mask out -- FINAL version']); end
+        case {'foam'}
+            % generate ice-free land-ice mask
+            % NOTE: Ocean = 0; Land = 1; Ice sheet = 2
+            %       (=> invert ocean mask, do not add ice)
+            go_licemask = abs(go_mask-1);
+            disp(['       - Created ice-free icemask.']);
+            if (opt_plots), plot_2dgridded(flipud(go_licemask),99999.0,'',[[str_dirout '/' str_nameout] '.licemask_out.FINAL'],['Land-ice mask out -- FINAL version']); end
+            % orography
+            [go_orog,go_tmp] = make_regrid_2d(gi_lonce,gi_latce,gi_orog',go_lone,go_late,opt_debug);
+            go_orog  = go_orog';
+            go_tmp   = go_tmp';
+            disp(['       - Orography re-gridded.']);
+            if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.RAW'],['Orography out -- RAW']); end
+            fprint_2DM(go_orog(:,:),1-go_mask(:,:),[[str_dirout '/' str_nameout] '.orog_out.RAW.dat'],'%10.2f','%10i',true,true);
+            % apply FINAL land-sea mask
+            % NOTE: ocean mask has 1 == ocean
+            % NOTE: at this point, re-gridded cells with no orographic information == NaN
+            %       while land cells in the mask are zero
+            %       because the mask might have changed compared to the orographic grid, we need:
+            %       (1) ocean cells to be NaN in the orographic grid irrespective of the original orographic re-gridding
+            %       (2) land cells which are NaN in the orographic grid, to be zero
+            %           (i.e. in the absence of GCM info, we are going to place 'new' land at sealevel
+            % (1)
+            go_orog(find(go_mask==1)) = NaN;
+            % (2)
+            go_orog(intersect(find(go_mask==0),find(go_orog==NaN))) = 0.0;
+            %
+            if (opt_plots), plot_2dgridded(flipud(go_orog),99999.0,'',[[str_dirout '/' str_nameout] '.orog_out.FINAL'],['Orography out -- FINAL version']); end
         otherwise
             % generate flat orography at 840 m ==> mean modern land elevation
             go_orog = abs(go_mask-1)*840;
@@ -1563,6 +1625,7 @@ if opt_makeents
     fprintf(fid,'%s\n',['ea_filenameorog=''',par_wor_name,'.orography.dat''']);
     fprintf(fid,'%s\n',['ea_filenamelice=''',par_wor_name,'.licemask.dat''']);
     fprintf(fid,'%s\n',['ea_filenamealba=''',par_wor_name,'.2Dalbd_cl.dat''']);
+    fprintf(fid,'%s\n',['ea_filename_wspeed=''',par_wor_name,'.windspeed_' str(1).wspd '_ents.dat''']);
 end
 % Boundary conditions: BIOGEM
 if (opt_makezonalwind)

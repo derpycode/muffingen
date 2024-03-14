@@ -30,7 +30,7 @@ if exist([str(1).path '/' str(1).exp '/' str(7).nc '.nc']) ~= 0
     netcdf.close(ncid);
 else
     % if file does not exist, assume no ice
-    disp(['         WARNING: icemask input file not found. Assume no icesheets']);
+    disp(['      *** WARNING *** icemask input file not found. Assume no icesheets']);
     % open different netCDF to get grid specification
     ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(4).nc '.nc'],'nowrite');
     % load land-sea mask
