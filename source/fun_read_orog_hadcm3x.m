@@ -30,7 +30,7 @@ grid_orog = double(grid_orog);
 % NOTE: for some reason this field does not need flipud-ing ... ??
 grid_orog = grid_orog';
 % filter out land (mark as invalid)
-% NOTE: assume that zero is ocean
+% NOTE: assume that zero is ocean, land-sea corrections made in muffingen.m
 grid_orog(find(grid_orog==0.0))=NaN;
 % close netCDF file
 netcdf.close(ncid);

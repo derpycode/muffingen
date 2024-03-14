@@ -1,4 +1,4 @@
-function [] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str,optplots);
+function [] = make_grid_winds_foam(gilonpm,gilonpe,gilatpm,gilatpe,gilonam,gilonae,gilatam,gilatae,gimask,golonm,golone,golatm,golate,gomask,str,optplots)
 % make_grid_winds_foam
 %
 %   *********************************************************
@@ -114,6 +114,37 @@ end
 % re-orientate
 giwspd_uvma = flipud(giwspd_uvma');
 %
+% NOTE: windspeed directly from output (wsma) is unavailable for FOAM
+%
+% *** load mask -- wind velocity **************************************** %
+%
+% open netCDF file
+ncid = netcdf.open([str(1).path '/' str(1).exp '/' str(3).nc '.nc'],'nowrite');
+% read netCDf information
+[ndims,nvars,ngatts,unlimdimid] = netcdf.inq(ncid);
+% load MASK
+varid  = netcdf.inqVarID(ncid,'ORO');
+locmaskvel(:,:,:) = netcdf.getVar(ncid,varid);
+% close netCDF file
+netcdf.close(ncid);
+%
+% *** process data -- wind velocity ************************************ %
+%
+% create annual averages (of mask!!!)
+gimaskpl = 0.0*locmaskvel(:,:,1);
+for t=1:12
+    gimaskpl = gimaskpl + locmaskvel(:,:,t)/12.0;
+end
+% re-orientate
+gimaskpl = flipud(gimaskpl');
+% derive mask values (ocean == 1, land == NaN, seaice > 1)
+% NOTE: FOAM mask is odd ... land is not quite equal to 1,
+%       more like 0.999999999 something ... unclear!
+% create land (only) mask (land==1, ocean/seaice==NaN)
+gimaskpl(find(gimaskpl<0.999)) = NaN;
+gimaskpl(find(gimaskpl>1.0))   = NaN;
+gimaskpl(find(~isnan(gimaskpl))) = 1.0;
+%
 % *** load mask -- wind stress ****************************************** %
 %
 % open netCDF file
@@ -135,7 +166,7 @@ for t=1:12,
 end
 % re-orientate
 gimaskp = flipud(gimaskp');
-% derive mask values (ocean == 1, land == NaN)
+% derive mask values (ocean == 1, land == NaN, seaice > 1)
 % NOTE: FOAM mask is odd ... land is not quite equal to 1,
 %       more like 0.999999999 something ... unclear!
 gimaskp(find(gimaskp<0.999)) = 1.0;
@@ -172,9 +203,13 @@ golatve = [golatm 90.0];
 % longitude
 golonue = [golonm golonm(end)+360.0/imax];
 golonve = golone;
-% create GENIE NaN mask
+% create GENIE NaN mask -- ocean
 gm = gomask;
 gm(find(gm == 0)) = NaN;
+% create GENIE NaN mask -- land
+gml = gomask;
+gml(find(gml == 1)) = NaN;
+gml(find(gml == 0)) = 1;
 %
 % *** Put on a GOLDSTEIN grid ******************************************* %
 %
@@ -263,12 +298,42 @@ wspeed_uvaa = gomask.*gowspdall;
 wspeed_uvaa(find(isnan(wspeed_uvaa))) = 0.0;
 % wspeed_uvma
 plot_2dgridded(flipud(giwspd_uvma),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.IN'],['wind speed in']);
-[gowspdall,gofwspdall] = make_regrid_2d(gilonae,gilatae,giwspd_uvma',golone,golate,false);
-gowspdall = gowspdall';
-gofwspdall = gofwspdall';
-if (optplots), plot_2dgridded(flipud(gowspdall),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.OUTALL'],['wind speed out -- no mask']); end
-wspeed_uvma = gomask.*gowspdall;
+[gowspdall_uvma,gofwspdall_uvma] = make_regrid_2d(gilonae,gilatae,giwspd_uvma',golone,golate,false);
+gowspdall_uvma = gowspdall_uvma';
+gofwspdall_uvma = gofwspdall_uvma';
+if (optplots), plot_2dgridded(flipud(gowspdall_uvma),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvma.OUTALL'],['wind speed out -- no mask']); end
+wspeed_uvma = gomask.*gowspdall_uvma;
 wspeed_uvma(find(isnan(wspeed_uvma))) = 0.0;
+%
+%
+% *** Put on a ENTS (land) grid ******************************************* %
+%
+% NOTE: don't forget to flip the re-gridded orientation back around again
+%
+% make GENIE land mask
+glmask = abs(gomask-1);
+%
+% -> wind speed
+% NOTE: GENIE c-grid: (golate,golone) == jmax+1 x imax+1
+% NOTE: input grid is the FOAM atmosphere grid
+% NOTE: create only no-mask version
+% replace NaNs with zeros
+% apply GENIE mask to output wind speed
+fprintf('       - Regridding wind speed to land c-grid\n');
+% re-grid masked field wspeed_uvaa
+[gowspdl,gofwspdl] = make_regrid_2d(gilonae,gilatae,(gimaskpl.*giwspd_uvaa)',golone,golate,false);
+gowspdl = gowspdl';
+gofwspdl = gofwspdl';
+if (optplots), plot_2dgridded(flipud(gowspdl),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvaal.OUT'],['wind speed out -- land mask']); end
+wspeed_uvaal = glmask.*gowspdl;
+wspeed_uvaal(find(isnan(wspeed_uvaal))) = 0.0;
+% re-grid masked field wspeed_uvma
+[gowspdl,gofwspdl] = make_regrid_2d(gilonae,gilatae,(gimaskpl.*giwspd_uvma)',golone,golate,false);
+gowspdl = gowspdl';
+gofwspdl = gofwspdl';
+if (optplots), plot_2dgridded(flipud(gowspdl),999.0,'',[[str(2).dir '/' str(2).exp] '.wspd_uvmal.OUT'],['wind speed out -- land mask']); end
+wspeed_uvmal = glmask.*gowspdl;
+wspeed_uvmal(find(isnan(wspeed_uvmal))) = 0.0;
 %
 % *** Copy to output arrays ********************************************* %
 %
@@ -287,7 +352,7 @@ wvelocity(:,:,2) = flipud(gowvelv);
 % *** SAVE DATA ********************************************************* %
 % *********************************************************************** %
 %
-% Save regridded data to file
+% Save regridded data to file OCEAN-only
 % Taux at u point (g_taux_u == gowtauuu)
 outname = [str(2).dir '/' str(2).exp '.taux_u.dat'];
 c = wstress(:,:,1); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
@@ -308,6 +373,7 @@ outname = [str(2).dir '/' str(2).exp '.tauy_v.dat'];
 c = wstress(:,:,4); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written tau v (v point) data to %s\n',outname);
+%
 % U wind velocity 
 outname = [str(2).dir '/' str(2).exp '.wvelx.dat'];
 c = wvelocity(:,:,1); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
@@ -318,6 +384,7 @@ outname = [str(2).dir '/' str(2).exp '.wvely.dat'];
 c = wvelocity(:,:,2); b = permute(c, [2 1]); a = reshape(b, [imax*jmax 1]);
 save (outname, 'a', '-ascii');
 fprintf('       - Written v wind speed data to %s\n',outname);
+%
 % Save 2-D ASCII wind speed scalar for BIOGEM
 outname = [str(2).dir '/' str(2).exp '.windspeed_uvaa.dat'];
 a = wspeed_uvaa;
@@ -326,6 +393,39 @@ outname = [str(2).dir '/' str(2).exp '.windspeed_uvma.dat'];
 a = wspeed_uvma;
 save(outname,'a','-ascii');
 fprintf('       - Written BIOGEM windspeed data to %s\n',outname);
+% Save 2-D ASCII wind speed scalar on FULL grid 
+%   no seperation between land-ocean while regridding
+%   uvaa regrids annual average wind velocities to derive speed
+wspeed_all = gowspdall;
+outname = [str(2).dir '/' str(2).exp '.windspeed_uvaa_all.dat'];
+a = wspeed_all;
+save(outname,'a','-ascii');
+fprintf('       - Written FULL GRID uvaa windspeed data\n');
+% Save 2-D ASCII wind speed scalar on FULL grid 
+%   no seperation between land-ocean while regridding
+%   uvma regrids monthly wind velocities to derive annual mean speed
+wspeed_all = gowspdall_uvma;
+outname = [str(2).dir '/' str(2).exp '.windspeed_uvma_all.dat'];
+a = wspeed_all;
+save(outname,'a','-ascii');
+fprintf('       - Written FULL GRID uvma windspeed data\n');
+% Save 2-D ASCII wind speed scalar on ocean + land grids
+%   only consider GCM ocean grids for cGENIE ocean windspeed
+%   only consider GCM land grids for cGENIE land windspeed
+wspeed_ents = wspeed_uvaa+wspeed_uvaal; % combine ocean+land
+outname = [str(2).dir '/' str(2).exp '.windspeed_uvaa_ents.dat'];
+a = wspeed_ents;
+save(outname,'a','-ascii');
+fprintf('       - Written ENTS uvaa windspeed (derived from annual mean velocity)\n');
+% Save 2-D ASCII wind speed scalar on ocean + land grids
+%   only consider GCM ocean grids for cGENIE ocean windspeed
+%   only consider GCM land grids for cGENIE land windspeed
+wspeed_ents = wspeed_uvma+wspeed_uvmal; % combine ocean+land
+outname = [str(2).dir '/' str(2).exp '.windspeed_uvma_ents.dat'];
+a = wspeed_ents;
+save(outname,'a','-ascii');
+fprintf('       - Written ENTS uvma windspeed (derived from monthly velocity)\n');
+
 %
 % *********************************************************************** %
 

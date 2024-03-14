@@ -39,6 +39,7 @@ function [] = make_grid_winds_zonal(go_latm,go_late,go_mask,str_nameout,par_tauo
 %   20/02/26: added 'grey world' intermediate stress option (3)
 %             re-ordered land vs. ocean array index to be consistent 
 %             with the actual choice options (e.g. 1 == land)
+%   24/03/13: added windspeed output for usage with ENTS
 %
 %   ***********************************************************************
 
@@ -95,7 +96,7 @@ go_cd = 0.0013;
 go_rhoair = 1.25;
 % set zonal profile parameters -- with land
 % NOTE: derived from NH observations
-%       (and to be vaguely consistent with HadeCM3 Eocene simulations)
+%       (and to be vaguely consistent with HadCM3 Eocene simulations)
 par_ws_amp(1)         = -0.090;
 par_ws_offset(1)      = -0.020;
 par_ws_cyclefactor(1) = 6.0;
@@ -226,6 +227,20 @@ taux_v(loc_ans) = -par_tau_min;
 % NOTE: from BIOGEM code :: fun_calc_u(i,j) = sqrt((sqrt(tv**2 + tv2**2))/(goldstein_rhoair*goldstein_cd))
 wind_u = sign(taux_u(:,:)).*((taux_u(:,:).^2).^0.5/(go_rhoair*go_cd)).^0.5;
 %
+% *** CREATE 2D WINDS OCEAN vs LAND ************************************* %
+%
+% Windspeed over land tends to be (~2x) weaker than windspeed over ocean
+% NOTE: With ENTS, need for 2D ocean-land defined windspeed
+%
+% make land grid (land=1, ocn=0)
+go_maskl = abs(go_mask-1);
+% make winds over land 2x as weak as over ocean
+wind_u_ents = go_maskl.*(wind_u./2);
+% fill remainder with ocean wind speed
+wind_u_ents(wind_u_ents==0) = wind_u(wind_u_ents==0);
+% windspeed is non-directional. remove sign
+wind_u_ents = abs(wind_u_ents);
+%
 % *********************************************************************** %
 
 % *********************************************************************** %
@@ -326,6 +341,11 @@ for j=1:jmax
 end
 % close file
 fclose(fid);
+%
+% Save 2D ASCII windspeed scalar on full grid
+outname = [str_nameout, '.windspeed__ents.dat'];
+a = wind_u_ents;
+save(outname,'a','-ascii');
 %
 % *********************************************************************** %
 
