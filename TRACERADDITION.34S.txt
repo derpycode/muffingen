@@ -1,0 +1,14 @@
+# *******************************************************************
+# Set number of tracers
+# README <<< the total number of tracers must be increased by 2 when adding 34S of SO4, and 34S of H2S >>>
+# list dissolved (ocean) biogeochemical tracers
+gm_ocn_select_39=.true.   # SO4_34S  
+gm_ocn_select_41=.true.   # H2S_34S   
+# list gaseous (atmospheric) biogeochemical tracers
+gm_atm_select_17=.true.   # pH2S_34S
+# NOTE: you should already have the following
+# IF NOT, add them (uncomment them), and increase the tracer number by 4 rather than 2
+###gm_ocn_select_38=.true.   # SO4                                
+###gm_ocn_select_40=.true.   # H2S
+###gm_atm_select_16=.true.   # pH2S
+# *******************************************************************
