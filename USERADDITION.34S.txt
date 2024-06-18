@@ -1,0 +1,20 @@
+#
+# *** ENABLE 34S ****************************************************
+#
+# README: Depending on the user-config you are adapting, nothing may need adding (other than the 34S tracers to the base-config).
+# 34S tracers
+# NOTE: This assumes that you already have a basic sulphur cycle and in the base-config, the tracers:
+#       gm_ocn_select_38 (SO4)                           
+#       gm_ocn_select_40 (H2S)
+#       gm_atm_select_16 (pH2S)
+# all set to .true. plus the corresponding isotope tracers:
+#       gm_ocn_select_39 (SO4_34S)
+#       gm_ocn_select_41 (H2S_34S)
+#       gm_atm_select_17 (pH2S_34S)
+# Sulphur cycle reactions
+# If you do not already have the following parameter settings in your user-config -- add them.
+# NOTE: By adding and uncommenting the following line, there will be a change in oxygen and sulphur cycles.
+# maximum time-scale to geochemical reaction completion (days)
+###bg_par_bio_geochem_tau=45.0
+#
+# *******************************************************************
