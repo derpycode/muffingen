@@ -108,11 +108,6 @@ bg_par_forcing_name="worjh2.preindustrial"
 # *** optional changes to align with PALEO recommendations **********
 #### maximum time-scale to geochemical reaction completion (days)
 ###bg_par_bio_geochem_tau=45.0
-#### extend solubility and geochem constant T range (leave S range as default)
-###gm_par_geochem_Tmin  = -2.0
-###gm_par_geochem_Tmax  = 45.0
-###gm_par_carbchem_Tmin = -2.0
-###gm_par_carbchem_Tmax = 45.0
 #
 # *******************************************************************
 # *** END ***********************************************************
