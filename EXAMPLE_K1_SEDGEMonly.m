@@ -78,6 +78,7 @@ opt_makewind=false;             % [false/true] re-grid wind products?
 opt_makezonalwind=false;        % [false/true] force zonal wind generation
 opt_makealbedo=false;           % [false/true] make albedo file
 opt_makeseds=true;              % [false/true] make sediment files
+opt_makeents=true;              % [false/true] create ENTS files?
 %
 % *** OPTIONS -- GRID FILTERING ***************************************** %
 %
