@@ -247,6 +247,8 @@ function [] = muffingen(POPT)
 %             *** v0.9.25 *************************************************
 %   24/02/20: fixes for high res SEDGEM grids by Alexandre Pohl
 %             *** v0.9.26 *************************************************
+%   26/09/16: removed opt_makeents=true default
+%             *** v0.9.27 *************************************************
 %
 %   ***********************************************************************
 %%
@@ -262,7 +264,7 @@ disp(['>>> INITIALIZING ...']);
 % set function name
 str_function = 'muffingen';
 % set version!
-str_muffingen_ver = 'v0.9.26';
+str_muffingen_ver = 'v0.9.27';
 % set date
 str_date = [datestr(date,11), datestr(date,5), datestr(date,7)];
 % close existing plot windows
@@ -280,7 +282,7 @@ eval(POPT);
 % zonal wind-stress generaton parameter
 if ~exist('par_tauopt','var'),   par_tauopt   = 0; end
 % ENTS-enabled output??
-if ~exist('opt_makeents','var'), opt_makeents = true; end
+if ~exist('opt_makeents','var'), opt_makeents = false; end
 % surface layer reference thickness (m)
 if ~exist('par_sur_D','var'),    par_sur_D    = 0.0; end
 % minimum k level
@@ -1323,7 +1325,8 @@ if opt_makealbedo
             xlabel('Latitude');
             ylabel('Albedo');
             title('Zonally averaged planetary albedo profile');
-            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.ps']);
+            % print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.ps']);
+            exportgraphics(gcf,[[str_dirout '/' str_nameout] '.zonalalbd_pl.' str_date '.png'],'ContentType','image');
             % reorientate albedo vector for saving
             vo_albd = fliplr(vo_albd);
     end
@@ -1409,7 +1412,8 @@ if opt_makeents
             axis([-90 90 0.0 1.0]);
             xlabel('Latitude'); ylabel('Cloud albedo');
             title('Zonally averaged cloud albedo profile');
-            print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.ps']);
+            % print('-dpsc2', [[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.ps']);
+            exportgraphics(gcf,[[str_dirout '/' str_nameout] '.zonalalbd_cl.' str_date '.png'],'ContentType','image');
             % reorientate albedo vector for saving
             vo_albd_cl = fliplr(vo_albd_cl);
 			% convert cloud albedo to 2D format for usage in ENTS
