@@ -261,7 +261,8 @@ axis([-90 90 -0.1 0.2]);
 hold on;
 scatter(go_latm(:),taux_u_1d(:));
 % save figure
-print('-dpsc2', [str_nameout, '.taux_u.' str_date '.ps']);
+% print('-dpsc2', [str_nameout, '.taux_u.' str_date '.ps']);
+exportgraphics(gcf,[str_nameout, '.taux_u.' str_date '.png'],'ContentType','image');
 % plot figure -- v grid
 figure;
 plot(go_late(2:end),taux_v_1d(:));
@@ -269,7 +270,8 @@ axis([-90 90 -0.1 0.2]);
 hold on;
 scatter(go_late(2:end),taux_v_1d(:));
 % save figure
-print('-dpsc2', [str_nameout, '.taux_v.' str_date '.ps']);
+% print('-dpsc2', [str_nameout, '.taux_v.' str_date '.ps']);
+exportgraphics(gcf,[str_nameout, '.taux_v.' str_date '.png'],'ContentType','image');
 %
 % *** SAVE FILES ******************************************************** %
 %
